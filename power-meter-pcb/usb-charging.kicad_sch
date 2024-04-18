@@ -1880,7 +1880,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 135.382 74.93 90)
 			(effects
 				(font
@@ -2224,7 +2224,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 61.722 72.39 90)
 			(effects
 				(font
@@ -2358,7 +2358,7 @@
 				)
 			)
 		)
-		(property "Footprint" "USB4105-GF-A:GCT_USB4105-GF-A"
+		(property "Footprint" "USB4105:GCT_USB4105-GF-A"
 			(at 101.6 71.12 0)
 			(effects
 				(font

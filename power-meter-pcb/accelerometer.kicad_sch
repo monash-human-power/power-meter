@@ -1079,7 +1079,7 @@
 				)
 			)
 		)
-		(property "Footprint" "ICM-42670-P:XDCR_ICM-42670-P"
+		(property "Footprint" "ICM-42670-P_AccelGyro:XDCR_ICM-42670-P"
 			(at 158.75 96.52 0)
 			(effects
 				(font
@@ -1490,7 +1490,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 213.0552 102.87 0)
 			(effects
 				(font

@@ -3156,7 +3156,7 @@
 		(uuid "a5a73275-f776-4e84-845c-1dec446cbe44")
 	)
 	(bus_entry
-		(at 176.53 121.92)
+		(at 175.26 121.92)
 		(size 2.54 2.54)
 		(stroke
 			(width 0)
@@ -3192,7 +3192,7 @@
 		(uuid "e6872a95-b9eb-4ae1-8519-f461688d4c69")
 	)
 	(bus_entry
-		(at 176.53 124.46)
+		(at 175.26 124.46)
 		(size 2.54 2.54)
 		(stroke
 			(width 0)
@@ -3301,7 +3301,7 @@
 	)
 	(bus
 		(pts
-			(xy 179.07 102.87) (xy 175.26 102.87)
+			(xy 177.8 104.14) (xy 175.26 104.14)
 		)
 		(stroke
 			(width 0)
@@ -3651,7 +3651,7 @@
 	)
 	(bus
 		(pts
-			(xy 179.07 127) (xy 179.07 133.35)
+			(xy 177.8 127) (xy 177.8 133.35)
 		)
 		(stroke
 			(width 0)
@@ -3691,7 +3691,7 @@
 	)
 	(bus
 		(pts
-			(xy 175.26 101.6) (xy 175.26 102.87)
+			(xy 175.26 101.6) (xy 175.26 104.14)
 		)
 		(stroke
 			(width 0)
@@ -4041,7 +4041,7 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 121.92) (xy 176.53 121.92)
+			(xy 161.29 121.92) (xy 175.26 121.92)
 		)
 		(stroke
 			(width 0)
@@ -4051,7 +4051,7 @@
 	)
 	(bus
 		(pts
-			(xy 179.07 133.35) (xy 193.04 133.35)
+			(xy 177.8 133.35) (xy 193.04 133.35)
 		)
 		(stroke
 			(width 0)
@@ -4241,7 +4241,7 @@
 	)
 	(wire
 		(pts
-			(xy 161.29 124.46) (xy 176.53 124.46)
+			(xy 161.29 124.46) (xy 175.26 124.46)
 		)
 		(stroke
 			(width 0)
@@ -4291,7 +4291,7 @@
 	)
 	(bus
 		(pts
-			(xy 179.07 124.46) (xy 179.07 127)
+			(xy 177.8 124.46) (xy 177.8 127)
 		)
 		(stroke
 			(width 0)
@@ -4378,6 +4378,16 @@
 			(type default)
 		)
 		(uuid "ffce70e3-309b-40dd-954f-98e46b7c04f0")
+	)
+	(text "FIX PIN NUMBERING ON TEMP SENSOR!!!"
+		(exclude_from_sim no)
+		(at 236.982 36.322 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "d586fcde-19a4-4598-b1ab-077102678715")
 	)
 	(label "BOOT"
 		(at 73.66 153.67 0)
@@ -4743,7 +4753,7 @@
 		(uuid "c6789316-20b5-4d0d-9777-b352a6c1c526")
 	)
 	(label "AMP1{DOUT SCLK}"
-		(at 179.07 132.08 0)
+		(at 177.8 132.08 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5045,7 +5055,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2"
 			(at 30.48 160.02 0)
 			(effects
 				(font
@@ -5181,7 +5191,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
 			(at 195.58 143.51 0)
 			(effects
 				(font
@@ -5540,7 +5550,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 44.7548 157.48 0)
 			(effects
 				(font
@@ -5805,7 +5815,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x08_P2.54mm_Vertical"
 			(at 46.99 58.42 0)
 			(effects
 				(font
@@ -6025,7 +6035,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 43.942 148.59 90)
 			(effects
 				(font
@@ -6281,7 +6291,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 69.342 148.59 90)
 			(effects
 				(font
@@ -6417,7 +6427,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 97.282 152.4 90)
 			(effects
 				(font
@@ -6485,7 +6495,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
 			(at 154.94 49.53 0)
 			(effects
 				(font
@@ -6564,7 +6574,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2"
 			(at 55.88 160.02 0)
 			(effects
 				(font
@@ -6634,7 +6644,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
 			(at 247.65 55.88 0)
 			(effects
 				(font
@@ -6707,7 +6717,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
 			(at 86.36 161.29 0)
 			(effects
 				(font
@@ -6777,7 +6787,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "LED_SMD:LED_0603_1608Metric_Pad1.05x0.95mm_HandSolder"
 			(at 99.06 161.29 0)
 			(effects
 				(font
@@ -6913,7 +6923,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
 			(at 84.582 152.4 90)
 			(effects
 				(font
@@ -6983,7 +6993,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Jumper:SolderJumper-3_P1.3mm_Open_RoundedPad1.0x1.5mm"
 			(at 210.82 151.13 0)
 			(effects
 				(font
@@ -7056,7 +7066,7 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
 			(at 70.1548 157.48 0)
 			(effects
 				(font
@@ -7289,7 +7299,7 @@
 		)
 	)
 	(sheet
-		(at 179.07 100.33)
+		(at 177.8 101.6)
 		(size 27.94 11.43)
 		(fields_autoplaced yes)
 		(stroke
@@ -7301,7 +7311,7 @@
 		)
 		(uuid "4fb726d4-a68e-4ad8-a718-58b82440e761")
 		(property "Sheetname" "USB and charging"
-			(at 179.07 99.6184 0)
+			(at 177.8 100.8884 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7310,7 +7320,7 @@
 			)
 		)
 		(property "Sheetfile" "usb-charging.kicad_sch"
-			(at 179.07 112.3446 0)
+			(at 177.8 113.6146 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7319,7 +7329,7 @@
 			)
 		)
 		(pin "USB{DP DN}" bidirectional
-			(at 179.07 102.87 180)
+			(at 177.8 104.14 180)
 			(effects
 				(font
 					(size 1.27 1.27)
