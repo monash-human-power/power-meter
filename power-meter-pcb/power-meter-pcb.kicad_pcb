@@ -318,7 +318,7 @@
 			(uuid "f8154fc6-5b00-49a8-9f27-71331734aec8")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 0 0 270)
+			(at 0 0 -90)
 			(layer "F.Fab")
 			(uuid "b911e3d5-fad1-4157-995b-756d4d64a960")
 			(effects
@@ -1315,7 +1315,7 @@
 	(footprint "USB4105:GCT_USB4105-GF-A"
 		(layer "F.Cu")
 		(uuid "d02e78ff-a092-4c60-a27c-30f2b0568653")
-		(at 117.6 103.505)
+		(at 118.745 105.41)
 		(property "Reference" "J1"
 			(at -1.825 -8.635 0)
 			(layer "F.SilkS")
