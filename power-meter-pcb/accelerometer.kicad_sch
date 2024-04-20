@@ -1208,7 +1208,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "35028bdd-822c-42ff-baf7-943300b2206f")
-		(property "Reference" "#PWR027"
+		(property "Reference" "#PWR044"
 			(at 212.09 111.76 0)
 			(effects
 				(font
@@ -1258,7 +1258,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR027")
+					(reference "#PWR044")
 					(unit 1)
 				)
 			)
@@ -1274,7 +1274,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4b14b906-5703-42e0-9d86-f9b1559d0955")
-		(property "Reference" "#PWR028"
+		(property "Reference" "#PWR043"
 			(at 212.09 96.52 0)
 			(effects
 				(font
@@ -1324,7 +1324,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR028")
+					(reference "#PWR043")
 					(unit 1)
 				)
 			)
@@ -1340,7 +1340,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5a5791d1-d68a-4d6a-86c4-33f2081ef228")
-		(property "Reference" "#PWR025"
+		(property "Reference" "#PWR042"
 			(at 186.69 123.19 0)
 			(effects
 				(font
@@ -1390,7 +1390,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR025")
+					(reference "#PWR042")
 					(unit 1)
 				)
 			)
@@ -1406,7 +1406,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "679f56d4-0d7d-43da-85fc-c98f86233ee0")
-		(property "Reference" "#PWR026"
+		(property "Reference" "#PWR041"
 			(at 186.69 87.63 0)
 			(effects
 				(font
@@ -1456,7 +1456,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR026")
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -1472,7 +1472,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "86fc4b01-bc48-44bf-b0b1-c9523f3a70db")
-		(property "Reference" "C4"
+		(property "Reference" "C14"
 			(at 215.9 97.7899 0)
 			(effects
 				(font
@@ -1526,7 +1526,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "C4")
+					(reference "C14")
 					(unit 1)
 				)
 			)
@@ -1542,7 +1542,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ea1ffbae-406d-4f10-9276-3bb58e6dd11b")
-		(property "Reference" "#PWR029"
+		(property "Reference" "#PWR040"
 			(at 115.57 100.33 0)
 			(effects
 				(font
@@ -1592,7 +1592,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR029")
+					(reference "#PWR040")
 					(unit 1)
 				)
 			)
