@@ -1,4 +1,8 @@
 # KICAD
+power-meter-pcb/out
+\#auto_saved_files\#
+~*.lck
+
 # Temporary files
 *.000
 *.bak
