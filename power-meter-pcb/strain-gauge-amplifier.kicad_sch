@@ -2142,6 +2142,12 @@
 		(uuid "35879f34-8561-4624-a429-70aa809fa9fa")
 	)
 	(junction
+		(at 66.04 118.11)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3a1ddbe9-9787-4832-89eb-1d1570e324ba")
+	)
+	(junction
 		(at 161.29 130.81)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2206,6 +2212,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "aa7e9a52-840d-4cc1-967c-1b4510aa518b")
+	)
+	(junction
+		(at 76.2 130.81)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b5aa928b-7e5a-44bf-be93-907452334a67")
 	)
 	(junction
 		(at 176.53 82.55)
@@ -2401,7 +2413,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 118.11) (xy 76.2 83.82)
+			(xy 76.2 113.03) (xy 76.2 83.82)
 		)
 		(stroke
 			(width 0)
@@ -2418,16 +2430,6 @@
 			(type default)
 		)
 		(uuid "25832c52-e590-4e30-8905-99099b5df3cf")
-	)
-	(wire
-		(pts
-			(xy 66.04 123.19) (xy 68.58 123.19)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "272d4ac0-f971-40b6-9ffa-ac411a4350a9")
 	)
 	(wire
 		(pts
@@ -2471,6 +2473,36 @@
 	)
 	(wire
 		(pts
+			(xy 63.5 118.11) (xy 66.04 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "331ce2cd-ad53-4b4c-a26c-7a2d2e772a3b")
+	)
+	(wire
+		(pts
+			(xy 66.04 118.11) (xy 66.04 120.65)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33ad4781-a7ee-4e93-8773-088467b98faa")
+	)
+	(wire
+		(pts
+			(xy 53.34 118.11) (xy 55.88 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33d58e7a-98e7-47b0-914d-3b8d7ab2e9f7")
+	)
+	(wire
+		(pts
 			(xy 173.99 80.01) (xy 176.53 80.01)
 		)
 		(stroke
@@ -2478,6 +2510,16 @@
 			(type default)
 		)
 		(uuid "356f574b-eaa2-454b-b660-960135f7b7e9")
+	)
+	(wire
+		(pts
+			(xy 66.04 118.11) (xy 68.58 118.11)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "361eb9bf-6b55-4d60-90a3-41a602aa4c7f")
 	)
 	(wire
 		(pts
@@ -2981,6 +3023,16 @@
 	)
 	(wire
 		(pts
+			(xy 66.04 128.27) (xy 66.04 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9e41c303-ff5c-4c49-8846-a72a37711494")
+	)
+	(wire
+		(pts
 			(xy 78.74 105.41) (xy 78.74 83.82)
 		)
 		(stroke
@@ -3221,7 +3273,7 @@
 	)
 	(wire
 		(pts
-			(xy 76.2 130.81) (xy 76.2 128.27)
+			(xy 76.2 130.81) (xy 76.2 123.19)
 		)
 		(stroke
 			(width 0)
@@ -3318,6 +3370,16 @@
 			(type default)
 		)
 		(uuid "f5080414-fb13-4b8f-ad1b-2d1176600e5a")
+	)
+	(wire
+		(pts
+			(xy 66.04 130.81) (xy 76.2 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f514b62e-dc3a-4943-bf6c-70c2e5f114b3")
 	)
 	(wire
 		(pts
@@ -3431,7 +3493,7 @@
 	)
 	(hierarchical_label "PWDN"
 		(shape input)
-		(at 66.04 123.19 180)
+		(at 53.34 118.11 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -3996,6 +4058,76 @@
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/feb88761-b4a9-421c-bc5f-37e5e311e229"
 					(reference "#J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 66.04 124.46 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "64c32614-a733-486f-b1d8-abfec690cae2")
+		(property "Reference" "C16"
+			(at 69.85 123.1899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "0.1u"
+			(at 69.85 125.7299 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
+			(at 67.0052 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 66.04 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 66.04 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "56138227-0c6e-49f6-9f46-241fbcf3dcca")
+		)
+		(pin "2"
+			(uuid "f7185184-ec75-4f0b-a381-67f79c24f66a")
+		)
+		(instances
+			(project "power-meter-pcb"
+				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/feb88761-b4a9-421c-bc5f-37e5e311e229"
+					(reference "C16")
 					(unit 1)
 				)
 			)
@@ -4706,6 +4838,74 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:R")
+		(at 59.69 118.11 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "a2a90d72-5101-4aec-92ea-74bf1c5d20ba")
+		(property "Reference" "R18"
+			(at 59.69 111.76 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "470"
+			(at 59.69 114.3 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
+			(at 59.69 119.888 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 59.69 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 59.69 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "741d7b2e-d11c-4b3a-9a80-fe4294d7fb50")
+		)
+		(pin "2"
+			(uuid "b93f09e4-8625-4277-9a92-e392e378bd5f")
+		)
+		(instances
+			(project "power-meter-pcb"
+				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/feb88761-b4a9-421c-bc5f-37e5e311e229"
+					(reference "R18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:+3.3VA")
 		(at 151.13 58.42 0)
 		(unit 1)
@@ -5108,7 +5308,7 @@
 	)
 	(symbol
 		(lib_id "Device:Q_NMOS_GSD")
-		(at 73.66 123.19 0)
+		(at 73.66 118.11 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -5116,7 +5316,7 @@
 		(dnp no)
 		(uuid "bd80fa8f-8fe0-451f-af49-19bf96981396")
 		(property "Reference" "Q3"
-			(at 80.01 123.19 0)
+			(at 80.01 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5124,7 +5324,7 @@
 			)
 		)
 		(property "Value" "AS2302"
-			(at 82.55 125.476 0)
+			(at 82.55 120.396 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5132,7 +5332,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:TSOT-23"
-			(at 78.74 120.65 0)
+			(at 78.74 115.57 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5141,7 +5341,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 73.66 123.19 0)
+			(at 73.66 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5150,7 +5350,7 @@
 			)
 		)
 		(property "Description" "N-MOSFET transistor, gate/source/drain"
-			(at 73.66 123.19 0)
+			(at 73.66 118.11 0)
 			(effects
 				(font
 					(size 1.27 1.27)
