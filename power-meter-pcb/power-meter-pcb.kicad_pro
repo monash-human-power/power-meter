@@ -486,7 +486,7 @@
       "plot": "out/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "out/power-meter-pcb.step",
       "svg": "",
       "vrml": ""
     },
