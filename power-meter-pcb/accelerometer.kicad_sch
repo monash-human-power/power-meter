@@ -8,6 +8,7 @@
 		(title "Cycling power meter FYP - Accelerometer and gyroscope")
 		(date "2024-04-18")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
+		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 	)
 	(lib_symbols
 		(symbol "Device:C"
