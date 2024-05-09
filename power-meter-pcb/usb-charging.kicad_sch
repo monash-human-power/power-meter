@@ -8651,7 +8651,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Battery_Cell"
+		(property "Value" "Battery"
 			(at 185.42 134.0484 0)
 			(effects
 				(font
@@ -8660,7 +8660,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_JST:JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical"
+		(property "Footprint" "Connector_JST:JST_PH_S2B-PH-K_1x02_P2.00mm_Horizontal"
 			(at 181.61 133.096 90)
 			(effects
 				(font
