@@ -6,9 +6,9 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - Accelerometer and gyroscope")
-		(date "2024-04-18")
+		(date "2024-05-14")
+		(rev "V1.0")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
-		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 	)
 	(lib_symbols
 		(symbol "Device:C"
@@ -1109,7 +1109,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Accelerometer and gyroscope"
 			(at 137.16 93.98 0)
 			(effects
 				(font
@@ -1155,6 +1155,15 @@
 					(size 1.27 1.27)
 				)
 				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 137.16 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
 				(hide yes)
 			)
 		)
@@ -1520,6 +1529,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 190.5 96.52 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 190.5 96.52 0)
 			(effects
 				(font

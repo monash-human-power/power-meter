@@ -6,9 +6,9 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - Strain gauge amplifier")
-		(date "2024-04-18")
+		(date "2024-05-14")
+		(rev "V1.0")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
-		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 	)
 	(lib_symbols
 		(symbol "Analog_ADC:ADS1232IPW"
@@ -3561,6 +3561,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 55.88 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "1cbc1aeb-bbbc-4080-8576-1cf1597a29b2")
 		)
@@ -3623,6 +3632,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 109.22 72.39 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 109.22 72.39 0)
 			(effects
 				(font
@@ -3974,6 +3992,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 185.42 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "c32ae2da-2fd1-4342-bffb-b03a5d749335")
 		)
@@ -4121,6 +4148,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 66.04 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "56138227-0c6e-49f6-9f46-241fbcf3dcca")
 		)
@@ -4191,6 +4227,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 109.22 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "a2cedb64-4f7f-45d0-98b2-4fe3e69331e9")
 		)
@@ -4250,6 +4295,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 185.42 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 185.42 97.79 0)
 			(effects
 				(font
@@ -4328,6 +4382,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 55.88 87.63 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "eccb1bd5-96be-414c-8a2b-be77dc7cad7c")
 		)
@@ -4398,6 +4461,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 127 88.9 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "4ffd1265-d3ba-4138-9f94-aa23b1837c2c")
 		)
@@ -4458,6 +4530,15 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x04, script generated"
+			(at 68.58 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 68.58 78.74 0)
 			(effects
 				(font
@@ -4541,6 +4622,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 153.67 130.81 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "7cc01f67-7f17-4654-8b3b-241c8a611eda")
 		)
@@ -4603,6 +4693,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 236.22 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 236.22 91.44 0)
 			(effects
 				(font
@@ -4681,6 +4780,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 224.79 91.44 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "44303c90-caba-4212-8654-b580d0cf9aa8")
 		)
@@ -4743,6 +4851,15 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x04, script generated"
+			(at 96.52 78.74 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 96.52 78.74 0)
 			(effects
 				(font
@@ -4817,6 +4934,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 59.69 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 59.69 118.11 0)
 			(effects
 				(font
@@ -5020,6 +5146,15 @@
 			)
 		)
 		(property "Description" "Single Bridge 24bit ADC for Sensors, TSSOP-24"
+			(at 156.21 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 156.21 100.33 0)
 			(effects
 				(font
@@ -5293,6 +5428,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 73.66 118.11 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "3cf52094-4948-432e-9218-6492072f4422")
 		)
@@ -5355,6 +5499,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 185.42 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 185.42 90.17 0)
 			(effects
 				(font

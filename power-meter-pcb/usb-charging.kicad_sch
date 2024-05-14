@@ -6,9 +6,9 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - USB and power supply")
-		(date "2024-04-18")
+		(date "2024-05-14")
+		(rev "V1.0")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
-		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 	)
 	(lib_symbols
 		(symbol "Battery_Management:MCP73831-2-OT"
@@ -3768,7 +3768,7 @@
 		(uuid "24735e0a-e98c-40a9-99dd-50a007c00d71")
 	)
 	(junction
-		(at 219.71 137.16)
+		(at 224.79 138.43)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "28b54f8b-5481-4344-b68c-9505c06a95e0")
@@ -3780,7 +3780,7 @@
 		(uuid "35fea496-9f86-40e9-bd1f-2f6f549b15d3")
 	)
 	(junction
-		(at 219.71 124.46)
+		(at 224.79 125.73)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "38582027-eca2-4844-a7a5-a891b77870da")
@@ -3816,7 +3816,7 @@
 		(uuid "49718db2-63ab-4d98-8068-25ecdb064eb8")
 	)
 	(junction
-		(at 232.41 124.46)
+		(at 237.49 125.73)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "5267f9f8-c54e-4670-a6c9-073d3bea08cb")
@@ -4181,7 +4181,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 111.76) (xy 219.71 114.3)
+			(xy 224.79 113.03) (xy 224.79 115.57)
 		)
 		(stroke
 			(width 0)
@@ -4301,7 +4301,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 124.46) (xy 232.41 124.46)
+			(xy 224.79 125.73) (xy 237.49 125.73)
 		)
 		(stroke
 			(width 0)
@@ -4431,7 +4431,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 137.16) (xy 219.71 139.7)
+			(xy 224.79 138.43) (xy 224.79 140.97)
 		)
 		(stroke
 			(width 0)
@@ -4651,7 +4651,7 @@
 	)
 	(wire
 		(pts
-			(xy 232.41 124.46) (xy 236.22 124.46)
+			(xy 237.49 125.73) (xy 241.3 125.73)
 		)
 		(stroke
 			(width 0)
@@ -4821,7 +4821,7 @@
 	)
 	(wire
 		(pts
-			(xy 232.41 134.62) (xy 232.41 137.16)
+			(xy 237.49 135.89) (xy 237.49 138.43)
 		)
 		(stroke
 			(width 0)
@@ -4991,7 +4991,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 134.62) (xy 219.71 137.16)
+			(xy 224.79 135.89) (xy 224.79 138.43)
 		)
 		(stroke
 			(width 0)
@@ -5041,7 +5041,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 124.46) (xy 219.71 127)
+			(xy 224.79 125.73) (xy 224.79 128.27)
 		)
 		(stroke
 			(width 0)
@@ -5181,7 +5181,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 137.16) (xy 232.41 137.16)
+			(xy 224.79 138.43) (xy 237.49 138.43)
 		)
 		(stroke
 			(width 0)
@@ -5351,7 +5351,7 @@
 	)
 	(wire
 		(pts
-			(xy 232.41 127) (xy 232.41 124.46)
+			(xy 237.49 128.27) (xy 237.49 125.73)
 		)
 		(stroke
 			(width 0)
@@ -5601,7 +5601,7 @@
 	)
 	(wire
 		(pts
-			(xy 219.71 121.92) (xy 219.71 124.46)
+			(xy 224.79 123.19) (xy 224.79 125.73)
 		)
 		(stroke
 			(width 0)
@@ -5661,7 +5661,7 @@
 	)
 	(text "Battery voltage measurement"
 		(exclude_from_sim no)
-		(at 223.012 101.854 0)
+		(at 228.092 103.124 0)
 		(effects
 			(font
 				(size 2.55 2.55)
@@ -5813,7 +5813,7 @@
 	)
 	(hierarchical_label "Battery voltage"
 		(shape output)
-		(at 236.22 124.46 0)
+		(at 241.3 125.73 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5936,6 +5936,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 85.09 67.31 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 85.09 67.31 0)
 			(effects
 				(font
@@ -6077,6 +6086,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 104.14 43.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "4"
 			(uuid "5ad3ef5b-9b74-419b-bf81-25fc9f13c91b")
 		)
@@ -6154,6 +6172,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 246.38 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "20005361-b5a4-49b1-8c8c-e147ba3f4b38")
 		)
@@ -6171,7 +6198,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 219.71 118.11 0)
+		(at 224.79 119.38 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -6180,7 +6207,7 @@
 		(fields_autoplaced yes)
 		(uuid "2159243f-fc00-4858-bccd-96b0a2239472")
 		(property "Reference" "R14"
-			(at 222.25 116.8399 0)
+			(at 227.33 118.1099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6189,7 +6216,7 @@
 			)
 		)
 		(property "Value" "1M"
-			(at 222.25 119.3799 0)
+			(at 227.33 120.6499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6198,7 +6225,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
-			(at 217.932 118.11 90)
+			(at 223.012 119.38 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6207,7 +6234,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 219.71 118.11 0)
+			(at 224.79 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6216,7 +6243,16 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 219.71 118.11 0)
+			(at 224.79 119.38 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 224.79 119.38 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -6352,6 +6388,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 82.55 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 82.55 129.54 0)
 			(effects
 				(font
@@ -6552,7 +6597,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "USB Connector"
 			(at 59.69 55.88 0)
 			(effects
 				(font
@@ -6598,6 +6643,15 @@
 					(size 1.27 1.27)
 				)
 				(justify bottom)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 59.69 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
 				(hide yes)
 			)
 		)
@@ -6791,6 +6845,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 48.26 129.54 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "369e6f52-0d66-42e8-84cb-688c14c52359")
 		)
@@ -6935,6 +6998,15 @@
 			)
 		)
 		(property "Sim.Pins" "1=K 2=A"
+			(at 88.9 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 88.9 151.13 0)
 			(effects
 				(font
@@ -7145,6 +7217,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 132.08 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "2213ee05-f515-41ff-9f05-c67cfd54b829")
 		)
@@ -7205,6 +7286,15 @@
 			)
 		)
 		(property "Description" "Ferrite bead"
+			(at 256.54 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 256.54 49.53 0)
 			(effects
 				(font
@@ -7275,6 +7365,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 267.97 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 267.97 63.5 0)
 			(effects
 				(font
@@ -7549,6 +7648,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 209.55 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "f8ec3bde-e6d7-4669-a292-84222906b8d3")
 		)
@@ -7646,6 +7754,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 156.21 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "7b468a92-3b5d-41fb-a9b3-4297326c2590")
 		)
@@ -7708,6 +7825,15 @@
 			)
 		)
 		(property "Description" "Light emitting diode"
+			(at 82.55 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 82.55 139.7 0)
 			(effects
 				(font
@@ -7853,6 +7979,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 60.96 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "3"
 			(uuid "a7f4d3e1-0e2b-456c-aa6a-4d39eb07e483")
 		)
@@ -7932,6 +8067,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 240.03 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "576bb3f4-8ea3-4a0d-9dc5-f598d8053ebb")
 		)
@@ -7992,6 +8136,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 166.37 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 166.37 128.27 0)
 			(effects
 				(font
@@ -8134,6 +8287,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 157.48 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "39174e77-7b10-4bcd-bb8f-32730dab121b")
 		)
@@ -8154,7 +8316,7 @@
 	)
 	(symbol
 		(lib_id "power:GNDD")
-		(at 219.71 139.7 0)
+		(at 224.79 140.97 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8163,7 +8325,7 @@
 		(fields_autoplaced yes)
 		(uuid "aecacbce-c47a-48ff-b508-812a95ca9161")
 		(property "Reference" "#PWR031"
-			(at 219.71 146.05 0)
+			(at 224.79 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8172,7 +8334,7 @@
 			)
 		)
 		(property "Value" "GNDD"
-			(at 219.71 143.51 0)
+			(at 224.79 144.78 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8180,7 +8342,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 219.71 139.7 0)
+			(at 224.79 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8189,7 +8351,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 219.71 139.7 0)
+			(at 224.79 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8198,7 +8360,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GNDD\" , digital ground"
-			(at 219.71 139.7 0)
+			(at 224.79 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8402,6 +8564,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 142.24 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "5615c35d-8502-4aa6-91ff-69fb82cf587f")
 		)
@@ -8530,7 +8701,16 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Battery protection"
+			(at 142.24 124.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 142.24 124.46 0)
 			(effects
 				(font
@@ -8687,6 +8867,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 181.61 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "7c658be7-5da2-44fc-b8fb-8e8bc696fa16")
 		)
@@ -8704,7 +8893,7 @@
 	)
 	(symbol
 		(lib_id "power:+BATT")
-		(at 219.71 111.76 0)
+		(at 224.79 113.03 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8713,7 +8902,7 @@
 		(fields_autoplaced yes)
 		(uuid "bfc206c4-a634-4730-899c-60281901a5cb")
 		(property "Reference" "#PWR030"
-			(at 219.71 115.57 0)
+			(at 224.79 116.84 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8722,7 +8911,7 @@
 			)
 		)
 		(property "Value" "+BATT"
-			(at 219.71 106.68 0)
+			(at 224.79 107.95 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8730,7 +8919,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 219.71 111.76 0)
+			(at 224.79 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8739,7 +8928,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 219.71 111.76 0)
+			(at 224.79 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8748,7 +8937,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+BATT\""
-			(at 219.71 111.76 0)
+			(at 224.79 113.03 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8836,7 +9025,7 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 219.71 130.81 0)
+		(at 224.79 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8845,7 +9034,7 @@
 		(fields_autoplaced yes)
 		(uuid "c0e36b03-4003-46d0-bc92-61671196668f")
 		(property "Reference" "R15"
-			(at 222.25 129.5399 0)
+			(at 227.33 130.8099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8854,7 +9043,7 @@
 			)
 		)
 		(property "Value" "1M"
-			(at 222.25 132.0799 0)
+			(at 227.33 133.3499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8863,7 +9052,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0603_1608Metric_Pad0.98x0.95mm_HandSolder"
-			(at 217.932 130.81 90)
+			(at 223.012 132.08 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8872,7 +9061,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 219.71 130.81 0)
+			(at 224.79 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8881,7 +9070,16 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 219.71 130.81 0)
+			(at 224.79 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 224.79 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8972,7 +9170,7 @@
 	)
 	(symbol
 		(lib_id "Device:C")
-		(at 232.41 130.81 0)
+		(at 237.49 132.08 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8981,7 +9179,7 @@
 		(fields_autoplaced yes)
 		(uuid "c3b42a14-d752-494e-b64c-ffe007ea6977")
 		(property "Reference" "C9"
-			(at 236.22 129.5399 0)
+			(at 241.3 130.8099 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8990,7 +9188,7 @@
 			)
 		)
 		(property "Value" "0.1u"
-			(at 236.22 132.0799 0)
+			(at 241.3 133.3499 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8999,7 +9197,7 @@
 			)
 		)
 		(property "Footprint" "Capacitor_SMD:C_0603_1608Metric_Pad1.08x0.95mm_HandSolder"
-			(at 233.3752 134.62 0)
+			(at 238.4552 135.89 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9008,7 +9206,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 232.41 130.81 0)
+			(at 237.49 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9017,7 +9215,16 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
-			(at 232.41 130.81 0)
+			(at 237.49 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 237.49 132.08 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9087,6 +9294,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 168.91 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "Yes"
 			(at 168.91 63.5 0)
 			(effects
 				(font
@@ -9165,6 +9381,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 193.04 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "326f4093-ef7a-48b9-9591-4050ecc5cb00")
 		)
@@ -9227,6 +9452,15 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 73.66 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 73.66 157.48 0)
 			(effects
 				(font
@@ -9371,6 +9605,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "Yes"
+			(at 228.6 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "befeda4c-895e-40ee-a5aa-3809c7938ace")
 		)
@@ -9441,6 +9684,15 @@
 				(hide yes)
 			)
 		)
+		(property "PlaceOnSecondary" "No"
+			(at 157.48 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "2196b9b1-a674-4fdd-9ca9-a0d1a5cc6977")
 		)
@@ -9503,6 +9755,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 21.59 59.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 21.59 59.69 0)
 			(effects
 				(font
@@ -9639,6 +9900,15 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 48.26 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
 			(at 48.26 157.48 0)
 			(effects
 				(font
