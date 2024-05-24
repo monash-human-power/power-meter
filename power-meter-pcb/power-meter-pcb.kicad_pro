@@ -483,7 +483,7 @@
       "gencad": "",
       "idf": "",
       "netlist": "",
-      "plot": "out/",
+      "plot": "out/board_export/",
       "pos_files": "",
       "specctra_dsn": "",
       "step": "out/power-meter-pcb.step",
@@ -496,10 +496,10 @@
     "annotate_start_num": 0,
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
-      "field_delimiter": ",",
+      "field_delimiter": "\t",
       "keep_line_breaks": false,
       "keep_tabs": false,
-      "name": "---",
+      "name": "TSV",
       "ref_delimiter": ",",
       "ref_range_delimiter": "",
       "string_delimiter": ""
@@ -521,9 +521,15 @@
           "show": true
         },
         {
-          "group_by": false,
+          "group_by": true,
           "label": "PlaceOnSecondary",
           "name": "PlaceOnSecondary",
+          "show": true
+        },
+        {
+          "group_by": false,
+          "label": "Description",
+          "name": "Description",
           "show": true
         },
         {
@@ -591,19 +597,13 @@
           "label": "Sim.Pins",
           "name": "Sim.Pins",
           "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Description",
-          "name": "Description",
-          "show": true
         }
       ],
       "filter_string": "",
-      "group_symbols": false,
+      "group_symbols": true,
       "name": "",
       "sort_asc": true,
-      "sort_field": "Description"
+      "sort_field": "Value"
     },
     "connection_grid_size": 50.0,
     "drawing": {
