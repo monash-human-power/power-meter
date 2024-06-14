@@ -3494,7 +3494,7 @@
 		)
 		(uuid "97a67d43-9e38-4688-8efd-7c8c2982326c")
 	)
-	(hierarchical_label "PWDN"
+	(hierarchical_label "Power save"
 		(shape input)
 		(at 53.34 118.11 180)
 		(fields_autoplaced yes)
