@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP")
-		(date "2024-05-14")
-		(rev "V1.0")
+		(date "2024-06-23")
+		(rev "V1.0.1")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 		(comment 2 "For the main crank, set J3 to short pins 1 and 2 and leave J1 and J2 open.")

@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - Strain gauge amplifier")
-		(date "2024-05-14")
-		(rev "V1.0")
+		(date "2024-06-23")
+		(rev "V1.0.1")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 	)
 	(lib_symbols
