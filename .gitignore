@@ -1,3 +1,6 @@
+# VSCode (ignore in this case as Arduino files are computer specific)
+\.vscode
+docs
 # KICAD
 power-meter-pcb/out
 \#auto_saved_files\#
