@@ -10,11 +10,17 @@ code_folder_name=$(basename $code_folder)
 
 # Get a list of staged and modified files in the code directory.
 changed_files=$(git status -s | awk "/^ *(A|M|AM|MM) +$code_folder_name/ {print \"$root_folder\" \$2}")
+echo "Changed files:"
 echo "$changed_files"
 
-# Update the date on each changed file.
-subs_date=$(date -I)
-echo "$changed_files" | while read line ; do
-   echo "Updating date in '$line'"
-   sed -e "s/^\\( *\\* *\\@date \\+\\)[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}/\\1${subs_date}/g" -i "$line"
-done
+# Check that there are actually changed files
+if [ ! -z "$1" ]; then
+    # Update the date on each changed file.
+    subs_date=$(date -I)
+        echo "$changed_files" | while read line ; do
+        echo "Updating date in '$line'"
+        sed -e "s/^\\( *\\* *\\@date \\+\\)[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}/\\1${subs_date}/g" -i "$line"
+    done
+else
+    echo "There are no changed code files to update."
+fi
