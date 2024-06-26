@@ -5,16 +5,17 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-06-26
+ * @date 2024-06-27
  */
 
 #include "defines.h"
-#include "states.h"
+#include "src/states.h"
+#include "src/connections.h"
 
 SemaphoreHandle_t serialMutex;
 
-StateActive active;
-StateSleep sleep;
+StateActive activeState;
+StateSleep sleepState;
 
 void setup()
 {
@@ -26,7 +27,7 @@ void setup()
 void loop()
 {
     // Run the state machine
-    State *current = &active;
+    State *current = &activeState;
     while (current)
     {
         LOGI("StateChange", current->name);

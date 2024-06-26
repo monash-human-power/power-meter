@@ -9,12 +9,12 @@ code_folder="${root_folder}power-meter-code"
 code_folder_name=$(basename $code_folder)
 
 # Get a list of staged and modified files in the code directory.
-changed_files=$(git status -s | awk "/^ *(A|M|AM|MM) +$code_folder_name/ {print \"$root_folder\" \$2}")
+changed_files=$(git status -s | awk "/^ *(A|M|AM|MM|R) +$code_folder_name/ {if(\$1 !~ /R/) {print \"$root_folder\" \$2;} else {print \"$root_folder\" \$4;}}")
 echo "Changed files:"
 echo "$changed_files"
 
 # Check that there are actually changed files
-if [ ! -z "$1" ]; then
+if [ -z "$1" ]; then
     # Update the date on each changed file.
     subs_date=$(date -I)
         echo "$changed_files" | while read line ; do
