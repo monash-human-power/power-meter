@@ -11,7 +11,7 @@
 #define VERSION "0.0.0"
 
 /**
- * Pins
+ * Pins and hardware details
  */
 // Strain gauge amplifiers
 #define PIN_AMP1_DOUT 1
@@ -20,6 +20,7 @@
 #define PIN_AMP2_SCLK 5
 #define PIN_AMP_PWDN 6
 #define PIN_POWER_SAVE 7
+#define AMP_BIT_DEPTH 24
 
 // Buttons and LEDs
 #define PIN_LED1 8
@@ -29,6 +30,9 @@
 // I2C for temperature sensor
 #define PIN_I2C_SCL 10
 #define PIN_I2C_SDA 11
+#define I2C_BUS_FREQ 400000
+#define TEMP1_I2C 0b1001000
+#define TEMP2_I2C 0b1001001
 
 // Accelerometer
 #define PIN_ACCEL_INTERRUPT 38
@@ -47,13 +51,16 @@
 #define PIN_USB_DN 19
 #define PIN_USB_DP 20
 
+
 /**
  * Logging
  * // TODO: Make work over USB.
  */
 // Logging (with mutexes)
-#define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
-#define SERIAL_GIVE() xSemaphoreGive(serialMutex)
+// #define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
+// #define SERIAL_GIVE() xSemaphoreGive(serialMutex)
+#define SERIAL_TAKE()
+#define SERIAL_GIVE()
 #define LOGV(tag, format, ...)            \
     SERIAL_TAKE();                        \
     ESP_LOGV(tag, format, ##__VA_ARGS__); \
