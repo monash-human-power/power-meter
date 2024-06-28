@@ -1,0 +1,28 @@
+#!/usr/bin/sh
+# Checks that the update date is correct and won't let the commit proceed if it isn't.
+# Usage:
+# Copy this file to .git/hooks/pre-commit and make it executable. Unlike many of the other scripts in the `tools`
+# folder, this one must be run with the current working directory as the repository's root folder.
+# ./pre-commit
+
+# Work out useful folder names
+root_folder="./"
+code_folder="${root_folder}power-meter-code"
+code_folder_name=$(basename $code_folder)
+
+# Get a list of staged and modified files in the code directory.
+changed_files=$(git status -s | awk "/^ *(A|M|AM|MM|R) +$code_folder_name/ {if(\$1 !~ /R/) {print \"$root_folder\" \$2;} else {print \"$root_folder\" \$4;}}")
+# echo "$changed_files"
+
+# Check that there are actually changed files
+if [ ! -z "$changed_files" ]; then
+    # There are changed files. Check the date for each
+    expected=$(date -I)
+    echo "$changed_files" | while read line ; do
+        actual=$(awk "/^ *\\* *\\@date/ {print \$3}" "$line")
+        if [ "$actual" != "$expected" ]; then
+            echo "In '$line', the date is '$actual'. Expected '$expected'. Please update this by running the update_date.sh script or fix this script." 
+            exit 1
+        fi
+    done
+fi

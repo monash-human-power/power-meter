@@ -28,6 +28,9 @@ As an example:
 ./tools/update_version.sh 1.2.3
 ```
 
+#### Git Hook for checking dates are correct before committing
+Copy the [`pre-commit`](./tools/pre-commit) file into [`.git/hooks/pre-commit`](.git/hooks/pre-commit). This will check the date of code files and make sure they are up to date.
+
 ### Doxygen documentation
 Documentation can be automatically generated using Doxygen by running `doxygen` from the root folder of the repository. You might need to install doxygen and graphviz first. The output will be placed in the [`docs`](docs) folder. GitHub actions may be set up later down the track to automatically generate and deploy to GitHub pages on commit- however that would require a public repository and documentation.
 

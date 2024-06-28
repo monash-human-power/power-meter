@@ -14,7 +14,7 @@ echo "Changed files:"
 echo "$changed_files"
 
 # Check that there are actually changed files
-if [ -z "$1" ]; then
+if [ ! -z "$changed_files" ]; then
     # Update the date on each changed file.
     subs_date=$(date -I)
         echo "$changed_files" | while read line ; do
