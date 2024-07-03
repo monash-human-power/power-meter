@@ -4,12 +4,13 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-06-29
+ * @date 2024-07-03
  */
 #pragma once
 
 #include "../defines.h"
 #include <Wire.h>
+#include <ICM42670P.h>
 
 
 /**
@@ -91,7 +92,7 @@ private:
  * @brief Class for interfacing with a single strain gauge.
  *
  */
-class StrainGauge
+class Side
 {
 public:
     /**
@@ -102,7 +103,7 @@ public:
      * @param i2cAddress the I2C address of the temperature sensor on this side, set by physical jumpers / solder
      *                   bridges.
      */
-    StrainGauge(const uint8_t pinDout, const uint8_t pinSclk, const uint8_t i2cAddress)
+    Side(const uint8_t pinDout, const uint8_t pinSclk, const uint8_t i2cAddress)
         : m_pinDout(pinDout), m_pinSclk(pinSclk), temperature(i2cAddress) {}
 
     /**
@@ -128,15 +129,15 @@ private:
  * @brief Class for interfacing with all strain gauges.
  *
  */
-class AllStrainGauges
+class PowerMeter
 {
 public:
     /**
      * @brief Construct a new All Strain Gauges object. The left and right strain gauge objects are also initialised.
      *
      */
-    AllStrainGauges() : left(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
-                        right(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C) {}
+    PowerMeter() : left(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
+                        right(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C), imu(SPI, PIN_SPI_AC_CS) {}
 
     /**
      * @brief Initialises the power meter hardware.
@@ -157,6 +158,8 @@ public:
      */
     void powerUp();
 
-    StrainGauge left;
-    StrainGauge right;
+private:
+    Side left;
+    Side right;
+    ICM42670 imu;
 };

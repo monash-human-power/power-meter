@@ -15,6 +15,11 @@ The firmware is written to use the Arduino environment and is located in the [`p
 ### IDE
 Development was principally undertaken using VS Code, however the Arduino IDE can also be used to compile and upload this project to the device.
 
+### Libraries
+Install the following libraries, either by using the Arduino library manager or going to their GitHub repository and cloning them.
+- [ICM42670P](https://github.com/tdk-invn-oss/motion.arduino.ICM42670P) library for communicating with the IMU.
+- [BasicLinearAlgebra](https://github.com/tomstewart89/BasicLinearAlgebra/) library for matrix maths. This is also added as a submodule for testing the Kalman filter on a computer.
+
 ### Tools for updating dates of changed files and versions
 A bash script has been written to update the dates on all modified or staged files (not including untracked files). Run `./tools/update_date.sh` to perform this operation.
 
@@ -37,3 +42,6 @@ Documentation can be automatically generated using Doxygen by running `doxygen` 
 To generate a massive appendix for the report, run `./tools/generate_refman.sh`
 
 The output file will be [`refman.pdf`](docs/latex/refman.pdf).
+
+## Scripts and testing
+A testing environment and Makefile have been set up to assist with developing the Kalman filter. This is found in the [`scripts-testing/kalman-filter`](./scripts-testing/kalman-filter/) directory. The [BasicLinearAlgebra](https://github.com/tomstewart89/BasicLinearAlgebra/) is included as a submodule to assist.

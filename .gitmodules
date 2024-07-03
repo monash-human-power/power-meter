@@ -1,0 +1,3 @@
+[submodule "scripts-testing/kalman-filter/BasicLinearAlgebra"]
+	path = scripts-testing/kalman-filter/BasicLinearAlgebra
+	url = https://github.com/tomstewart89/BasicLinearAlgebra/

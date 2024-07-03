@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-06-29
+ * @date 2024-07-03
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -40,6 +40,9 @@
 #define PIN_SPI_SDI 40
 #define PIN_SPI_SCLK 41
 #define PIN_SPI_AC_CS 42
+#define IMU_SAMPLE_RATE 800 // Options are 12, 25, 50, 100, 200, 400, 800, 1600 Hz (any other value defaults to 100 Hz).
+#define IMU_ACCEL_RANGE 2 // Options are 2, 4, 8, 16 G (any other value defaults to 16 G).
+#define IMU_GYRO_RANGE 1000 // Options are 250, 500, 1000, 2000 dps (any other value defaults to 2000 dps).
 
 // Power management
 #define PIN_BATTERY_VOLTAGE 26
@@ -50,7 +53,6 @@
 #define SERIAL_BAUD 115200
 #define PIN_USB_DN 19
 #define PIN_USB_DP 20
-
 
 /**
  * Logging
@@ -81,3 +83,5 @@
     SERIAL_TAKE();                        \
     ESP_LOGE(tag, format, ##__VA_ARGS__); \
     SERIAL_GIVE()
+
+#define PROTECT_STATES

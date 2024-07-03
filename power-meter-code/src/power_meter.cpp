@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-06-29
+ * @date 2024-07-03
  */
 
 #include "Arduino.h"
@@ -58,12 +58,12 @@ float TempSensor::readTempRegister()
     }
 }
 
-void StrainGauge::begin()
+void Side::begin()
 {
     temperature.begin();
 }
 
-void AllStrainGauges::begin()
+void PowerMeter::begin()
 {
     // Initialise I2C for the temperature sensors
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, I2C_BUS_FREQ);
@@ -71,16 +71,27 @@ void AllStrainGauges::begin()
     // Initialise the strain gauges
     left.begin();
     right.begin();
+
+    // Initialise the IMU
+    // Manually initialise the SPI bus beforehand so that the pins can be specified. The call to `SPI.begin()` in the
+    // IMU library should have no effect / returned early.
+    SPI.begin(PIN_SPI_SCLK, PIN_SPI_SDI, PIN_SPI_SDO, PIN_SPI_AC_CS);
+    int result = imu.begin();
+    if(!result)
+    {
+        LOGE("IMU", "Cannot connect to IMU, error %d.", result);
+    }
 }
 
-void AllStrainGauges::powerDown()
+void PowerMeter::powerDown()
 {
     digitalWrite(PIN_AMP_PWDN, LOW);
     digitalWrite(PIN_POWER_SAVE, LOW);
 }
 
-void AllStrainGauges::powerUp()
+void PowerMeter::powerUp()
 {
+    // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.
     delay(5); // Way longer than required, but should let the reference and strain gauge voltages settle.
     // Reset sequence specified in the ADS1232 datasheet.
@@ -89,4 +100,8 @@ void AllStrainGauges::powerUp()
     digitalWrite(PIN_AMP_PWDN, LOW);
     delayMicroseconds(26);
     digitalWrite(PIN_AMP_PWDN, HIGH);
+
+    // Setup the IMU
+    imu.startAccel(IMU_SAMPLE_RATE, IMU_ACCEL_RANGE);
+    imu.startGyro(IMU_GYRO_RANGE, IMU_GYRO_RANGE);
 }
