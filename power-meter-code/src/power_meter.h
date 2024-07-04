@@ -4,11 +4,12 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-03
+ * @date 2024-07-04
  */
 #pragma once
 
 #include "../defines.h"
+#include "kalman.h"
 #include <Wire.h>
 #include <ICM42670P.h>
 
@@ -125,6 +126,53 @@ private:
     const uint8_t m_pinDout, m_pinSclk;
 };
 
+class IMUManager
+{
+public:
+    /**
+     * @brief Constructs the manager and assigns pins.
+     * 
+     */
+    IMUManager(): m_imu(SPI, PIN_SPI_AC_CS), m_kalman(KALMAN_Q, KALMAN_R, KALMAN_X0, KALMAN_P0) {}
+
+    /**
+     * @brief Initialises the power meter hardware.
+     *
+     */
+    void begin();
+
+    /**
+     * @brief Starts the IMU.
+     */
+    void startEstimating();
+
+    /**
+     * @brief Enables tilt / movement detection to wake the system up again.
+     * 
+     */
+    void enableMotion();
+
+    /**
+     * @brief Task for operating the IMU.
+     * 
+     * @param pvParameters 
+     */
+    void taskIMU(void *pvParameters);
+
+    /**
+     * @brief Processes the IMU event to work out where we are.
+     * 
+     * @param evt data from the IMU.
+     */
+    void processIMUEvent(inv_imu_sensor_event_t *evt);
+
+private:
+    float const m_correctCentripedal(float reading, float radius, float velocity);
+
+    ICM42670 m_imu;
+    Kalman<float> m_kalman;
+};
+
 /**
  * @brief Class for interfacing with all strain gauges.
  *
@@ -137,7 +185,7 @@ public:
      *
      */
     PowerMeter() : left(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
-                        right(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C), imu(SPI, PIN_SPI_AC_CS) {}
+                        right(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C) {}
 
     /**
      * @brief Initialises the power meter hardware.
@@ -158,8 +206,13 @@ public:
      */
     void powerUp();
 
+    /**
+     * @brief Keeps a record of the current orientation and speed.
+     * 
+     */
+    IMUManager imuManager;
+
 private:
     Side left;
     Side right;
-    ICM42670 imu;
 };

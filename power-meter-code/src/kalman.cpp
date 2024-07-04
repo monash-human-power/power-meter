@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-03
+ * @date 2024-07-04
  */
 #include "kalman.h"
 
@@ -58,6 +58,13 @@ inline Matrix<2, 1, T> Kalman<T>::subtractStates(Matrix<2, 1, T> state1, Matrix<
         result(0, 0) -= 2*M_PI;
     }
     return result;
+}
+
+template <typename T>
+inline void Kalman<T>::resetState(Matrix<2, 1, T> xInitialState, Matrix<2, 2, T> pInitialCovariance)
+{
+    m_xState = xInitialState;
+    m_pCovariance = pInitialCovariance;
 }
 
 template <typename T>

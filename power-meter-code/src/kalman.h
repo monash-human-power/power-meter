@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-03
+ * @date 2024-07-04
  */
 #pragma once
 #include <BasicLinearAlgebra.h>
@@ -52,6 +52,15 @@ public:
      * @param timestep The timestep in seconds from the previous measurement.
      */
     void update(Matrix<2, 1, T> measurement, T timestep);
+
+    /**
+     * @brief Resets the state to the given values.
+     * 
+     * @param xInitialState The initial state extimate.
+     * @param pInitialCovariance The covariance matrix of the initial state. Large values in this will allow wildy
+     *                           inaccurate initial guesses to be quickly forgotten.
+     */
+    void resetState(Matrix<2, 1, T> xInitialState, Matrix<2, 2, T> pInitialCovariance);
 
     /**
      * @brief Get the covariance matrix (thread safe).

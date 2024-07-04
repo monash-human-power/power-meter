@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-03
+ * @date 2024-07-04
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -85,3 +85,5 @@
     SERIAL_GIVE()
 
 #define PROTECT_STATES
+
+#include "constants.h"
