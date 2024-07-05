@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-04
+ * @date 2024-07-05
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -45,7 +45,7 @@
 #define IMU_GYRO_RANGE 1000 // Options are 250, 500, 1000, 2000 dps (any other value defaults to 2000 dps).
 
 // Power management
-#define PIN_BATTERY_VOLTAGE 26
+#define PIN_BATTERY_VOLTAGE 12
 
 // Communications
 #define PIN_UART_TX0
