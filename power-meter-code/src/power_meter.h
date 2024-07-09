@@ -4,15 +4,14 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-04
+ * @date 2024-07-09
  */
 #pragma once
 
+#include "Arduino.h"
 #include "../defines.h"
-#include "kalman.h"
+#include "imu.h"
 #include <Wire.h>
-#include <ICM42670P.h>
-
 
 /**
  * @brief Class for communicating with a P3T1755 temperature sensor.
@@ -124,53 +123,6 @@ private:
      *
      */
     const uint8_t m_pinDout, m_pinSclk;
-};
-
-class IMUManager
-{
-public:
-    /**
-     * @brief Constructs the manager and assigns pins.
-     * 
-     */
-    IMUManager(): m_imu(SPI, PIN_SPI_AC_CS), m_kalman(KALMAN_Q, KALMAN_R, KALMAN_X0, KALMAN_P0) {}
-
-    /**
-     * @brief Initialises the power meter hardware.
-     *
-     */
-    void begin();
-
-    /**
-     * @brief Starts the IMU.
-     */
-    void startEstimating();
-
-    /**
-     * @brief Enables tilt / movement detection to wake the system up again.
-     * 
-     */
-    void enableMotion();
-
-    /**
-     * @brief Task for operating the IMU.
-     * 
-     * @param pvParameters 
-     */
-    void taskIMU(void *pvParameters);
-
-    /**
-     * @brief Processes the IMU event to work out where we are.
-     * 
-     * @param evt data from the IMU.
-     */
-    void processIMUEvent(inv_imu_sensor_event_t *evt);
-
-private:
-    float const m_correctCentripedal(float reading, float radius, float velocity);
-
-    ICM42670 m_imu;
-    Kalman<float> m_kalman;
 };
 
 /**

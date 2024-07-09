@@ -4,18 +4,18 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-04
+ * @date 2024-07-09
  */
 #pragma once
 #include <BasicLinearAlgebra.h>
 
 #ifdef PROTECT_KALMAN_STATES
-    #error Kalman semaphores not implemented yet.
-    #define TAKE_KALMAN_SEMAPHORE()
-    #define GIVE_KALMAN_SEMAPHORE()
+    // All access operations are very quick. For efficiency, making this a critical section should be ok.
+    #define TAKE_KALMAN_PROTECT() taskENTER_CRITICAL()
+    #define GIVE_KALMAN_PROTECT() taskEXIT_CRITICAL()
 #else
-    #define TAKE_KALMAN_SEMAPHORE()
-    #define GIVE_KALMAN_SEMAPHORE()
+    #define TAKE_KALMAN_PROTECT()
+    #define GIVE_KALMAN_PROTECT()
 #endif
 
 using namespace BLA;
@@ -51,7 +51,7 @@ public:
      * @param measurement 2x1 matrix representing the new measurements (position on top, omega on bottom).
      * @param timestep The timestep in seconds from the previous measurement.
      */
-    void update(Matrix<2, 1, T> measurement, T timestep);
+    void update(Matrix<2, 1, T> &measurement, T timestep);
 
     /**
      * @brief Resets the state to the given values.

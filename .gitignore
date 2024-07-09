@@ -2,6 +2,7 @@
 \.vscode
 docs
 power-meter-code/constants.h
+.ipynb_checkpoints
 
 ### KICAD ###
 power-meter-pcb/out

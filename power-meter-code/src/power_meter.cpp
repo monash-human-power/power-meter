@@ -4,15 +4,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-04
+ * @date 2024-07-09
  */
 
 #include "Arduino.h"
 #include "power_meter.h"
-
-extern void irqIMUActive();
-extern void irqIMUWake();
-extern void callbackProcessIMU(inv_imu_sensor_event_t *evt);
 
 void TempSensor::begin()
 {
@@ -67,59 +63,6 @@ void Side::begin()
     temperature.begin();
 }
 
-void IMUManager::begin()
-{
-    // Initialise the IMU
-    // Manually initialise the SPI bus beforehand so that the pins can be specified. The call to `SPI.begin()` in the
-    // IMU library should have no effect / returned early.
-    SPI.begin(PIN_SPI_SCLK, PIN_SPI_SDI, PIN_SPI_SDO, PIN_SPI_AC_CS);
-    int result = m_imu.begin();
-    if(!result)
-    {
-        LOGE("IMU", "Cannot connect to IMU, error %d.", result);
-    }
-}
-
-void IMUManager::startEstimating()
-{
-    // Setup the IMU
-    m_imu.enableFifoInterrupt(PIN_ACCEL_INTERRUPT, irqIMUActive, 10);
-    m_imu.startAccel(IMU_SAMPLE_RATE, IMU_ACCEL_RANGE);
-    m_imu.startGyro(IMU_GYRO_RANGE, IMU_GYRO_RANGE);
-}
-
-void IMUManager::enableMotion()
-{
-    // TODO: Interrupt handler.
-    m_imu.startWakeOnMotion(PIN_ACCEL_INTERRUPT, irqIMUWake);
-}
-
-void IMUManager::taskIMU(void *pvParameters)
-{
-    while (true)
-    {
-        // Wait for the interrupt to occur and we get a notification
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-        // Get data from the accelerometer
-        m_imu.getDataFromFifo(callbackProcessIMU);
-    }
-}
-
-void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
-{
-    if (m_imu.isAccelDataValid(evt) && m_imu.isGyroDataValid(evt))
-    {
-        // X accel = evt->accel[0]
-        // TODO
-    }
-}
-
-inline float const IMUManager::m_correctCentripedal(float reading, float radius, float velocity)
-{
-    // TODO
-}
-
 void PowerMeter::begin()
 {
     // Initialise I2C for the temperature sensors
@@ -143,7 +86,8 @@ void PowerMeter::powerUp()
 {
     // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.
-    delay(5); // Way longer than required, but should let the reference and strain gauge voltages settle.
+    delay(5);                           // Way longer than required, but should let the reference and strain gauge voltages settle.
+
     // Reset sequence specified in the ADS1232 datasheet.
     digitalWrite(PIN_AMP_PWDN, HIGH);
     delayMicroseconds(26);

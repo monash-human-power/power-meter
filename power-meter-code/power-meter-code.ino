@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-04
+ * @date 2024-07-09
  */
 
 #include "defines.h"
@@ -29,6 +29,17 @@ void setup()
 
     // Start the hardware.
     powerMeter.begin();
+    
+    // Start tasks
+    // TODO: Determine RAM allocations
+    xTaskCreatePinnedToCore(
+        taskIMU,
+        "IMU",
+        4096,
+        NULL,
+        1,
+        &imuTaskHandle,
+        1);
 }
 
 void loop()
@@ -40,36 +51,4 @@ void loop()
         LOGI("StateChange", current->name);
         current = current->enter();
     }
-}
-
-/**
- * @brief Interrupt called when the IMU has new data during tracking.
- * 
- */
-void irqIMUActive()
-{
-    // Notify the IMU task. If the IMU task has a higher priority than the one currently running, force a context
-    // switch.
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    vTaskNotifyGiveFromISR(imuTaskHandle, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
-
-/**
- * @brief Interrupt called when the IMU detets movement to wake the unit up.
- * 
- */
-void irqIMUWake()
-{
-    // TODO
-    LOGI("Wake", "Wakeup interrupt received");
-}
-
-/**
- * @brief Function to conveniently handle data from the IMU.
- * 
- */
-void callbackProcessIMU(inv_imu_sensor_event_t *evt)
-{
-    powerMeter.imuManager.processIMUEvent(evt);
 }
