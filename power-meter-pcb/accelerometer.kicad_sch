@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - Accelerometer and gyroscope")
-		(date "2024-07-05")
-		(rev "V1.0.2")
+		(date "2024-07-11")
+		(rev "V1.0.3")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 	)
 	(lib_symbols
@@ -1167,6 +1167,24 @@
 				(hide yes)
 			)
 		)
+		(property "Sim.Device" ""
+			(at 143.51 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" ""
+			(at 143.51 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "4"
 			(uuid "0a6faeca-0157-4968-9c37-62bc2e492ce0")
 		)
@@ -1228,7 +1246,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "35028bdd-822c-42ff-baf7-943300b2206f")
-		(property "Reference" "#PWR047"
+		(property "Reference" "#PWR041"
 			(at 196.85 107.95 0)
 			(effects
 				(font
@@ -1278,7 +1296,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR047")
+					(reference "#PWR041")
 					(unit 1)
 				)
 			)
@@ -1294,7 +1312,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "4b14b906-5703-42e0-9d86-f9b1559d0955")
-		(property "Reference" "#PWR046"
+		(property "Reference" "#PWR040"
 			(at 196.85 92.71 0)
 			(effects
 				(font
@@ -1344,7 +1362,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR046")
+					(reference "#PWR040")
 					(unit 1)
 				)
 			)
@@ -1360,7 +1378,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5a5791d1-d68a-4d6a-86c4-33f2081ef228")
-		(property "Reference" "#PWR045"
+		(property "Reference" "#PWR039"
 			(at 171.45 119.38 0)
 			(effects
 				(font
@@ -1410,7 +1428,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR045")
+					(reference "#PWR039")
 					(unit 1)
 				)
 			)
@@ -1426,7 +1444,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "679f56d4-0d7d-43da-85fc-c98f86233ee0")
-		(property "Reference" "#PWR044"
+		(property "Reference" "#PWR038"
 			(at 171.45 83.82 0)
 			(effects
 				(font
@@ -1476,7 +1494,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR044")
+					(reference "#PWR038")
 					(unit 1)
 				)
 			)
@@ -1492,7 +1510,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "86fc4b01-bc48-44bf-b0b1-c9523f3a70db")
-		(property "Reference" "C16"
+		(property "Reference" "C13"
 			(at 200.66 93.9799 0)
 			(effects
 				(font
@@ -1546,6 +1564,24 @@
 				(hide yes)
 			)
 		)
+		(property "Sim.Device" ""
+			(at 196.85 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Sim.Pins" ""
+			(at 196.85 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "f5350a98-8e03-4fdf-ad1b-b4bce419b77f")
 		)
@@ -1555,7 +1591,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "C16")
+					(reference "C13")
 					(unit 1)
 				)
 			)
@@ -1571,7 +1607,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ea1ffbae-406d-4f10-9276-3bb58e6dd11b")
-		(property "Reference" "#PWR043"
+		(property "Reference" "#PWR037"
 			(at 100.33 96.52 0)
 			(effects
 				(font
@@ -1621,7 +1657,7 @@
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6/2b9cb85e-d958-4741-88c2-27e776d7a0b9"
-					(reference "#PWR043")
+					(reference "#PWR037")
 					(unit 1)
 				)
 			)
