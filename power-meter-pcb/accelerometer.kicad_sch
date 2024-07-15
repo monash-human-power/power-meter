@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - Accelerometer and gyroscope")
-		(date "2024-07-11")
-		(rev "V1.0.3")
+		(date "2024-07-15")
+		(rev "V1.0.4")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 	)
 	(lib_symbols
