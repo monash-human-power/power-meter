@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-07-19
  */
 #pragma once
 
@@ -64,10 +64,10 @@ private:
      */
     enum TempPointers
     {
-        ptrTemp = 0,
-        ptrConf = 1,
-        ptrTLow = 2,
-        ptrTHigh = 3
+        PTR_TEMP = 0,
+        PTR_CONF = 1,
+        PTR_TEMP_LOW = 2,
+        PTR_TEMP_HIGH = 3
     };
 
     /**
@@ -76,14 +76,14 @@ private:
      */
     enum ConfBits
     {
-        confBitSD = 0,
-        confBitTM = 1,
-        confBitPOL = 2,
-        confBitF0 = 3,
-        confBitF1 = 4,
-        confBitR0 = 5,
-        confBitR1 = 6,
-        confBitOS = 7
+        CONF_BIT_SD = 0,
+        CONF_BIT_TM = 1,
+        CONF_BIT_POL = 2,
+        CONF_BIT_F0 = 3,
+        CONF_BIT_F1 = 4,
+        CONF_BIT_R0 = 5,
+        CONF_BIT_R1 = 6,
+        CONF_BIT_OS = 7
     };
     const uint8_t m_i2cAddress;
 };
@@ -136,8 +136,8 @@ public:
      * @brief Construct a new All Strain Gauges object. The left and right strain gauge objects are also initialised.
      *
      */
-    PowerMeter() : left(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
-                        right(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C) {}
+    PowerMeter() : m_sides{Side(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
+                        Side(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C)} {}
 
     /**
      * @brief Initialises the power meter hardware.
@@ -165,6 +165,9 @@ public:
     IMUManager imuManager;
 
 private:
-    Side left;
-    Side right;
+    /**
+     * @brief Each side of the power meter. Using an array for easy manipulation later.
+     * 
+     */
+    Side m_sides[2];
 };

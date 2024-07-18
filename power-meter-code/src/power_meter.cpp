@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-07-19
  */
 
 #include "Arduino.h"
@@ -14,8 +14,8 @@ void TempSensor::begin()
 {
     Wire.beginTransmission(m_i2cAddress);
     // Set the configuration to default conversion time, default fault queue and enable shutdown.
-    Wire.write(ptrConf);
-    Wire.write(bit(confBitR0) | bit(confBitF0) | bit(confBitSD)); // Default R0 and F0 are 1.
+    Wire.write(PTR_CONF);
+    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD)); // Default R0 and F0 are 1.
     Wire.endTransmission(true);
 }
 
@@ -29,9 +29,9 @@ float TempSensor::readTemp()
 void TempSensor::startCapture()
 {
     Wire.beginTransmission(m_i2cAddress);
-    Wire.write(ptrConf);
+    Wire.write(PTR_CONF);
     // Set the configuration register to as initialised + one shot.
-    Wire.write(bit(confBitR0) | bit(confBitF0) | bit(confBitSD) | bit(confBitOS));
+    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | bit(CONF_BIT_OS));
     Wire.endTransmission(true);
 }
 
@@ -39,7 +39,7 @@ float TempSensor::readTempRegister()
 {
     // Set the pointer to the temperature register.
     Wire.beginTransmission(m_i2cAddress);
-    Wire.write(ptrTemp);
+    Wire.write(PTR_TEMP);
     Wire.endTransmission(true);
 
     // Attempt to get the data
@@ -69,8 +69,8 @@ void PowerMeter::begin()
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, I2C_BUS_FREQ);
 
     // Initialise the strain gauges
-    left.begin();
-    right.begin();
+    m_sides[SIDE_LEFT].begin();
+    m_sides[SIDE_RIGHT].begin();
 
     // Initialise the IMU
     imuManager.begin();
