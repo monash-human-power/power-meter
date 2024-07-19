@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-19
+ * @date 2024-07-20
  */
 #pragma once
 #include "Arduino.h"
@@ -29,7 +29,7 @@ void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
 {
     // Housekeeping queue
     // Check if the queue has already been created.
-    if(!m_housekeepingQueue)
+    if (!m_housekeepingQueue)
     {
         // Doesn't exist, create.
         m_housekeepingQueue = xQueueCreate(housekeepingLength, sizeof(HousekeepingData));
@@ -43,7 +43,7 @@ void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
 
     // Low-speed queue
     // Check if the queue has already been created.
-    if(!m_lowSpeedQueue)
+    if (!m_lowSpeedQueue)
     {
         // Doesn't exist, create.
         m_lowSpeedQueue = xQueueCreate(lowSpeedLength, sizeof(LowSpeedData));
@@ -56,29 +56,47 @@ void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
     }
 }
 
+void Connection::enable()
+{
+    xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_ENABLE);
+}
+
+void Connection::disable()
+{
+    xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_DISABLE);
+}
+
+void Connection::run(TaskHandle_t taskHandle)
+{
+    m_taskHandle = taskHandle;
+    runStateMachine("Connections", &m_stateDisabled);
+}
+
 void Connection::addHousekeeping(HousekeepingData &data)
 {
-    m_addToQueue(m_housekeepingQueue, (void *)&data);
+    addToQueue(m_housekeepingQueue, (void *)&data);
 }
 
 void Connection::addLowSpeed(LowSpeedData &data)
 {
-    m_addToQueue(m_lowSpeedQueue, (void *)&data);
+    addToQueue(m_lowSpeedQueue, (void *)&data);
 }
 
-void Connection::m_addToQueue(QueueHandle_t queue, void *data)
+inline bool Connection::isDisableWaiting(BaseType_t yieldTicks = 0)
 {
-    const int MAX_DELAY = 5;
-    int error = xQueueSend(queue, data, MAX_DELAY);
-    if (error != pdTRUE)
-    {
-        LOGE("Queues", "Couldn't add data to a queue (%d)", error);
-    }
+    return ulTaskNotifyTakeIndexed(CONN_NOTIFY_DISABLE, pdTRUE, yieldTicks);
 }
 
-void HighSpeedConnection::begin(const int housekeepingLength, const int lowSpeedLength, const int highSpeedLength)
+State *Connection::StateDisabled::enter()
 {
-    Connection::begin(housekeepingLength, lowSpeedLength);
+    // Wait for a connection notification.
+    ulTaskNotifyTakeIndexed(CONN_NOTIFY_ENABLE, pdTRUE, portMAX_DELAY);
+    return &m_enableState;
+}
+
+void HighSpeedConnection::begin(const int highSpeedLength)
+{
+    // Connection::begin(housekeepingLength, lowSpeedLength);
     m_createSideQueue(SIDE_LEFT, highSpeedLength);
     m_createSideQueue(SIDE_RIGHT, highSpeedLength);
 }
@@ -86,7 +104,7 @@ void HighSpeedConnection::begin(const int housekeepingLength, const int lowSpeed
 void HighSpeedConnection::m_createSideQueue(EnumSide side, int length)
 {
     // Check if the queue has already been created.
-    if(!m_sideQueues[side])
+    if (!m_sideQueues[side])
     {
         // Doesn't exist, create.
         m_sideQueues[side] = xQueueCreate(length, sizeof(HighSpeedData));
@@ -101,14 +119,14 @@ void HighSpeedConnection::m_createSideQueue(EnumSide side, int length)
 
 inline void HighSpeedConnection::addHighSpeed(HighSpeedData &data, EnumSide side)
 {
-    m_addToQueue(m_sideQueues[side], (void *)&data);
+    addToQueue(m_sideQueues[side], (void *)&data);
 }
 
-void IMUConnection::begin(const int housekeepingLength, const int lowSpeedLength, const int imuLength)
+void IMUConnection::begin(const int imuLength)
 {
-    Connection::begin(housekeepingLength, lowSpeedLength);
+    // Connection::begin(housekeepingLength, lowSpeedLength);
     // Check if the queue has already been created.
-    if(!m_imuQueue)
+    if (!m_imuQueue)
     {
         // Doesn't exist, create.
         m_imuQueue = xQueueCreate(imuLength, sizeof(IMUData));
@@ -123,5 +141,15 @@ void IMUConnection::begin(const int housekeepingLength, const int lowSpeedLength
 
 void IMUConnection::addIMU(IMUData &data)
 {
-    m_addToQueue(m_imuQueue, (void *)&data);
+    addToQueue(m_imuQueue, (void *)&data);
+}
+
+void addToQueue(QueueHandle_t queue, void *data)
+{
+    const int MAX_DELAY = 5;
+    int error = xQueueSend(queue, data, MAX_DELAY);
+    if (error != pdTRUE)
+    {
+        LOGE("Queues", "Couldn't add data to a queue (%d)", error);
+    }
 }

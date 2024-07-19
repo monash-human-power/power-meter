@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-19
+ * @date 2024-07-20
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -84,12 +84,28 @@
     ESP_LOGE(tag, format, ##__VA_ARGS__); \
     SERIAL_GIVE()
 
+// https://gcc.gnu.org/onlinedocs/gcc-4.8.5/cpp/Stringification.html
+#define xstringify(s) stringify(s)
+#define stringify(s) #s
+
+/**
+ * @brief Enumerator to represent each side of the power meter.
+ * 
+ */
 enum EnumSide
 {
     SIDE_LEFT = 0,
     SIDE_RIGHT = 1
 };
 
-#define PROTECT_KALMAN_STATES
+/**
+ * WiFi settings.
+ */
+#define MQTT_TOPIC_SEPARATOR '/'
+#define RECONNECT_DELAY 1000
+#define MQTT_RETRY_ITERATIONS 20
+#define WIFI_RECONNECT_ATTEMPT_TIME 60000 // If not connected in 1 minute, disconnect and attempt again.
+
+#define PROTECT_KALMAN_STATES // Enables protection of the state variable in the Kalman filter.
 
 #include "constants.h"

@@ -4,11 +4,12 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-19
+ * @date 2024-07-20
  */
 #pragma once
 #include "Arduino.h"
 #include "../defines.h"
+#include "states.h"
 
 #define VELOCITY_TO_CADENCE(vel) (vel * 60 / (2 * M_PI));
 
@@ -129,6 +130,13 @@ class Connection
 {
 public:
     /**
+     * @brief Construct a new Connection object.
+     *
+     * @param enableState is the state that should be called to enable the connection.
+     */
+    Connection(State &enableState) : m_stateDisabled(enableState) {}
+
+    /**
      * @brief Sets up the connection.
      *
      * As a base class, this sets up the low-speed and housekeeping queues if they don't already exist.
@@ -141,14 +149,26 @@ public:
     /**
      * @brief Enables the connection after sleep or on startup.
      *
+     * Sends a notification by default.
+     *
      */
-    virtual void enable() {}
+    virtual void enable();
 
     /**
      * @brief Stops the connection and enters a low power mode.
      *
+     * Sends a notification by default.
      */
-    virtual void disable() {}
+    virtual void disable();
+
+    /**
+     * @brief Runs the task that manages the connection.
+     *
+     * This starts the state machine in the disabled state. When `enable()` is called, the next state will be called
+     * automatically.
+     *
+     */
+    void run(TaskHandle_t taskHandle);
 
     /**
      * @brief Checks if the connection is currently active (can the device send data to the outside world)?
@@ -199,19 +219,53 @@ protected:
     QueueHandle_t m_housekeepingQueue, m_lowSpeedQueue;
 
     /**
-     * @brief Attempts to add data to a queue and has a tantrum if it's full.
+     * @brief Enumberator to represent channels to notify over.
      *
-     * @param queue the queue to add data to.
-     * @param data the data.
      */
-    void m_addToQueue(QueueHandle_t queue, void *data);
+    enum ConnectionNotifyChannel
+    {
+        CONN_NOTIFY_ENABLE,
+        CONN_NOTIFY_DISABLE
+    };
+
+    /**
+     * @brief Handle of the task being run.
+     *
+     */
+    TaskHandle_t m_taskHandle;
+
+    /**
+     * @brief Checks if the connection needs to be disabled and put to sleep.
+     *
+     * @param yieldTicks is the maximum ticks to wait (i.e. can be used as a delay that might exit early).
+     *
+     * @return true `disable()` has been called since the last check.
+     * @return false `disable()` has not been called since the last check.
+     */
+    static bool isDisableWaiting(BaseType_t yieldTicks = 0);
+
+    /**
+     * @brief State for when the connection is disabled and in low power.
+     *
+     * This waits for a notification to re-enable.
+     *
+     */
+    class StateDisabled : public State
+    {
+    public:
+        StateDisabled(State &enableState) : State("Disabled"), m_enableState(enableState) {}
+        virtual State *enter();
+
+    private:
+        State &m_enableState;
+    } m_stateDisabled;
 };
 
 /**
  * @brief Adds the queue to implement a high speed connection.
  *
  */
-class HighSpeedConnection : public Connection
+class HighSpeedConnection
 {
 public:
     /**
@@ -219,11 +273,9 @@ public:
      *
      * As a base class, this sets up the high-speed queues if they don't already exist and calls `Connection::begin()`.
      *
-     * @param housekeepingLength maximum length of the housekeeping queue.
-     * @param lowSpeedLength maximum length of the low-speed queue.
      * @param highSpeedLength maximum length of the high-speed queues.
      */
-    virtual void begin(const int housekeepingLength, const int lowSpeedLength, const int highSpeedLength);
+    virtual void begin(const int highSpeedLength);
 
     /**
      * @brief Adds high-speed data that can be transmitted.
@@ -257,7 +309,7 @@ private:
  * @brief Adds the queue to implement high-speed IMU data.
  *
  */
-class IMUConnection : public Connection
+class IMUConnection
 {
 public:
     /**
@@ -265,11 +317,9 @@ public:
      *
      * As a base class, this sets up the IMU queue if they don't already exist and calls `Connection::begin()`.
      *
-     * @param housekeepingLength maximum length of the housekeeping queue.
-     * @param lowSpeedLength maximum length of the low-speed queue.
      * @param imuLength maximum length of the imu queue.
      */
-    virtual void begin(const int housekeepingLength, const int lowSpeedLength, const int imuLength);
+    virtual void begin(const int imuLength);
 
     /**
      * @brief Adds high-speed IMU data that can be transmitted.
@@ -289,3 +339,11 @@ protected:
      */
     QueueHandle_t m_imuQueue;
 };
+
+/**
+ * @brief Attempts to add data to a queue and has a tantrum if it's full.
+ *
+ * @param queue the queue to add data to.
+ * @param data the data.
+ */
+void addToQueue(QueueHandle_t queue, void *data);

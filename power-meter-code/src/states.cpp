@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-06-27
+ * @date 2024-07-20
  */
 #include "Arduino.h"
 #include "states.h"
@@ -21,4 +21,17 @@ State *StateActive::enter()
 State *StateSleep::enter()
 {
     // TODO
+}
+
+void runStateMachine(const char *name, State *initial)
+{
+    // Run the state machine
+    while (initial)
+    {
+        LOGI(name, "Changing state to %s", initial->name);
+        initial = initial->enter();
+    }
+
+    // Was given a null state, so fall through.
+    LOGI(name, "State machine finished.");
 }

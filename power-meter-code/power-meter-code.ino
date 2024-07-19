@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-07-20
  */
 
 #include "defines.h"
@@ -45,10 +45,5 @@ void setup()
 void loop()
 {
     // Run the state machine
-    State *current = &activeState;
-    while (current)
-    {
-        LOGI("StateChange", current->name);
-        current = current->enter();
-    }
+    runStateMachine("Main States", &activeState);
 }
