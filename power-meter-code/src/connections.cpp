@@ -4,26 +4,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-21
  */
 #pragma once
 #include "Arduino.h"
 #include "connections.h"
-
-inline float HousekeepingData::averageTemp()
-{
-    return (temperatures[SIDE_LEFT] + temperatures[SIDE_RIGHT]) / 2;
-}
-
-inline float IMUData::cadence()
-{
-    return VELOCITY_TO_CADENCE(velocity);
-}
-
-inline float HighSpeedData::power()
-{
-    return velocity * torque;
-}
 
 void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
 {
@@ -82,7 +67,7 @@ void Connection::addLowSpeed(LowSpeedData &data)
     addToQueue(m_lowSpeedQueue, (void *)&data);
 }
 
-inline bool Connection::isDisableWaiting(BaseType_t yieldTicks = 0)
+inline bool Connection::isDisableWaiting(BaseType_t yieldTicks)
 {
     return ulTaskNotifyTakeIndexed(CONN_NOTIFY_DISABLE, pdTRUE, yieldTicks);
 }

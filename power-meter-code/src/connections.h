@@ -4,121 +4,13 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-21
  */
 #pragma once
 #include "Arduino.h"
 #include "../defines.h"
 #include "states.h"
-
-#define VELOCITY_TO_CADENCE(vel) (vel * 60 / (2 * M_PI));
-
-/**
- * @brief Data to be passed on the housekeeping queue
- *
- */
-class HousekeepingData
-{
-public:
-    /**
-     * @brief Temperature of each side in degrees C.
-     *
-     */
-    float temperatures[2];
-
-    /**
-     * @brief Battery voltage in V.
-     *
-     */
-    float battery;
-
-    /**
-     * @brief Calculates the average temperature of all sides.
-     *
-     * @return float The average temperature in degrees C.
-     */
-    float averageTemp();
-};
-
-/**
- * @brief Low speed data (what would be reported by a basic power meter).
- *
- */
-class LowSpeedData
-{
-public:
-    /**
-     * @brief The average power in W.
-     *
-     */
-    float power;
-
-    /**
-     * @brief The average cadance in RPM.
-     *
-     */
-    float cadence;
-
-    /**
-     * @brief The pedal balance.
-     *
-     * 0 is completely left only, 0.5 is balanced, 1 is completely right only.
-     *
-     */
-    float balance;
-};
-
-class IMUData
-{
-public:
-    /**
-     * @brief Time in ms since the system start.
-     *
-     */
-    uint32_t timestamp;
-
-    /**
-     * @brief Instantaneous angular velocity in rad/s.
-     *
-     */
-    float velocity;
-
-    /**
-     * @brief Instantaneous position in radians.
-     *
-     */
-    float position;
-
-    /**
-     * @brief Calculates the instantanerous cadence (angular velocity) in revolutions per minute.
-     *
-     * For some reason cyclists don't work exclusively in radians per second.
-     *
-     * @return float the cadence.
-     */
-    float cadence();
-};
-
-/**
- * @brief High speed data for one side.
- *
- */
-class HighSpeedData : public IMUData
-{
-public:
-    /**
-     * @brief Torque in Nm.
-     *
-     */
-    float torque;
-
-    /**
-     * @brief Calculates the power in W.
-     *
-     * @return float the power in W.
-     */
-    float power();
-};
+#include "data_points.h"
 
 /**
  * @brief Abstract base class for a connection that handles incoming data and publishes it elsewhere.
