@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-21
+ * @date 2024-07-22
  */
 #include "connection_mqtt.h"
 
@@ -133,8 +133,8 @@ void MQTTConnection::m_handleIMUQueue()
 }
 
 #define DELAY_WITH_DISABLE(time)                     \
-    if (isDisableWaiting(time / portTICK_PERIOD_MS)) \
-    return &m_shutdownState
+    if (m_connection.isDisableWaiting(time / portTICK_PERIOD_MS)) \
+    return &m_connection.m_stateShutdown
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
@@ -156,7 +156,7 @@ State *MQTTConnection::StateWiFiConnect::enter()
 
     // Successfully connected.
     LOGI("Networking", "Connected with IP address '%s'.", WiFi.localIP().toString().c_str());
-    return &m_mqttState;
+    return &m_connection.m_stateMQTTConnect;
 }
 
 State *MQTTConnection::StateMQTTConnect::enter()
@@ -177,7 +177,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
         // Check if WiFi is connected and reconnect if needed.
         if (WiFi.status() != WL_CONNECTED)
         {
-            return &m_wifiState;
+            return &m_connection.m_stateWiFiConnect;
         }
 
         // Attempt to restart the connection every so often.
@@ -192,24 +192,24 @@ State *MQTTConnection::StateMQTTConnect::enter()
 
     // Successfully connected to MQTT
     LOGI("Networking", "Connected to MQTT broker.");
-    return &m_activeState;
+    return &m_connection.m_stateActive;
 }
 
 State *MQTTConnection::StateActive::enter()
 {
     // Check for data on the queues regularly and publish if so.
-    while (!isDisableWaiting(0))
+    while (!m_connection.isDisableWaiting(0))
     {
         // Check if WiFi is connected and reconnect if needed.
         if (WiFi.status() != WL_CONNECTED)
         {
-            return &m_wifiState;
+            return &m_connection.m_stateWiFiConnect;
         }
 
         // Run the MQTT loop. Check if MQTT is connected and reconnect if needed.
         if (!mqtt.loop())
         {
-            return &m_mqttState;
+            return &m_connection.m_stateMQTTConnect;
         }
 
         // Check each queue and send data if present. Queue sets could be useful here.
@@ -219,12 +219,12 @@ State *MQTTConnection::StateActive::enter()
         // Wait for a bit
         taskYIELD();
     }
-    return &m_shutdownState;
+    return &m_connection.m_stateShutdown;
 }
 
 State *MQTTConnection::StateShutdown::enter()
 {
     mqtt.disconnect();
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
-    return &m_disabledState;
+    return &m_connection.m_stateDisabled;
 }

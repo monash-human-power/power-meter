@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-22
  */
 #pragma once
 #include "../defines.h"
@@ -51,8 +51,11 @@ protected:
 class StateActive : public State
 {
 public:
-    StateActive() : State("Active") {}
+    StateActive(State &sleepState) : State("Active"), m_sleepState(sleepState) {}
     virtual State *enter();
+
+private:
+    State &m_sleepState;
 };
 
 /**
@@ -62,23 +65,16 @@ public:
 class StateSleep : public State
 {
 public:
-    StateSleep() : State("Sleep") {}
+    StateSleep(State &activeState) : State("Sleep"), m_activeState(activeState) {}
     virtual State *enter();
-};
 
-/**
- * @brief A struct containing all states.
- *
- */
-struct StatesList
-{
-    StateActive *active;
-    StateSleep *sleep;
+private:
+    State &m_activeState;
 };
 
 /**
  * @brief Runs the state machine.
- * 
+ *
  * @param name the name to use for debugging.
  * @param initial the initial state.
  */

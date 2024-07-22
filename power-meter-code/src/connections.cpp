@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-21
+ * @date 2024-07-22
  */
 #pragma once
 #include "Arduino.h"
@@ -67,7 +67,7 @@ void Connection::addLowSpeed(LowSpeedData &data)
     addToQueue(m_lowSpeedQueue, (void *)&data);
 }
 
-inline bool Connection::isDisableWaiting(BaseType_t yieldTicks)
+bool Connection::isDisableWaiting(BaseType_t yieldTicks)
 {
     return ulTaskNotifyTakeIndexed(CONN_NOTIFY_DISABLE, pdTRUE, yieldTicks);
 }
@@ -137,4 +137,10 @@ void addToQueue(QueueHandle_t queue, void *data)
     {
         LOGE("Queues", "Couldn't add data to a queue (%d)", error);
     }
+}
+
+void taskConnection(void *pvParameters)
+{
+    Connection *connection = (Connection *)pvParameters;
+    connection->run(xTaskGetCurrentTaskHandle());
 }

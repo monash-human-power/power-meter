@@ -8,19 +8,28 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-22
  */
-#include "Arduino.h"
 #include "states.h"
+
+// Don't include in the header file to stop circular issues.
+#include "connection_mqtt.h"
+extern MQTTConnection connection;
 
 State *StateActive::enter()
 {
-    // TODO
+    connection.enable();
+    delay(30000);
+    return &m_sleepState;
 }
 
 State *StateSleep::enter()
 {
-    // TODO
+    connection.disable();
+    LOGD("Sleep", "Simulating sleeping");
+    delay(10000);
+    LOGD("Sleep", "Waking up");
+    return &m_activeState;
 }
 
 void runStateMachine(const char *name, State *initial)
@@ -28,6 +37,8 @@ void runStateMachine(const char *name, State *initial)
     // Run the state machine
     while (initial)
     {
+        // LOGD("state", "hi");
+        LOGD("states", "Hi");
         LOGI(name, "Changing state to %s", initial->name);
         initial = initial->enter();
     }

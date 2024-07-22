@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-21
+ * @date 2024-07-22
  */
 #pragma once
 #include "Arduino.h"
@@ -134,7 +134,7 @@ protected:
      * @return true `disable()` has been called since the last check.
      * @return false `disable()` has not been called since the last check.
      */
-    static bool isDisableWaiting(BaseType_t yieldTicks = 0);
+    bool isDisableWaiting(BaseType_t yieldTicks);
 
     /**
      * @brief State for when the connection is disabled and in low power.
@@ -239,3 +239,10 @@ protected:
  * @param data the data.
  */
 void addToQueue(QueueHandle_t queue, void *data);
+
+/**
+ * @brief Task that runs the connection.
+ * 
+ * @param pvParameters contains a pointer to the connection to run.
+ */
+void taskConnection(void *pvParameters);

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-21
+ * @date 2024-07-22
  */
 #pragma once
 #include "../defines.h"
@@ -15,7 +15,7 @@
 
 /**
  * @brief MQTT Topics
- * 
+ *
  */
 #define MQTT_TOPIC_PREFIX "/power/"
 #define MQTT_TOPIC_HOUSEKEEPING MQTT_TOPIC_PREFIX "housekeeping"
@@ -35,10 +35,10 @@ public:
      */
     MQTTConnection()
         : Connection(m_stateWiFiConnect),
-          m_stateWiFiConnect(m_stateMQTTConnect, m_stateShutdown),
-          m_stateMQTTConnect(m_stateWiFiConnect, m_stateActive, m_stateShutdown),
-          m_stateActive(*this, m_stateWiFiConnect, m_stateMQTTConnect, m_stateShutdown),
-          m_stateShutdown(m_stateDisabled) {}
+          m_stateWiFiConnect(*this),
+          m_stateMQTTConnect(*this),
+          m_stateActive(*this),
+          m_stateShutdown(*this) {}
 
     /**
      * @brief Initialises the connection
@@ -49,21 +49,21 @@ public:
 protected:
     /**
      * @brief Checks the queues and acts on any new messages to publish.
-     * 
+     *
      */
     void runActive();
 
 private:
     /**
      * @brief Checks if there is data for a side to send and does the sending if needed.
-     * 
+     *
      * @param side the side to check.
      */
     void m_handleSideQueue(EnumSide side);
 
     /**
      * @brief Checks if there is any data for the IMU queue and does the sending if needed.
-     * 
+     *
      */
     void m_handleIMUQueue();
 
@@ -77,11 +77,10 @@ private:
         /**
          * @brief Construct a new State WiFi Connect object
          *
-         * @param mqttState the state to transition to if successful.
-         * @param shutdownState the state to transition to if failed.
+         * @param connection is the MQTTConnection object to operate on.
          */
-        StateWiFiConnect(State &mqttState, State &shutdownState)
-            : State("WiFi"), m_mqttState(mqttState), m_shutdownState(shutdownState) {}
+        StateWiFiConnect(MQTTConnection &connection)
+            : State("WiFi"), m_connection(connection) {}
 
         /**
          * @brief Connects to WiFi.
@@ -92,7 +91,7 @@ private:
         virtual State *enter();
 
     private:
-        State &m_mqttState, &m_shutdownState;
+        MQTTConnection &m_connection;
 
     } m_stateWiFiConnect;
 
@@ -106,15 +105,11 @@ private:
         /**
          * @brief Construct a new State MQTT Connect object
          *
-         * @param wifiState is the state to transition to if the WiFi connection drops out.
-         * @param activeState the state to transition to if successful.
-         * @param shutdownState the state to transition to if failed.
+         * @param connection is the MQTTConnection object to operate on.
          */
-        StateMQTTConnect(State &wifiState, State &activeState, State &shutdownState)
+        StateMQTTConnect(MQTTConnection &connection)
             : State("MQTT"),
-              m_wifiState(wifiState),
-              m_activeState(activeState),
-              m_shutdownState(shutdownState) {}
+              m_connection(connection) {}
 
         /**
          * @brief Connects to MQTT.
@@ -125,7 +120,7 @@ private:
         virtual State *enter();
 
     private:
-        State &m_wifiState, &m_activeState, &m_shutdownState;
+        MQTTConnection &m_connection;
 
     } m_stateMQTTConnect;
 
@@ -138,18 +133,12 @@ private:
     public:
         /**
          * @brief Construct a new State Active object
-         * 
-         * @param connection the MQTTConnection to look at the queues of. Feels rather evil.
-         * @param wifiState the state to transition to when WiFi fails.
-         * @param mqttState the state to transition to when MQTT fails.
-         * @param shutdownState the state to transition to when interrupted.
+         *
+         * @param connection is the MQTTConnection object to operate on.
          */
-        StateActive(MQTTConnection connection, State &wifiState, State &mqttState, State &shutdownState)
+        StateActive(MQTTConnection &connection)
             : State("Active"),
-              m_connection(connection),
-              m_wifiState(wifiState),
-              m_mqttState(mqttState),
-              m_shutdownState(shutdownState) {}
+              m_connection(connection) {}
 
         /**
          * @brief Connects to MQTT.
@@ -160,7 +149,6 @@ private:
 
     private:
         MQTTConnection &m_connection;
-        State &m_wifiState, &m_mqttState, &m_shutdownState;
 
     } m_stateActive;
 
@@ -174,10 +162,10 @@ private:
         /**
          * @brief Construct a new State Disable object
          *
-         * @param disabledState the low-power state to transition to.
+         * @param connection is the MQTTConnection object to operate on.
          */
-        StateShutdown(State &disabledState)
-            : State("Shutdown"), m_disabledState(disabledState) {}
+        StateShutdown(MQTTConnection &connection)
+            : State("Shutdown"), m_connection(connection) {}
 
         /**
          * @brief Connects to MQTT.
@@ -187,7 +175,7 @@ private:
         virtual State *enter();
 
     private:
-        State &m_disabledState;
+        MQTTConnection &m_connection;
 
     } m_stateShutdown;
 };
