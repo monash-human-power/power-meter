@@ -8,9 +8,10 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 #include "states.h"
+extern SemaphoreHandle_t serialMutex;
 
 // Don't include in the header file to stop circular issues.
 #include "connection_mqtt.h"
@@ -37,8 +38,6 @@ void runStateMachine(const char *name, State *initial)
     // Run the state machine
     while (initial)
     {
-        // LOGD("state", "hi");
-        LOGD("states", "Hi");
         LOGI(name, "Changing state to %s", initial->name);
         initial = initial->enter();
     }

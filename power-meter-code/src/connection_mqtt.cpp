@@ -4,13 +4,15 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 #include "connection_mqtt.h"
+extern SemaphoreHandle_t serialMutex;
 
 // MQTT client
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
+
 
 void MQTTConnection::begin()
 {
@@ -31,11 +33,11 @@ void MQTTConnection::begin()
 }
 
 #define MQTT_LOG_PUBLISH(topic, payload) \
-    LOGV(topic, payload);                \
+    LOGV(topic, "%s", payload);                \
     mqtt.publish(topic, payload)
 
 #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
-    LOGV(topic, "Binary data");                      \
+    LOGV(topic, "Binary data of length %d", length);                      \
     mqtt.publish(topic, payload, length)
 
 void MQTTConnection::runActive()
@@ -132,9 +134,15 @@ void MQTTConnection::m_handleIMUQueue()
     }
 }
 
-#define DELAY_WITH_DISABLE(time)                     \
-    if (m_connection.isDisableWaiting(time / portTICK_PERIOD_MS)) \
-    return &m_connection.m_stateShutdown
+#define DELAY_WITH_DISABLE(ticks)                     \
+    if (m_connection.isDisableWaiting(ticks)) { \
+    LOGE("Connection", "Time to shut down"); \
+    return &m_connection.m_stateShutdown; \
+    } \
+    else \
+    { \
+        LOGV("Connection", "Delay occured without shutdown"); \
+    }
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
@@ -198,7 +206,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
 State *MQTTConnection::StateActive::enter()
 {
     // Check for data on the queues regularly and publish if so.
-    while (!m_connection.isDisableWaiting(0))
+    while (!m_connection.isDisableWaiting(1))
     {
         // Check if WiFi is connected and reconnect if needed.
         if (WiFi.status() != WL_CONNECTED)
@@ -216,8 +224,8 @@ State *MQTTConnection::StateActive::enter()
         // Call a function in the connection so that we have more convenient access to the queues.
         m_connection.runActive();
 
-        // Wait for a bit
-        taskYIELD();
+        // // Wait for a bit (now part of the notify take).
+        // taskYIELD();
     }
     return &m_connection.m_stateShutdown;
 }

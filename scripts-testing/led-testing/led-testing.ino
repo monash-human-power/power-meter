@@ -11,14 +11,14 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  for (int i = 0; i < 50; i++)
-  {
-    Serial.println(i);
-    pinMode(i, OUTPUT);
-    digitalWrite(i, HIGH);
-    delay(20);
-    digitalWrite(i, LOW);
-  }
+  // for (int i = 0; i < 50; i++)
+  // {
+  //   Serial.println(i);
+  //   pinMode(i, OUTPUT);
+  //   digitalWrite(i, HIGH);
+  //   delay(20);
+  //   digitalWrite(i, LOW);
+  // }
   digitalWrite(8, HIGH);
   digitalWrite(9, LOW);
   delay(500);

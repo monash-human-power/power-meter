@@ -8,11 +8,10 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 #pragma once
 #include "../defines.h"
-
 /**
  * @brief Parent class for a state in a state machine.
  *

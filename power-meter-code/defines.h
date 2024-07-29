@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-30
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -59,10 +59,10 @@
  * // TODO: Make work over USB.
  */
 // Logging (with mutexes)
-// #define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
-// #define SERIAL_GIVE() xSemaphoreGive(serialMutex)
-#define SERIAL_TAKE()
-#define SERIAL_GIVE()
+#define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
+#define SERIAL_GIVE() xSemaphoreGive(serialMutex)
+// #define SERIAL_TAKE()
+// #define SERIAL_GIVE()
 #define LOGV(tag, format, ...)            \
     SERIAL_TAKE();                        \
     ESP_LOGV(tag, format, ##__VA_ARGS__); \
@@ -109,3 +109,4 @@ enum EnumSide
 #define PROTECT_KALMAN_STATES // Enables protection of the state variable in the Kalman filter.
 
 #include "constants.h"
+#include "Arduino.h"

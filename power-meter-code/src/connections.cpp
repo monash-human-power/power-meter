@@ -4,11 +4,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 #pragma once
-#include "Arduino.h"
 #include "connections.h"
+extern SemaphoreHandle_t serialMutex;
 
 void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
 {
@@ -43,12 +43,26 @@ void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
 
 void Connection::enable()
 {
-    xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_ENABLE);
+    if (m_taskHandle)
+    {
+        xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_ENABLE);
+    }
+    else
+    {
+        LOGE("Connection", "No task handle to enable.");
+    }
 }
 
 void Connection::disable()
 {
-    xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_DISABLE);
+    if (m_taskHandle)
+    {
+        xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_DISABLE);
+    }
+    else
+    {
+        LOGE("Connection", "No task handle to disable.");
+    }
 }
 
 void Connection::run(TaskHandle_t taskHandle)
@@ -67,8 +81,9 @@ void Connection::addLowSpeed(LowSpeedData &data)
     addToQueue(m_lowSpeedQueue, (void *)&data);
 }
 
-bool Connection::isDisableWaiting(BaseType_t yieldTicks)
+bool Connection::isDisableWaiting(unsigned int yieldTicks)
 {
+    LOGV("Connection", "Checking if notify disable waiting, wait time %d ticks.", yieldTicks);
     return ulTaskNotifyTakeIndexed(CONN_NOTIFY_DISABLE, pdTRUE, yieldTicks);
 }
 

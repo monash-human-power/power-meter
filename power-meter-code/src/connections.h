@@ -4,10 +4,9 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 #pragma once
-#include "Arduino.h"
 #include "../defines.h"
 #include "states.h"
 #include "data_points.h"
@@ -124,7 +123,7 @@ protected:
      * @brief Handle of the task being run.
      *
      */
-    TaskHandle_t m_taskHandle;
+    TaskHandle_t m_taskHandle = NULL;
 
     /**
      * @brief Checks if the connection needs to be disabled and put to sleep.
@@ -134,7 +133,7 @@ protected:
      * @return true `disable()` has been called since the last check.
      * @return false `disable()` has not been called since the last check.
      */
-    bool isDisableWaiting(BaseType_t yieldTicks);
+    bool isDisableWaiting(unsigned int yieldTicks);
 
     /**
      * @brief State for when the connection is disabled and in low power.

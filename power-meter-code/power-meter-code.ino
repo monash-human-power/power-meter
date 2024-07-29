@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-30
  */
 
 #include "defines.h"
@@ -22,10 +22,16 @@ StateActive activeState(sleepState);
 StateSleep sleepState(activeState);
 
 PowerMeter powerMeter;
+
+// Initialise the connection. We need a pointer to it's parent class that isn't on the stack to use as a task parameter.
 MQTTConnection connection;
+Connection* connectionBasePtr = &connection;
 
 void setup()
 {
+    // Initialise mutexes
+    serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
+
     // Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
     Serial.setDebugOutput(true);
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
@@ -39,7 +45,7 @@ void setup()
         taskConnection,
         "Connection",
         8000,
-        (void *)&connection,
+        connectionBasePtr,
         1,
         NULL,
         1);
@@ -54,10 +60,12 @@ void setup()
     //     1,
     //     &imuTaskHandle,
     //     1);
+    delay(1000);
+    // LOGI("Setup", "Entering main loop");
 }
 
 void loop()
 {
     // Run the state machine
-    // runStateMachine("Main States", &activeState);
+    runStateMachine("Main States", &activeState);
 }

@@ -4,10 +4,9 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-21
+ * @date 2024-07-30
  */
 #pragma once
-#include "Arduino.h"
 #include "../defines.h"
 
 #define VELOCITY_TO_CADENCE(vel) (vel * 60 / (2 * M_PI));

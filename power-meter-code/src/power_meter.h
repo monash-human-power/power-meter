@@ -4,11 +4,10 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-19
+ * @date 2024-07-30
  */
 #pragma once
 
-#include "Arduino.h"
 #include "../defines.h"
 #include "imu.h"
 #include <Wire.h>
