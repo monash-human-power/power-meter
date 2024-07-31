@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 
 #include "power_meter.h"
@@ -60,11 +60,13 @@ float TempSensor::readTempRegister()
 
 void Side::begin()
 {
+    LOGD("Side", "Starting hardware for a side");
     temperature.begin();
 }
 
 void PowerMeter::begin()
 {
+    LOGD("Power", "Starting hardware");
     // Initialise I2C for the temperature sensors
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, I2C_BUS_FREQ);
 
@@ -78,12 +80,22 @@ void PowerMeter::begin()
 
 void PowerMeter::powerDown()
 {
+    LOGI("Power", "Power down");
     digitalWrite(PIN_AMP_PWDN, LOW);
     digitalWrite(PIN_POWER_SAVE, LOW);
 }
 
 void PowerMeter::powerUp()
 {
+    LOGI("Power", "Power up");
+    // Set pin modes. // TODO: OOP
+    pinMode(PIN_POWER_SAVE, OUTPUT);
+    pinMode(PIN_AMP1_SCLK, OUTPUT);
+    pinMode(PIN_AMP2_SCLK, OUTPUT);
+    pinMode(PIN_AMP_PWDN, OUTPUT);
+    pinMode(PIN_AMP1_DOUT, INPUT);
+    pinMode(PIN_AMP2_DOUT, INPUT);
+    pinMode(PIN_ACCEL_INTERRUPT, INPUT);
     // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.
     delay(5);                           // Way longer than required, but should let the reference and strain gauge voltages settle.

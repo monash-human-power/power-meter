@@ -8,10 +8,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 #pragma once
 #include "../defines.h"
+#include "power_meter.h"
 /**
  * @brief Parent class for a state in a state machine.
  *

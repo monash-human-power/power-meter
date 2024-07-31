@@ -44,4 +44,4 @@ To generate a massive appendix for the report, run `./tools/generate_refman.sh`
 The output file will be [`refman.pdf`](docs/latex/refman.pdf).
 
 ## Scripts and testing
-A testing environment and Makefile have been set up to assist with developing the Kalman filter. This is found in the [`scripts-testing/kalman-filter`](./scripts-testing/kalman-filter/) directory. The [BasicLinearAlgebra](https://github.com/tomstewart89/BasicLinearAlgebra/) is included as a submodule to assist.
+Scripts for testing the board hardware and easing development of certain sections can be found in the [`scripts-testing`](./scripts-testing/) directory.

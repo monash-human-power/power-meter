@@ -11,6 +11,7 @@
 #include "connections.h"
 #include "states.h"
 #include <WiFi.h>
+#include <esp_wifi.h>
 #include <PubSubClient.h>
 
 /**

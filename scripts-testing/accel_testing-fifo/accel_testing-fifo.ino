@@ -1,10 +1,9 @@
 /*
-> Relies on [LED testing](#1-led-testing) passing.
+> Relies on [LED testing](#1-led-testing) and [Accelerometer polling](#2-accelerometer-polling) passing.
 
-This script regularly polls the IMU and sets the colour of the LEDs based on the readings of the X axis accelerometer (tilt to change colour). The values read are also sent over the serial port.
+This script behaves the same as the polling script, however it uses the FIFO buffer and interrupts to obtain the data.
 
-This script is based off the [ICM42670P Arduino library `Polling_SPI`](https://github.com/tdk-invn-oss/motion.arduino.ICM42670P/blob/main/examples/Polling_SPI/Polling_SPI.ino) example.
-
+This script is based off the [ICM42670P Arduino library `FIFO_Interrupt`](https://github.com/tdk-invn-oss/motion.arduino.ICM42670P/blob/main/examples/FIFO_Interrupt/FIFO_Interrupt.ino) example.
  */
 #include "ICM42670P.h"
 
@@ -25,6 +24,13 @@ This script is based off the [ICM42670P Arduino library `Polling_SPI`](https://g
 
 // Instantiate an ICM42670 with SPI interface and CS on pin 8
 ICM42670 IMU(SPI,PIN_SPI_AC_CS);
+
+uint8_t irq_received = 0;
+
+void irq_handler(void) {
+  irq_received = 1;
+}
+
 void setup() {
   pinMode(PIN_LED1, OUTPUT);
   pinMode(PIN_LED2, OUTPUT);
@@ -50,6 +56,9 @@ void setup() {
   //   Serial.println(ret);
   //   while(1);
   // }
+  // Enable interrupt on pin 2, Fifo watermark=10
+  IMU.enableFifoInterrupt(PIN_ACCEL_INTERRUPT,irq_handler,10);
+
   // Accel ODR = 100 Hz and Full Scale Range = 16G
   IMU.startAccel(100,16);
   // Gyro ODR = 100 Hz and Full Scale Range = 2000 dps
@@ -58,41 +67,44 @@ void setup() {
   delay(100);
 }
 
+void event_cb(inv_imu_sensor_event_t *evt) {
+  // Format data for Serial Plotter
+  if(IMU.isAccelDataValid(evt)&&IMU.isGyroDataValid(evt)) {
+    Serial.print(evt->accel[0]);
+    Serial.print(" ");
+    Serial.print(evt->accel[1]);
+    Serial.print(" ");
+    Serial.print(evt->accel[2]);
+    Serial.print(" ");
+    Serial.print(evt->gyro[0]);
+    Serial.print(" ");
+    Serial.print(evt->gyro[1]);
+    Serial.print(" ");
+    Serial.print(evt->gyro[2]);
+    Serial.print(" ");
+    Serial.println(evt->temperature);
+
+    // Set LEDs
+    if (evt->accel[0] > 500)
+    {
+      setLEDState(true);
+    }
+    else if (evt->accel[0] < -500)
+    {
+      setLEDState(false);
+    }
+  }
+}
+
 void loop() {
 
   inv_imu_sensor_event_t imu_event;
 
-  // Get last event
-  IMU.getDataFromRegisters(imu_event);
-
-  // Format data for Serial Plotter
-  // Serial.print("AccelX:");
-  Serial.print(imu_event.accel[0]);
-  Serial.print(" ");
-  Serial.print(imu_event.accel[1]);
-  Serial.print(" ");
-  Serial.print(imu_event.accel[2]);
-  Serial.print(" ");
-  Serial.print(imu_event.gyro[0]);
-  Serial.print(" ");
-  Serial.print(imu_event.gyro[1]);
-  Serial.print(" ");
-  Serial.print(imu_event.gyro[2]);
-  Serial.print(" ");
-  Serial.println(imu_event.temperature);
-
-  // Set LEDs
-  if (imu_event.accel[0] > 500)
-  {
-    setLEDState(true);
+  // Wait for interrupt to read data from fifo
+  if(irq_received) {
+      irq_received = 0;
+      IMU.getDataFromFifo(event_cb);
   }
-  else if (imu_event.accel[0] < -500)
-  {
-    setLEDState(false);
-  }
-
-  // Run @ ODR 100Hz
-  delay(10);
 }
 
 void setLEDState(bool state)

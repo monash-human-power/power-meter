@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 
 #include "defines.h"
@@ -37,7 +37,7 @@ void setup()
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
 
     // Start the hardware.
-    // powerMeter.begin();
+    powerMeter.begin();
 
     // Initialise the connection.
     connection.begin();
@@ -49,17 +49,18 @@ void setup()
         1,
         NULL,
         1);
-
+    // TODO: Avoid race condition where the task handle is not initialised to enable or disable the connection.
+    delay(20); // Very dodgy way to make sure the condition is avoided.
     // Start tasks
     // TODO: Determine RAM allocations
-    // xTaskCreatePinnedToCore(
-    //     taskIMU,
-    //     "IMU",
-    //     4096,
-    //     NULL,
-    //     1,
-    //     &imuTaskHandle,
-    //     1);
+    xTaskCreatePinnedToCore(
+        taskIMU,
+        "IMU",
+        4096,
+        NULL,
+        1,
+        &imuTaskHandle,
+        1);
     delay(1000);
     // LOGI("Setup", "Entering main loop");
 }

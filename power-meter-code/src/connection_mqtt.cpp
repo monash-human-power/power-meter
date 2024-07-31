@@ -203,17 +203,21 @@ State *MQTTConnection::StateMQTTConnect::enter()
  \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
  \"version\": \"" VERSION "\",\
  \"connect-time\": %lu,\
- \"calibration\": \"{}\"\
-}"                                                         // TODO: Calibration data
-#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) - 3 + 10) // Remove placeholder, add enough for 1 ul.
+ \"calibration\": \"{}\",\
+ \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\
+}"                                                                           // TODO: Calibration data
+#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2)) // Remove placeholders, add enough for time and MAC.
 void MQTTConnection::StateMQTTConnect::sendAboutMQTTMessage()
 {
-    // Housekeeping data can be sent. Generate a json string.
+    // About info can be sent. Generate a json string.
+    uint8_t baseMac[6];
+    esp_wifi_get_mac(WIFI_IF_STA, baseMac);
     char payload[ABOUT_STR_BUFFER_SIZE];
     sprintf(
         payload,
         ABOUT_STR,
-        millis());
+        millis(),
+        baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 
     // Publish
     MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);

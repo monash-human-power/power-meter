@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-07-31
  */
 
 #include "imu.h"
@@ -16,6 +16,7 @@ extern PowerMeter powerMeter;
 
 void IMUManager::begin()
 {
+    LOGD("IMU", "Starting IMU");
     // Initialise the IMU
     // Manually initialise the SPI bus beforehand so that the pins can be specified. The call to `SPI.begin()` in the
     // IMU library should have no effect / returned early.
@@ -49,7 +50,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         float zGyro = SCALE_GYRO(evt->gyro[2]); // TODO: Work out direction and axis.
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
         float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
-
+        LOGV("X Accel", "%f", xAccel);
         // Calculate the time step (given in 4us resolution).
         float timeStep = (evt->timestamp_fsync - m_lastTimestamp) * 4e-6;
         m_lastTimestamp = evt->timestamp_fsync;
@@ -62,7 +63,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
     }
     else
     {
-        LOGW("IMU", "Accel or Gyro data invalid");
+        LOGE("IMU", "Accel or Gyro data invalid");
     }
 }
 
@@ -115,6 +116,7 @@ float const IMUManager::m_calculateAngle(float x, float y)
 
 void taskIMU(void *pvParameters)
 {
+    LOGD("IMU", "Starting the IMU task");
     while (true)
     {
         // Wait for the interrupt to occur and we get a notification
