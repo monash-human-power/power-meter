@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 #pragma once
 #include "connections.h"
@@ -45,7 +45,9 @@ void Connection::enable()
 {
     if (m_taskHandle)
     {
-        xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_ENABLE);
+        // Can't use indexed notifications by default in Arduino, so use notification values instead (the notification
+        // array is fixed at length 1).
+        xTaskNotify(m_taskHandle, CONN_NOTIFY_ENABLE, eSetBits);
     }
     else
     {
@@ -57,7 +59,7 @@ void Connection::disable()
 {
     if (m_taskHandle)
     {
-        xTaskNotifyGiveIndexed(m_taskHandle, CONN_NOTIFY_DISABLE);
+        xTaskNotify(m_taskHandle, CONN_NOTIFY_DISABLE, eSetBits);
     }
     else
     {
@@ -81,16 +83,29 @@ void Connection::addLowSpeed(LowSpeedData &data)
     addToQueue(m_lowSpeedQueue, (void *)&data);
 }
 
-bool Connection::isDisableWaiting(unsigned int yieldTicks)
+bool Connection::isDisableWaiting(uint32_t yieldTicks)
 {
-    LOGV("Connection", "Checking if notify disable waiting, wait time %d ticks.", yieldTicks);
-    return ulTaskNotifyTakeIndexed(CONN_NOTIFY_DISABLE, pdTRUE, yieldTicks);
+    return isNotificationWaiting(yieldTicks, CONN_NOTIFY_DISABLE);
+}
+
+inline bool Connection::isNotificationWaiting(uint32_t yieldTicks, uint32_t bits)
+{
+    uint32_t notificationValue = 0;
+    bool result = xTaskNotifyWait(
+        0x00,                // Don't clear anything on entry.
+        bits, // Clear disable bit on exit.
+        &notificationValue,  // Save the received
+        yieldTicks);         // How long to wait
+    return result && (notificationValue & bits);
 }
 
 State *Connection::StateDisabled::enter()
 {
-    // Wait for a connection notification.
-    ulTaskNotifyTakeIndexed(CONN_NOTIFY_ENABLE, pdTRUE, portMAX_DELAY);
+    // Wait for a notification that also has the enable bits set.
+    while (!isNotificationWaiting(portMAX_DELAY, CONN_NOTIFY_ENABLE)) {
+        LOGD("DisabledState", "Notification received, but not to enable");
+    }
+    
     return &m_enableState;
 }
 

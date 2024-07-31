@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 #include "connection_mqtt.h"
 extern SemaphoreHandle_t serialMutex;
@@ -12,7 +12,6 @@ extern SemaphoreHandle_t serialMutex;
 // MQTT client
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
-
 
 void MQTTConnection::begin()
 {
@@ -33,11 +32,11 @@ void MQTTConnection::begin()
 }
 
 #define MQTT_LOG_PUBLISH(topic, payload) \
-    LOGV(topic, "%s", payload);                \
+    LOGV(topic, "%s", payload);          \
     mqtt.publish(topic, payload)
 
 #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
-    LOGV(topic, "Binary data of length %d", length);                      \
+    LOGV(topic, "Binary data of length %d", length); \
     mqtt.publish(topic, payload, length)
 
 void MQTTConnection::runActive()
@@ -134,15 +133,9 @@ void MQTTConnection::m_handleIMUQueue()
     }
 }
 
-#define DELAY_WITH_DISABLE(ticks)                     \
-    if (m_connection.isDisableWaiting(ticks)) { \
-    LOGE("Connection", "Time to shut down"); \
-    return &m_connection.m_stateShutdown; \
-    } \
-    else \
-    { \
-        LOGV("Connection", "Delay occured without shutdown"); \
-    }
+#define DELAY_WITH_DISABLE(ticks)             \
+    if (m_connection.isDisableWaiting(ticks)) \
+    return &m_connection.m_stateShutdown
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
@@ -200,7 +193,30 @@ State *MQTTConnection::StateMQTTConnect::enter()
 
     // Successfully connected to MQTT
     LOGI("Networking", "Connected to MQTT broker.");
+    sendAboutMQTTMessage();
     return &m_connection.m_stateActive;
+}
+
+#define ABOUT_STR "\
+{\
+ \"name\": \"" DEVICE_NAME "\",\
+ \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
+ \"version\": \"" VERSION "\",\
+ \"connect-time\": %lu,\
+ \"calibration\": \"{}\"\
+}"                                                         // TODO: Calibration data
+#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) - 3 + 10) // Remove placeholder, add enough for 1 ul.
+void MQTTConnection::StateMQTTConnect::sendAboutMQTTMessage()
+{
+    // Housekeeping data can be sent. Generate a json string.
+    char payload[ABOUT_STR_BUFFER_SIZE];
+    sprintf(
+        payload,
+        ABOUT_STR,
+        millis());
+
+    // Publish
+    MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);
 }
 
 State *MQTTConnection::StateActive::enter()

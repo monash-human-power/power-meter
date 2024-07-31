@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-22
+ * @date 2024-07-31
  */
 #pragma once
 #include "../defines.h"
@@ -18,6 +18,7 @@
  *
  */
 #define MQTT_TOPIC_PREFIX "/power/"
+#define MQTT_TOPIC_ABOUT MQTT_TOPIC_PREFIX "about"
 #define MQTT_TOPIC_HOUSEKEEPING MQTT_TOPIC_PREFIX "housekeeping"
 #define MQTT_TOPIC_LOW_SPEED MQTT_TOPIC_PREFIX "power"
 #define MQTT_TOPIC_HIGH_SPEED MQTT_TOPIC_PREFIX "fast/"
@@ -118,6 +119,13 @@ private:
          * @return State* If interrupted, returns `m_stateDisconnect`.
          */
         virtual State *enter();
+
+        /**
+         * @brief Publishes an "about" message on MQTT on connection.
+         *
+         * Set this function as the on-connect callback.
+         */
+        void sendAboutMQTTMessage();
 
     private:
         MQTTConnection &m_connection;

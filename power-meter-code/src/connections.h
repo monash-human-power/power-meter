@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-07-31
  */
 #pragma once
 #include "../defines.h"
@@ -115,8 +115,8 @@ protected:
      */
     enum ConnectionNotifyChannel
     {
-        CONN_NOTIFY_ENABLE,
-        CONN_NOTIFY_DISABLE
+        CONN_NOTIFY_ENABLE = 0b01,
+        CONN_NOTIFY_DISABLE = 0b10
     };
 
     /**
@@ -133,7 +133,7 @@ protected:
      * @return true `disable()` has been called since the last check.
      * @return false `disable()` has not been called since the last check.
      */
-    bool isDisableWaiting(unsigned int yieldTicks);
+    bool isDisableWaiting(uint32_t yieldTicks);
 
     /**
      * @brief State for when the connection is disabled and in low power.
@@ -150,6 +150,20 @@ protected:
     private:
         State &m_enableState;
     } m_stateDisabled;
+
+    private:
+    /**
+     * @brief Checks / waits for a notification and checks if a particular bit is set.
+     * 
+     * Only the given bit is cleared if a notification is received.
+     * 
+     * @param yieldTicks the maximum time delay.
+     * @param bits the bits to listen for. Any notification will be received, but only these bits will be cleared and
+     *             checked for.
+     * @return true a notification was received within the time limit and the given bits were set.
+     * @return false a notification was not received or the given bits were not set.
+     */
+    static bool isNotificationWaiting(uint32_t yieldTicks, uint32_t bits);
 };
 
 /**

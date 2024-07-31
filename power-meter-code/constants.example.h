@@ -7,9 +7,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-20
+ * @date 2024-07-31
  */
 #pragma once
+
+#define DEVICE_NAME "Power meter prototype" // Name of the power meter for easier identification later.
 
 /**
  * @brief Constants for the Kalman filter used to estimate the current rotation angle and angular velocity.
