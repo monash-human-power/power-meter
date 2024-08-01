@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-01
  */
 
 #include "defines.h"
@@ -50,7 +50,7 @@ void setup()
         NULL,
         1);
     // TODO: Avoid race condition where the task handle is not initialised to enable or disable the connection.
-    delay(20); // Very dodgy way to make sure the condition is avoided.
+    delay(100); // Very dodgy way to make sure the condition is avoided.
     // Start tasks
     // TODO: Determine RAM allocations
     xTaskCreatePinnedToCore(
@@ -61,7 +61,7 @@ void setup()
         1,
         &imuTaskHandle,
         1);
-    delay(1000);
+    delay(100);
     // LOGI("Setup", "Entering main loop");
 }
 

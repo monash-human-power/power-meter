@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-01
  */
 
 #include "imu.h"
@@ -14,6 +14,11 @@ extern SemaphoreHandle_t serialMutex;
 extern TaskHandle_t imuTaskHandle;
 extern PowerMeter powerMeter;
 
+// #include "connections.h"
+// extern Connection *connectionBasePtr;
+#include "connection_mqtt.h"
+extern MQTTConnection connection;
+
 void IMUManager::begin()
 {
     LOGD("IMU", "Starting IMU");
@@ -22,7 +27,7 @@ void IMUManager::begin()
     // IMU library should have no effect / returned early.
     SPI.begin(PIN_SPI_SCLK, PIN_SPI_SDI, PIN_SPI_SDO, PIN_SPI_AC_CS);
     int result = imu.begin();
-    if (!result)
+    if (result)
     {
         LOGE("IMU", "Cannot connect to IMU, error %d.", result);
     }
@@ -34,6 +39,7 @@ void IMUManager::startEstimating()
     imu.enableFifoInterrupt(PIN_ACCEL_INTERRUPT, irqIMUActive, 10);
     imu.startAccel(IMU_SAMPLE_RATE, IMU_ACCEL_RANGE);
     imu.startGyro(IMU_GYRO_RANGE, IMU_GYRO_RANGE);
+    // LOGD("IMU", "Setting up IMU");
 }
 
 void IMUManager::enableMotion()
@@ -50,7 +56,6 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         float zGyro = SCALE_GYRO(evt->gyro[2]); // TODO: Work out direction and axis.
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
         float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
-        LOGV("X Accel", "%f", xAccel);
         // Calculate the time step (given in 4us resolution).
         float timeStep = (evt->timestamp_fsync - m_lastTimestamp) * 4e-6;
         m_lastTimestamp = evt->timestamp_fsync;
@@ -60,11 +65,20 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         measurement(0, 0) = m_calculateAngle(xAccel, yAccel);
         measurement(0, 1) = zGyro;
         m_kalman.update(measurement, timeStep);
+        m_sendIMUData();
     }
     else
     {
         LOGE("IMU", "Accel or Gyro data invalid");
     }
+}
+
+void IMUManager::getIMUData(IMUData &data)
+{
+    data.timestamp = m_lastTimestamp;
+    Matrix<2, 1, float> state = m_kalman.getState();
+    data.position = state(0, 0);
+    data.velocity = state(0, 1);
 }
 
 inline float const IMUManager::m_correctCentripedal(float reading, float radius, float velocity)
@@ -114,6 +128,24 @@ float const IMUManager::m_calculateAngle(float x, float y)
     }
 }
 
+void IMUManager::m_sendIMUData()
+{
+
+    // Attempt to see if the connection supports IMU data.
+    // IMUConnection *imuConn = static_cast<IMUConnection*>(connectionBasePtr);
+    // if (imuConn)
+    // {
+    //     // IMUData is supported. Generate the data.
+    //     IMUData data;
+    //     getIMUData(data);
+    //     LOGI("IMU", "About to send data");
+    //     imuConn->addIMU(data);
+    // }
+    IMUData data;
+    getIMUData(data);
+    connection.addIMU(data);
+}
+
 void taskIMU(void *pvParameters)
 {
     LOGD("IMU", "Starting the IMU task");
@@ -121,7 +153,6 @@ void taskIMU(void *pvParameters)
     {
         // Wait for the interrupt to occur and we get a notification
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
         // Get data from the accelerometer. An anonymous function is used as callback to call the correct class method.
         powerMeter.imuManager.imu.getDataFromFifo(
             [](inv_imu_sensor_event_t *evt)

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-01
  */
 #pragma once
 #include "connections.h"
@@ -156,7 +156,7 @@ void IMUConnection::begin(const int imuLength)
 
 void IMUConnection::addIMU(IMUData &data)
 {
-    addToQueue(m_imuQueue, (void *)&data);
+    addToQueue(m_imuQueue, &data);
 }
 
 void addToQueue(QueueHandle_t queue, void *data)

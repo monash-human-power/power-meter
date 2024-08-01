@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-08-01
  */
 #pragma once
 #define VERSION "0.0.0"
@@ -36,11 +36,11 @@
 
 // Accelerometer
 #define PIN_ACCEL_INTERRUPT 38
-#define PIN_SPI_SDO 39
-#define PIN_SPI_SDI 40
+#define PIN_SPI_SDI 39
+#define PIN_SPI_SDO 40
 #define PIN_SPI_SCLK 41
 #define PIN_SPI_AC_CS 42
-#define IMU_SAMPLE_RATE 800 // Options are 12, 25, 50, 100, 200, 400, 800, 1600 Hz (any other value defaults to 100 Hz).
+#define IMU_SAMPLE_RATE 100 // Options are 12, 25, 50, 100, 200, 400, 800, 1600 Hz (any other value defaults to 100 Hz).
 #define IMU_ACCEL_RANGE 4   // Options are 2, 4, 8, 16 G (any other value defaults to 16 G).
 #define IMU_GYRO_RANGE 1000 // Options are 250, 500, 1000, 2000 dps (any other value defaults to 2000 dps).
 
@@ -60,7 +60,7 @@
  */
 // Logging (with mutexes)
 #define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
-#define SERIAL_GIVE() xSemaphoreGive(serialMutex)
+#define SERIAL_GIVE() delay(200); xSemaphoreGive(serialMutex)
 // #define SERIAL_TAKE()
 // #define SERIAL_GIVE()
 #define LOGV(tag, format, ...)            \

@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-01
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -22,7 +22,13 @@ State *StateActive::enter()
 {
     connection.enable();
     powerMeter.powerUp();
-    delay(30000);
+
+    // Wait in this state forever temporarily.
+    while (1)
+    {
+        delay(500);
+    }
+    // delay(30000);
     return &m_sleepState;
 }
 

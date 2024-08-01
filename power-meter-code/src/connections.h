@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-01
  */
 #pragma once
 #include "../defines.h"
@@ -93,14 +93,14 @@ public:
      * @param data the data object to accept.
      * @param side the side that this data pertains to.
      */
-    virtual void addHighSpeed(HighSpeedData &data, EnumSide side) {}
+    // virtual void addHighSpeed(HighSpeedData &data, EnumSide side) {}
 
     /**
      * @brief Function that may be implemented to handle data from the IMU.
      *
      * @param data the data object to accept.
      */
-    virtual void addIMU(IMUData &data) {}
+    // virtual void addIMU(IMUData &data) {}
 
 protected:
     /**
