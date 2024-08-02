@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-03
  */
 
 #pragma once
@@ -15,8 +15,17 @@
 #include "data_points.h"
 #include <ICM42670P.h>
 
-#define SCALE_ACCEL(raw) (raw / (float)((1 << 15) - 1)) * IMU_ACCEL_RANGE
-#define SCALE_GYRO(raw) (raw / (float)((1 << 15) - 1)) * IMU_GYRO_RANGE
+/**
+ * @brief Calculates the acceleration in m/s
+ *
+ */
+#define SCALE_ACCEL(raw) ((raw / (float)((1 << 15) - 1)) * IMU_ACCEL_RANGE * GRAVITY)
+
+/**
+ * @brief Calculates the rotation rate in rad/s
+ *
+ */
+#define SCALE_GYRO(raw) ((raw / (float)((1 << 15) - 1)) * IMU_GYRO_RANGE * M_PI / 180)
 
 class IMUManager
 {
@@ -51,13 +60,6 @@ public:
      */
     void processIMUEvent(inv_imu_sensor_event_t *evt);
 
-    /**
-     * @brief Populates a given IMU data object with the latest data from tha Kalman filter.
-     * 
-     * @param data is the data object to populate.
-     */
-    void getIMUData(IMUData &data);
-
     ICM42670 imu;
 
 private:
@@ -80,12 +82,6 @@ private:
      * @return float const the calculated angle (radians).
      */
     float const m_calculateAngle(float x, float y);
-
-    /**
-     * @brief Sends the latest IMU data.
-     * 
-     */
-    void m_sendIMUData();
 
     Kalman<float> m_kalman;
     uint16_t m_lastTimestamp = 0;

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-03
  */
 
 #include "imu.h"
@@ -36,10 +36,10 @@ void IMUManager::begin()
 void IMUManager::startEstimating()
 {
     // Setup the IMU
-    imu.enableFifoInterrupt(PIN_ACCEL_INTERRUPT, irqIMUActive, 10);
+    // Set FIFO watermark to 1 so that we get a constant update rate instead of in batches.
+    imu.enableFifoInterrupt(PIN_ACCEL_INTERRUPT, irqIMUActive, 1);
     imu.startAccel(IMU_SAMPLE_RATE, IMU_ACCEL_RANGE);
     imu.startGyro(IMU_GYRO_RANGE, IMU_GYRO_RANGE);
-    // LOGD("IMU", "Setting up IMU");
 }
 
 void IMUManager::enableMotion()
@@ -55,9 +55,9 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         // Extract the data we need from the gyro.
         float zGyro = SCALE_GYRO(evt->gyro[2]); // TODO: Work out direction and axis.
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
-        float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
-        // Calculate the time step (given in 4us resolution).
-        float timeStep = (evt->timestamp_fsync - m_lastTimestamp) * 4e-6;
+        float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[1]), IMU_OFFSET_Y, zGyro);
+        // evt->timestamp_fsync is given in 16us resolution.
+        float timeStep = (evt->timestamp_fsync - m_lastTimestamp) * 16e-6;
         m_lastTimestamp = evt->timestamp_fsync;
 
         // Add to the Kalman filter
@@ -65,20 +65,23 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         measurement(0, 0) = m_calculateAngle(xAccel, yAccel);
         measurement(0, 1) = zGyro;
         m_kalman.update(measurement, timeStep);
-        m_sendIMUData();
+
+        // Send the data
+        IMUData data;
+        // data.timestamp = m_lastTimestamp;
+        data.timestamp = micros();
+        Matrix<2, 1, float> state = m_kalman.getState();
+        data.position = state(0, 0);
+        data.velocity = state(0, 1);
+        data.xAccel = xAccel;
+        data.yAccel = yAccel;
+        data.zGyro = zGyro;
+        connection.addIMU(data);
     }
     else
     {
         LOGE("IMU", "Accel or Gyro data invalid");
     }
-}
-
-void IMUManager::getIMUData(IMUData &data)
-{
-    data.timestamp = m_lastTimestamp;
-    Matrix<2, 1, float> state = m_kalman.getState();
-    data.position = state(0, 0);
-    data.velocity = state(0, 1);
 }
 
 inline float const IMUManager::m_correctCentripedal(float reading, float radius, float velocity)
@@ -126,24 +129,6 @@ float const IMUManager::m_calculateAngle(float x, float y)
             return -M_PI_2;
         }
     }
-}
-
-void IMUManager::m_sendIMUData()
-{
-
-    // Attempt to see if the connection supports IMU data.
-    // IMUConnection *imuConn = static_cast<IMUConnection*>(connectionBasePtr);
-    // if (imuConn)
-    // {
-    //     // IMUData is supported. Generate the data.
-    //     IMUData data;
-    //     getIMUData(data);
-    //     LOGI("IMU", "About to send data");
-    //     imuConn->addIMU(data);
-    // }
-    IMUData data;
-    getIMUData(data);
-    connection.addIMU(data);
 }
 
 void taskIMU(void *pvParameters)

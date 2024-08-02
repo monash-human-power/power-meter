@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-08-03
  */
 #pragma once
 #include "../defines.h"
@@ -13,7 +13,7 @@
 
 /**
  * @brief Adds an object to a buffer.
- * 
+ *
  * This is the same endianness as the system (little endian for the ESP32).
  */
 #define ADD_TO_BYTES(object, buffer, offset) \
@@ -74,7 +74,7 @@ public:
     float balance;
 };
 
-class IMUData
+class BaseData
 {
 public:
     /**
@@ -113,10 +113,29 @@ public:
 };
 
 /**
+ * @brief High-speed IMU data.
+ *
+ */
+class IMUData : public BaseData
+{
+public:
+    float xAccel;
+    float yAccel;
+    float zGyro;
+
+    /**
+     * @brief Adds the current data point to a buffer for transmission.
+     *
+     * @param buffer is the buffer to put the data in. This needs to be at least 24 bytes long.
+     */
+    virtual void toBytes(uint8_t *buffer);
+};
+
+/**
  * @brief High speed data for one side.
  *
  */
-class HighSpeedData : public IMUData
+class HighSpeedData : public BaseData
 {
 public:
     /**

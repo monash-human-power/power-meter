@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-03
  */
 #pragma once
 #include "../defines.h"
@@ -100,7 +100,7 @@ public:
      *
      * @param data the data object to accept.
      */
-    // virtual void addIMU(IMUData &data) {}
+    // virtual void addIMU(BaseData &data) {}
 
 protected:
     /**

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-03
  */
 #include "connection_mqtt.h"
 extern SemaphoreHandle_t serialMutex;
@@ -117,7 +117,7 @@ void MQTTConnection::m_handleIMUQueue()
     if (uxQueueMessagesWaiting(m_imuQueue) >= MQTT_FAST_BUFFERING)
     {
         // We have enough data to add.
-        const unsigned int POINT_SIZE = 12;
+        const unsigned int POINT_SIZE = 24;
         const unsigned int PAYLOAD_SIZE = POINT_SIZE * MQTT_FAST_BUFFERING;
         uint8_t buffer[PAYLOAD_SIZE];
         for (int i = 0; i < MQTT_FAST_BUFFERING; i++)
