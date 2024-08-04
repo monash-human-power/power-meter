@@ -4,15 +4,17 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-08-05
  */
 #pragma once
+// #include "defines.h"
 #include <BasicLinearAlgebra.h>
 
+#define PROTECT_KALMAN_STATES // Enables protection of the state variable in the Kalman filter.
 #ifdef PROTECT_KALMAN_STATES
     // All access operations are very quick. For efficiency, making this a critical section should be ok.
-    #define TAKE_KALMAN_PROTECT() taskENTER_CRITICAL()
-    #define GIVE_KALMAN_PROTECT() taskEXIT_CRITICAL()
+    #define TAKE_KALMAN_PROTECT() taskENTER_CRITICAL(&spinlock)
+    #define GIVE_KALMAN_PROTECT() taskEXIT_CRITICAL(&spinlock)
 #else
     #define TAKE_KALMAN_PROTECT()
     #define GIVE_KALMAN_PROTECT()

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-04
+ * @date 2024-08-05
  */
 #include "connection_mqtt.h"
 extern SemaphoreHandle_t serialMutex;
@@ -18,11 +18,9 @@ void MQTTConnection::begin()
     // Initialise the queues
     const int housekeeping = 1;
     const int lowSpeed = 1;
-    const int highSpeed = MQTT_FAST_BUFFERING + 5;
-    const int imu = MQTT_FAST_BUFFERING + 5;
-    HighSpeedConnection::begin(highSpeed);
-    IMUConnection::begin(imu);
-    Connection::begin(housekeeping, lowSpeed);
+    const int highSpeed = MQTT_FAST_BUFFERING + MQTT_FAST_BUFFERING_BUFFER;
+    const int imu = MQTT_FAST_BUFFERING + MQTT_FAST_BUFFERING_BUFFER;
+    Connection::begin(housekeeping, lowSpeed, highSpeed, imu);
 
     // Set the buffer to be big enough for the high speed data.
     if (!mqtt.setBufferSize(1300))
@@ -139,6 +137,7 @@ void MQTTConnection::m_handleIMUQueue()
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
+    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
     // Wait until connected to WiFi.
     do
     {
@@ -168,6 +167,7 @@ State *MQTTConnection::StateWiFiConnect::enter()
 State *MQTTConnection::StateMQTTConnect::enter()
 {
     // Initial setup
+    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
     LOGV("Networking", "Connecting to MQTT broker '" MQTT_BROKER "' on port " xstringify(MQTT_PORT) ".");
     mqtt.setServer(MQTT_BROKER, MQTT_PORT);
     int iterations = 0;
@@ -203,39 +203,15 @@ State *MQTTConnection::StateMQTTConnect::enter()
 
     // Successfully connected to MQTT
     LOGI("Networking", "Connected to MQTT broker.");
-    sendAboutMQTTMessage();
     return &m_connection.m_stateActive;
-}
-
-#define ABOUT_STR "\
-{\
- \"name\": \"" DEVICE_NAME "\",\
- \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
- \"version\": \"" VERSION "\",\
- \"connect-time\": %lu,\
- \"calibration\": \"{}\",\
- \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\
-}"                                                                           // TODO: Calibration data
-#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2)) // Remove placeholders, add enough for time and MAC.
-void MQTTConnection::StateMQTTConnect::sendAboutMQTTMessage()
-{
-    // About info can be sent. Generate a json string.
-    uint8_t baseMac[6];
-    esp_wifi_get_mac(WIFI_IF_STA, baseMac);
-    char payload[ABOUT_STR_BUFFER_SIZE];
-    sprintf(
-        payload,
-        ABOUT_STR,
-        millis(),
-        baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
-
-    // Successfully connected.
-    // Publish
-    MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);
 }
 
 State *MQTTConnection::StateActive::enter()
 {
+    // Setup to send data
+    sendAboutMQTTMessage();
+    m_connection.m_setConnected(true); // We can start sending data.
+
     // Check for data on the queues regularly and publish if so.
     while (!m_connection.isDisableWaiting(1))
     {
@@ -263,8 +239,36 @@ State *MQTTConnection::StateActive::enter()
     return &m_connection.m_stateShutdown;
 }
 
+#define ABOUT_STR "\
+{\
+ \"name\": \"" DEVICE_NAME "\",\
+ \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
+ \"version\": \"" VERSION "\",\
+ \"connect-time\": %lu,\
+ \"calibration\": \"{}\",\
+ \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\
+}"                                                                           // TODO: Calibration data
+#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2)) // Remove placeholders, add enough for time and MAC.
+void MQTTConnection::StateActive::sendAboutMQTTMessage()
+{
+    // About info can be sent. Generate a json string.
+    uint8_t baseMac[6];
+    esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+    char payload[ABOUT_STR_BUFFER_SIZE];
+    sprintf(
+        payload,
+        ABOUT_STR,
+        millis(),
+        baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
+
+    // Successfully connected.
+    // Publish
+    MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);
+}
+
 State *MQTTConnection::StateShutdown::enter()
 {
+    m_connection.m_setConnected(false); // Stop accepting new data.
     mqtt.disconnect();
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
     // TODO: Is disabling OTA updates needed?

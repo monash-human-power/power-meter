@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-04
+ * @date 2024-08-05
  */
 #pragma once
 #include "../defines.h"
@@ -29,7 +29,8 @@
 #define MQTT_TOPIC_RIGHT "right"
 
 #define MQTT_FAST_BUFFERING 50 // How many datapoints to bundle and send together at a time.
-class MQTTConnection : public HighSpeedConnection, public IMUConnection, public Connection
+#define MQTT_FAST_BUFFERING_BUFFER 20
+class MQTTConnection : public Connection
 {
 public:
     /**
@@ -122,13 +123,6 @@ private:
          */
         virtual State *enter();
 
-        /**
-         * @brief Publishes an "about" message on MQTT on connection.
-         *
-         * Set this function as the on-connect callback.
-         */
-        void sendAboutMQTTMessage();
-
     private:
         MQTTConnection &m_connection;
 
@@ -156,6 +150,13 @@ private:
          * @return State* the state to transition to when interrupted.
          */
         virtual State *enter();
+
+        /**
+         * @brief Publishes an "about" message on MQTT on connection.
+         *
+         * Set this function as the on-connect callback.
+         */
+        void sendAboutMQTTMessage();
 
     private:
         MQTTConnection &m_connection;

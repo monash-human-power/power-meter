@@ -3,6 +3,8 @@
 docs
 power-meter-code/constants.h
 .ipynb_checkpoints
+log.txt
+imu.csv
 
 ### KICAD ###
 power-meter-pcb/out

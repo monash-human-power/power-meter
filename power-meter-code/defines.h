@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-04
+ * @date 2024-08-05
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -108,8 +108,6 @@ enum EnumSide
 
 // Constant constants.
 #define GRAVITY 9.81 // Accelerometer operates in g, calculations are done in SI units.
-
-#define PROTECT_KALMAN_STATES // Enables protection of the state variable in the Kalman filter.
 
 #include "constants.h"
 #include "Arduino.h"

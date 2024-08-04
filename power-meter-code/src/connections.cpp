@@ -4,13 +4,13 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-05
  */
 #pragma once
 #include "connections.h"
 extern SemaphoreHandle_t serialMutex;
 
-void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
+void Connection::begin(const int housekeepingLength, const int lowSpeedLength, const int highSpeedLength, const int imuLength)
 {
     // Housekeeping queue
     // Check if the queue has already been created.
@@ -37,6 +37,26 @@ void Connection::begin(const int housekeepingLength, const int lowSpeedLength)
         if (!m_lowSpeedQueue)
         {
             LOGE("Queues", "Couldn't create low-speed queue");
+        }
+    }
+
+    // High speed queue. Check if the queue has already been created and is needed.
+    if (highSpeedLength)
+    {
+        m_createSideQueue(SIDE_LEFT, highSpeedLength);
+        m_createSideQueue(SIDE_RIGHT, highSpeedLength);
+    }
+
+    // Check if the queue has already been created and the queue is needed.
+    if (!m_imuQueue && imuLength)
+    {
+        // Doesn't exist, create.
+        m_imuQueue = xQueueCreate(imuLength, sizeof(IMUData));
+
+        // Check it was created successfully.
+        if (!m_imuQueue)
+        {
+            LOGE("Queues", "Couldn't create IMU queue");
         }
     }
 }
@@ -75,17 +95,48 @@ void Connection::run(TaskHandle_t taskHandle)
 
 void Connection::addHousekeeping(HousekeepingData &data)
 {
-    addToQueue(m_housekeepingQueue, (void *)&data);
+    m_addToQueue(m_housekeepingQueue, (void *)&data);
 }
 
 void Connection::addLowSpeed(LowSpeedData &data)
 {
-    addToQueue(m_lowSpeedQueue, (void *)&data);
+    m_addToQueue(m_lowSpeedQueue, (void *)&data);
+}
+
+void Connection::addHighSpeed(HighSpeedData &data, EnumSide side)
+{
+    if (m_sideQueues[side])
+    {
+        m_addToQueue(m_sideQueues[side], (void *)&data);
+    }
+}
+
+void Connection::addIMU(IMUData &data)
+{
+    if (m_imuQueue)
+    {
+        digitalWrite(PIN_LED2, HIGH);
+        m_addToQueue(m_imuQueue, &data);
+        digitalWrite(PIN_LED2, LOW);
+    }
 }
 
 bool Connection::isDisableWaiting(uint32_t yieldTicks)
 {
     return isNotificationWaiting(yieldTicks, CONN_NOTIFY_DISABLE);
+}
+
+inline bool Connection::m_isConnected()
+{
+    // Accessing a boolean should be monatomic.
+    bool connected = m_connected;
+    return connected;
+}
+
+void Connection::m_setConnected(bool state)
+{
+    // Accessing a boolean should be monatomic.
+    m_connected = state;
 }
 
 inline bool Connection::isNotificationWaiting(uint32_t yieldTicks, uint32_t bits)
@@ -99,24 +150,7 @@ inline bool Connection::isNotificationWaiting(uint32_t yieldTicks, uint32_t bits
     return result && (notificationValue & bits);
 }
 
-State *Connection::StateDisabled::enter()
-{
-    // Wait for a notification that also has the enable bits set.
-    while (!isNotificationWaiting(portMAX_DELAY, CONN_NOTIFY_ENABLE)) {
-        LOGD("DisabledState", "Notification received, but not to enable");
-    }
-    
-    return &m_enableState;
-}
-
-void HighSpeedConnection::begin(const int highSpeedLength)
-{
-    // Connection::begin(housekeepingLength, lowSpeedLength);
-    m_createSideQueue(SIDE_LEFT, highSpeedLength);
-    m_createSideQueue(SIDE_RIGHT, highSpeedLength);
-}
-
-void HighSpeedConnection::m_createSideQueue(EnumSide side, int length)
+void Connection::m_createSideQueue(EnumSide side, int length)
 {
     // Check if the queue has already been created.
     if (!m_sideQueues[side])
@@ -132,40 +166,29 @@ void HighSpeedConnection::m_createSideQueue(EnumSide side, int length)
     }
 }
 
-inline void HighSpeedConnection::addHighSpeed(HighSpeedData &data, EnumSide side)
+State *Connection::StateDisabled::enter()
 {
-    addToQueue(m_sideQueues[side], (void *)&data);
-}
-
-void IMUConnection::begin(const int imuLength)
-{
-    // Connection::begin(housekeepingLength, lowSpeedLength);
-    // Check if the queue has already been created.
-    if (!m_imuQueue)
-    {
-        // Doesn't exist, create.
-        m_imuQueue = xQueueCreate(imuLength, sizeof(IMUData));
-
-        // Check it was created successfully.
-        if (!m_imuQueue)
-        {
-            LOGE("Queues", "Couldn't create IMU queue");
-        }
+    // Make sure we aren't accepting data.
+    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
+    // Wait for a notification that also has the enable bits set.
+    while (!isNotificationWaiting(portMAX_DELAY, CONN_NOTIFY_ENABLE)) {
+        LOGD("DisabledState", "Notification received, but not to enable");
     }
+    
+    return &m_enableState;
 }
 
-void IMUConnection::addIMU(IMUData &data)
+void Connection::m_addToQueue(QueueHandle_t queue, void *data)
 {
-    addToQueue(m_imuQueue, &data);
-}
-
-void addToQueue(QueueHandle_t queue, void *data)
-{
-    const int MAX_DELAY = 5;
-    int error = xQueueSend(queue, data, MAX_DELAY);
-    if (error != pdTRUE)
+    // Check we can actually accept the data
+    if (m_isConnected())
     {
-        LOGE("Queues", "Couldn't add data to a queue (%d)", error);
+        const int MAX_DELAY = 5;
+        int error = xQueueSend(queue, data, MAX_DELAY);
+        if (error != pdTRUE)
+        {
+            LOGE("Queues", "Couldn't add data to a queue (%d)", error);
+        }
     }
 }
 

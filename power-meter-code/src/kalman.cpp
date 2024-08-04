@@ -4,9 +4,11 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-09
+ * @date 2024-08-05
  */
 #include "kalman.h"
+
+extern portMUX_TYPE spinlock;
 
 template <typename T>
 void Kalman<T>::update(Matrix<2, 1, T> &measurement, T timestep)

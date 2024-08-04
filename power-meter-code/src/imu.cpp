@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-03
+ * @date 2024-08-05
  */
 
 #include "imu.h"
@@ -14,10 +14,8 @@ extern SemaphoreHandle_t serialMutex;
 extern TaskHandle_t imuTaskHandle;
 extern PowerMeter powerMeter;
 
-// #include "connections.h"
-// extern Connection *connectionBasePtr;
-#include "connection_mqtt.h"
-extern MQTTConnection connection;
+#include "connections.h"
+extern Connection *connectionBasePtr;
 
 void IMUManager::begin()
 {
@@ -76,7 +74,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         data.xAccel = xAccel;
         data.yAccel = yAccel;
         data.zGyro = zGyro;
-        connection.addIMU(data);
+        connectionBasePtr->addIMU(data);
     }
     else
     {

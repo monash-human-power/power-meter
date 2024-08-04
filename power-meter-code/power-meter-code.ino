@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-05
  */
 
 #include "defines.h"
@@ -16,6 +16,7 @@
 
 SemaphoreHandle_t serialMutex;
 TaskHandle_t imuTaskHandle;
+portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 
 extern StateSleep sleepState;
 StateActive activeState(sleepState);
@@ -31,7 +32,6 @@ void setup()
 {
     // Initialise mutexes
     serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
-
     // Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
     Serial.setDebugOutput(true);
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
@@ -44,7 +44,7 @@ void setup()
     xTaskCreatePinnedToCore(
         taskConnection,
         "Connection",
-        8000,
+        9000,
         connectionBasePtr,
         1,
         NULL,
@@ -56,13 +56,12 @@ void setup()
     xTaskCreatePinnedToCore(
         taskIMU,
         "IMU",
-        4096,
+        2048,
         NULL,
-        1,
+        2, // Make this a higher priority than other tasks.
         &imuTaskHandle,
         1);
     delay(100);
-    // LOGI("Setup", "Entering main loop");
 }
 
 void loop()
