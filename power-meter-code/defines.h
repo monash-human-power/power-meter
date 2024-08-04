@@ -5,10 +5,10 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-04
  */
 #pragma once
-#define VERSION "0.0.0"
+#define VERSION "0.0.1"
 
 /**
  * Pins and hardware details
@@ -105,6 +105,9 @@ enum EnumSide
 #define RECONNECT_DELAY 1000
 #define MQTT_RETRY_ITERATIONS 20
 #define WIFI_RECONNECT_ATTEMPT_TIME 60000 // If not connected in 1 minute, disconnect and attempt again.
+
+// Constant constants.
+#define GRAVITY 9.81 // Accelerometer operates in g, calculations are done in SI units.
 
 #define PROTECT_KALMAN_STATES // Enables protection of the state variable in the Kalman filter.
 

@@ -7,7 +7,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-04
  */
 #pragma once
 
@@ -26,8 +26,8 @@
  * @brief Relative physical offset of the IMU from the axle centre (in m).
  * 
  */
-#define IMU_OFFSET_X 0.022 // TODO: Measure
-#define IMU_OFFSET_Y -0.050 // TODO: Measure
+#define IMU_OFFSET_X 0 // TODO: Measure
+#define IMU_OFFSET_Y 0 // TODO: Measure
 
 /**
  * @brief WiFi settings
@@ -42,3 +42,15 @@
  */
 #define MQTT_BROKER "computername.local"
 #define MQTT_PORT 1883
+#define MQTT_ID "power-meter"
+
+/**
+ * @brief OTA Settings
+ * 
+ */
+#define OTA_ENABLE
+#ifdef OTA_ENABLE
+#define OTA_PORT 3232
+#define OTA_HOSTNAME "power"
+#define OTA_PASSWORD "MyOTAPassword"
+#endif

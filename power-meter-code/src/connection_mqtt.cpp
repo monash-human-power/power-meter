@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-03
+ * @date 2024-08-04
  */
 #include "connection_mqtt.h"
 extern SemaphoreHandle_t serialMutex;
@@ -157,6 +157,11 @@ State *MQTTConnection::StateWiFiConnect::enter()
 
     // Successfully connected.
     LOGI("Networking", "Connected with IP address '%s'.", WiFi.localIP().toString().c_str());
+
+#ifdef OTA_ENABLE
+    // Setup OTA updates if needed.
+    OTAManager::setupOTA();
+#endif
     return &m_connection.m_stateMQTTConnect;
 }
 
@@ -189,6 +194,11 @@ State *MQTTConnection::StateMQTTConnect::enter()
             mqtt.connect(MQTT_ID); // Modify here to set a password if needed.
             iterations = 0;
         }
+
+#ifdef OTA_ENABLE
+        // Check OTA updates as needed
+        OTAManager::handleOTA();
+#endif
     }
 
     // Successfully connected to MQTT
@@ -219,6 +229,7 @@ void MQTTConnection::StateMQTTConnect::sendAboutMQTTMessage()
         millis(),
         baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 
+    // Successfully connected.
     // Publish
     MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);
 }
@@ -244,8 +255,10 @@ State *MQTTConnection::StateActive::enter()
         // Call a function in the connection so that we have more convenient access to the queues.
         m_connection.runActive();
 
-        // // Wait for a bit (now part of the notify take).
-        // taskYIELD();
+#ifdef OTA_ENABLE
+        // Check OTA updates as needed
+        OTAManager::handleOTA();
+#endif
     }
     return &m_connection.m_stateShutdown;
 }
@@ -254,5 +267,6 @@ State *MQTTConnection::StateShutdown::enter()
 {
     mqtt.disconnect();
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
+    // TODO: Is disabling OTA updates needed?
     return &m_connection.m_stateDisabled;
 }

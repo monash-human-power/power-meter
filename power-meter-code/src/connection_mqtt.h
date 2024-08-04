@@ -4,12 +4,13 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-04
  */
 #pragma once
 #include "../defines.h"
 #include "connections.h"
 #include "states.h"
+#include "ota.h"
 #include <WiFi.h>
 #include <esp_wifi.h>
 #include <PubSubClient.h>
