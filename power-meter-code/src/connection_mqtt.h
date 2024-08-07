@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-07
  */
 #pragma once
 #include "../defines.h"
@@ -27,6 +27,7 @@
 #define MQTT_TOPIC_IMU MQTT_TOPIC_PREFIX "imu"
 #define MQTT_TOPIC_LEFT "left"
 #define MQTT_TOPIC_RIGHT "right"
+#define MQTT_TOPIC_CONFIG MQTT_TOPIC_PREFIX "conf"
 
 #define MQTT_FAST_BUFFERING 50 // How many datapoints to bundle and send together at a time.
 #define MQTT_FAST_BUFFERING_BUFFER 20
@@ -190,3 +191,5 @@ private:
 
     } m_stateShutdown;
 };
+
+void mqttCallback(const char* topic, byte* payload, unsigned int length);

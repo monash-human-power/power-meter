@@ -10,9 +10,8 @@
 #include "../defines.h"
 #include <BasicLinearAlgebra.h>
 #include <Preferences.h>
-
+#include <ArduinoJson.h>
 using namespace BLA;
-extern Preferences prefs;
 
 #define CONF_KEY "power-conf"
 #define MAX_INPUT_LENGTH 40
@@ -43,10 +42,22 @@ public:
     void print();
 
     /**
-     * @brief Command line interface for setting configs.
+     * @brief Reads a string containing JSON data and extracts preferences from this.
      * 
+     * @param text the text containing the JSON data.
+     * @param length the maximum length of the text.
+     * @return true successfully read.
+     * @return false failed to read.
      */
-    void commandLine();
+    bool readJSON(char *text, uint32_t length);
+
+    /**
+     * @brief Writes the config to JSON.
+     * 
+     * @param text the text buffer to put the result in.
+     * @param length the maximum length.
+     */
+    void writeJSON(char *text, uint32_t length);
 
     EnumConnection connectionMethod = CONNECTION_MQTT;
     Matrix<2, 2, float> qEnvCovariance = DEFAULT_KALMAN_Q;

@@ -4,10 +4,12 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-07
  */
 #include "connection_mqtt.h"
+#include "config.h"
 extern SemaphoreHandle_t serialMutex;
+extern Config config;
 
 // MQTT client
 WiFiClient wifi;
@@ -170,6 +172,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
     m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
     LOGV("Networking", "Connecting to MQTT broker '" MQTT_BROKER "' on port " xstringify(MQTT_PORT) ".");
     mqtt.setServer(MQTT_BROKER, MQTT_PORT);
+    mqtt.setCallback(mqttCallback);
     int iterations = 0;
 
     // Wait until connected
@@ -203,6 +206,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
 
     // Successfully connected to MQTT
     LOGI("Networking", "Connected to MQTT broker.");
+    mqtt.subscribe(MQTT_TOPIC_CONFIG);
     return &m_connection.m_stateActive;
 }
 
@@ -245,20 +249,23 @@ State *MQTTConnection::StateActive::enter()
  \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
  \"version\": \"" VERSION "\",\
  \"connect-time\": %lu,\
- \"calibration\": \"{}\",\
+ \"calibration\": %s,\
  \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\
-}"                                                                           // TODO: Calibration data
-#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2)) // Remove placeholders, add enough for time and MAC.
+}"
+#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2) + 214) // Remove placeholders, add enough for time and MAC.
 void MQTTConnection::StateActive::sendAboutMQTTMessage()
 {
     // About info can be sent. Generate a json string.
     uint8_t baseMac[6];
     esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+    char confJSON[214];
+    config.writeJSON(confJSON, 214);
     char payload[ABOUT_STR_BUFFER_SIZE];
     sprintf(
         payload,
         ABOUT_STR,
         millis(),
+        confJSON,
         baseMac[0], baseMac[1], baseMac[2], baseMac[3], baseMac[4], baseMac[5]);
 
     // Successfully connected.
@@ -273,4 +280,12 @@ State *MQTTConnection::StateShutdown::enter()
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
     // TODO: Is disabling OTA updates needed?
     return &m_connection.m_stateDisabled;
+}
+
+void mqttCallback(const char *topic, byte *payload, unsigned int length)
+{
+    LOGI("MQTT", "Received a message with topic '%s'.", topic);
+    config.readJSON((char *)payload, length);
+    config.print();
+    config.save();
 }
