@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-07
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -96,6 +96,16 @@ enum EnumSide
 {
     SIDE_LEFT = 0,
     SIDE_RIGHT = 1
+};
+
+/**
+ * @brief Enumerator to represent the selected connection method.
+ * 
+ */
+enum EnumConnection
+{
+    CONNECTION_MQTT,
+    CONNECTION_BLE
 };
 
 /**

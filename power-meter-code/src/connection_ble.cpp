@@ -4,7 +4,18 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-08-07
  */
 #include "connection_ble.h"
 extern SemaphoreHandle_t serialMutex;
+
+void BLEConnection::begin()
+{
+    LOGE("BLE", "BLE CONNECTION IS NOT IMPLEMENTED YET!!!");
+}
+
+State *BLEConnection::StateBLEConnect::enter()
+{
+    LOGE("BLE", "BLE Connect state not implemented!!!");
+    return nullptr;
+}

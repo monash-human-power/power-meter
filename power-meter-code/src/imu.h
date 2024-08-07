@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-03
+ * @date 2024-08-07
  */
 
 #pragma once
@@ -34,7 +34,7 @@ public:
      * @brief Constructs the manager and assigns pins.
      *
      */
-    IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(KALMAN_Q, KALMAN_R, KALMAN_X0, KALMAN_P0) {}
+    IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(DEFAULT_KALMAN_Q, DEFAULT_KALMAN_R, KALMAN_X0, KALMAN_P0) {}
 
     /**
      * @brief Initialises the power meter hardware.

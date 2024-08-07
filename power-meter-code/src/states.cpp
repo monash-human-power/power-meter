@@ -8,19 +8,19 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-01
+ * @date 2024-08-07
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
 
 // Don't include in the header file to stop circular issues.
-#include "connection_mqtt.h"
-extern MQTTConnection connection;
+#include "connections.h"
+extern Connection *connectionBasePtr;
 extern PowerMeter powerMeter;
 
 State *StateActive::enter()
 {
-    connection.enable();
+    connectionBasePtr->enable();
     powerMeter.powerUp();
 
     // Wait in this state forever temporarily.
@@ -34,7 +34,7 @@ State *StateActive::enter()
 
 State *StateSleep::enter()
 {
-    connection.disable();
+    connectionBasePtr->disable();
     powerMeter.powerDown();
     LOGD("Sleep", "Simulating sleeping");
     delay(10000);

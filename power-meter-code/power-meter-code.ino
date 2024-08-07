@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-07
  */
 
 #include "defines.h"
@@ -13,20 +13,26 @@
 #include "src/states.h"
 #include "src/connections.h"
 #include "src/connection_mqtt.h"
+#include "src/connection_ble.h"
+#include "src/config.h"
 
 SemaphoreHandle_t serialMutex;
 TaskHandle_t imuTaskHandle;
 portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
+Preferences prefs;
 
+// Main states for the state machine.
 extern StateSleep sleepState;
 StateActive activeState(sleepState);
 StateSleep sleepState(activeState);
 
 PowerMeter powerMeter;
+Config config;
 
 // Initialise the connection. We need a pointer to it's parent class that isn't on the stack to use as a task parameter.
-MQTTConnection connection;
-Connection* connectionBasePtr = &connection;
+MQTTConnection connectionMQTT;
+BLEConnection connectionBLE;
+Connection *connectionBasePtr;
 
 void setup()
 {
@@ -36,11 +42,26 @@ void setup()
     Serial.setDebugOutput(true);
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
 
+    // Load config
+    config.load();
+    config.print();
+
     // Start the hardware.
     powerMeter.begin();
 
-    // Initialise the connection.
-    connection.begin();
+    // Initialise the selected connection.
+    switch (config.connectionMethod)
+    {
+    case CONNECTION_MQTT:
+        connectionMQTT.begin();
+        connectionBasePtr = &connectionMQTT;
+        break;
+    case CONNECTION_BLE:
+        connectionBLE.begin();
+        connectionBasePtr = &connectionBLE;
+        break;
+    }
+
     xTaskCreatePinnedToCore(
         taskConnection,
         "Connection",
