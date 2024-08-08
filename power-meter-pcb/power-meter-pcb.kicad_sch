@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP")
-		(date "2024-07-15")
-		(rev "V1.0.4")
+		(date "2024-08-08")
+		(rev "V1.1.0")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 		(comment 1 "For the secondary crank, set J3 to short pins 2 and 3 and short J1 and J2.")
 		(comment 2 "For the main crank, set J3 to short pins 1 and 2 and leave J1 and J2 open.")
@@ -5886,7 +5886,7 @@
 		)
 		(uuid "31bcf7ad-5738-44d9-b702-a5875671d7d0")
 	)
-	(text_box "Temperature sensor I2C addresses:\nMain:		Pins 1 & 2 shorted: 1001 000\nSecondary:	Pins 2 & 3 shorted: 1001 001"
+	(text_box "Temperature sensor I2C addresses:\nMain:		Pins 1 & 2 shorted: 1001 001\nSecondary:	Pins 2 & 3 shorted: 1001 000"
 		(exclude_from_sim no)
 		(at 162.56 34.29 0)
 		(size 48.26 8.89)
@@ -6515,7 +6515,7 @@
 		)
 		(uuid "d5d32051-9d62-4f55-85f0-2383004f1c82")
 	)
-	(label "I2C.SCL"
+	(label "I2C.SDA"
 		(at 41.91 45.72 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6548,7 +6548,7 @@
 		)
 		(uuid "dc95c23c-f5b2-4a32-a8ba-3a64f6e4fdf3")
 	)
-	(label "I2C.SDA"
+	(label "I2C.SCL"
 		(at 41.91 43.18 0)
 		(fields_autoplaced yes)
 		(effects
