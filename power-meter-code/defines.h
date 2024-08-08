@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-08
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -28,11 +28,11 @@
 #define PIN_BOOT 0
 
 // I2C for temperature sensor
-#define PIN_I2C_SCL 10
-#define PIN_I2C_SDA 11
+#define PIN_I2C_SDA 10
+#define PIN_I2C_SCL 11
 #define I2C_BUS_FREQ 400000
-#define TEMP1_I2C 0b1001000
-#define TEMP2_I2C 0b1001001
+#define TEMP1_I2C 0b1001001
+#define TEMP2_I2C 0b1001000
 
 // Accelerometer
 #define PIN_ACCEL_INTERRUPT 38

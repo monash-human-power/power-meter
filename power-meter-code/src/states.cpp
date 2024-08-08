@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-08
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -24,9 +24,19 @@ State *StateActive::enter()
     powerMeter.powerUp();
 
     // Wait in this state forever temporarily.
+    bool state = false;
     while (1)
     {
-        delay(500);
+        state = !state;
+        LOGD("Temp", "Turning LED %d", state);
+        powerMeter.sides[SIDE_RIGHT].temperature.setLED(state);
+        delay(2000);
+        for (int i = 0; i < 5; i++)
+        {
+            float temp = powerMeter.sides[SIDE_RIGHT].temperature.readTemp();
+            LOGD("Temp", "Temperature is %f C", temp);
+            delay(1000);
+        }
     }
     // delay(30000);
     return &m_sleepState;

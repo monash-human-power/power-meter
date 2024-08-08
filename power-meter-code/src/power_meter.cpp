@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-08
  */
 
 #include "power_meter.h"
@@ -30,8 +30,9 @@ void TempSensor::startCapture()
 {
     Wire.beginTransmission(m_i2cAddress);
     Wire.write(PTR_CONF);
-    // Set the configuration register to as initialised + one shot.
-    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | bit(CONF_BIT_OS));
+    // Set the configuration register to 55ms conversion time, fault queue length 0, one shot.
+    // Polarity is set as per the desired LED state.
+    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | bit(CONF_BIT_OS) | m_polarity);
     Wire.endTransmission(true);
 }
 
@@ -47,8 +48,9 @@ float TempSensor::readTempRegister()
     if (receivedSize == 2)
     {
         // We received the expected number of bytes.
-        int16_t rawTemp = (Wire.read() << 8) | (Wire.read() >> 4);
-        return rawTemp * 0.0625;
+        int16_t rawTemp = Wire.read() << 8;
+        rawTemp |= Wire.read();
+        return rawTemp / 256.0;
     }
     else
     {
@@ -56,6 +58,26 @@ float TempSensor::readTempRegister()
         LOGE("Temp", "Error reading temperature from %d", m_i2cAddress);
         return NAN;
     }
+}
+
+void TempSensor::setLED(bool state)
+{
+    if (state)
+    {
+        m_polarity = bit(CONF_BIT_POL);
+    }
+    else
+    {
+        m_polarity = 0;
+    }
+
+    // Set the LED state now.
+    Wire.beginTransmission(m_i2cAddress);
+    Wire.write(PTR_CONF);
+    // Set the configuration register to 55ms conversion time, fault queue length 0.
+    // Polarity is set as per the desired LED state. Don't start a conversion.
+    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | m_polarity);
+    Wire.endTransmission(true);
 }
 
 void Side::begin()
@@ -71,8 +93,8 @@ void PowerMeter::begin()
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, I2C_BUS_FREQ);
 
     // Initialise the strain gauges
-    m_sides[SIDE_LEFT].begin();
-    m_sides[SIDE_RIGHT].begin();
+    sides[SIDE_LEFT].begin();
+    sides[SIDE_RIGHT].begin();
 
     // Initialise the IMU
     imuManager.begin();

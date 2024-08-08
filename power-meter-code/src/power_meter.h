@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-30
+ * @date 2024-08-08
  */
 #pragma once
 
@@ -56,6 +56,13 @@ public:
      */
     float readTempRegister();
 
+    /**
+     * @brief Turns the LED connected to the alarm pin on or off.
+     * 
+     * @param state if true, turns the LED on. If false, turns it off.
+     */
+    void setLED(bool state);
+
 private:
     /**
      * @brief Enumerator to store the pointers for each register in the sensor.
@@ -85,6 +92,8 @@ private:
         CONF_BIT_OS = 7
     };
     const uint8_t m_i2cAddress;
+
+    uint8_t m_polarity;
 };
 
 /**
@@ -135,7 +144,7 @@ public:
      * @brief Construct a new All Strain Gauges object. The left and right strain gauge objects are also initialised.
      *
      */
-    PowerMeter() : m_sides{Side(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
+    PowerMeter() : sides{Side(PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
                         Side(PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C)} {}
 
     /**
@@ -163,10 +172,9 @@ public:
      */
     IMUManager imuManager;
 
-private:
     /**
      * @brief Each side of the power meter. Using an array for easy manipulation later.
      * 
      */
-    Side m_sides[2];
+    Side sides[2];
 };

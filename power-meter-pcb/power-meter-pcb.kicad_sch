@@ -6152,7 +6152,7 @@
 		)
 		(uuid "51192071-565a-4213-8a46-479d9d330daa")
 	)
-	(label "I2C.SDA"
+	(label "I2C.SCL"
 		(at 166.37 130.81 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6383,7 +6383,7 @@
 		)
 		(uuid "a8f44b7b-f809-41ed-a7fb-8d859734b5f5")
 	)
-	(label "I2C.SCL"
+	(label "I2C.SDA"
 		(at 237.49 44.45 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6405,7 +6405,7 @@
 		)
 		(uuid "b2a24c7b-59b2-4da1-a690-43c8b4ecc181")
 	)
-	(label "I2C.SCL"
+	(label "I2C.SDA"
 		(at 166.37 128.27 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6581,7 +6581,7 @@
 		)
 		(uuid "e2603653-33de-481d-983d-d4eef2f429fc")
 	)
-	(label "I2C.SDA"
+	(label "I2C.SCL"
 		(at 237.49 41.91 0)
 		(fields_autoplaced yes)
 		(effects
