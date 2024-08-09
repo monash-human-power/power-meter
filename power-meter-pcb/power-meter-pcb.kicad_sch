@@ -5987,7 +5987,7 @@
 		)
 		(uuid "087bc089-d7a0-4798-85ee-70371565e4de")
 	)
-	(label "SPI.SDO"
+	(label "SPI.SDI"
 		(at 214.63 130.81 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6449,7 +6449,7 @@
 		)
 		(uuid "c6547732-ff75-44cf-bf98-2d83cfc2f9e8")
 	)
-	(label "SPI.SDI"
+	(label "SPI.SDO"
 		(at 214.63 133.35 0)
 		(fields_autoplaced yes)
 		(effects

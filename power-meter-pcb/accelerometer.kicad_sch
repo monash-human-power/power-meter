@@ -1007,7 +1007,7 @@
 		)
 		(uuid "11b71395-3b27-44c1-b654-751b3bbd51dc")
 	)
-	(label "SPI.SDO"
+	(label "SPI.SDI"
 		(at 107.95 100.33 0)
 		(fields_autoplaced yes)
 		(effects
@@ -1029,7 +1029,7 @@
 		)
 		(uuid "30d946d7-7131-43b9-b721-08a9a75e7027")
 	)
-	(label "SPI.SDI"
+	(label "SPI.SDO"
 		(at 107.95 97.79 0)
 		(fields_autoplaced yes)
 		(effects
