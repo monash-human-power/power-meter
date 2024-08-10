@@ -7,7 +7,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-04
+ * @date 2024-08-11
  */
 #pragma once
 
@@ -17,8 +17,8 @@
  * @brief Constants for the Kalman filter used to estimate the current rotation angle and angular velocity.
  * 
  */
-#define KALMAN_Q {0.002, 0, 0, 0.01} // Environmental covariance matrix.
-#define KALMAN_R {1e4, 0, 0, 0.1} // Measurement covariance matrix.
+#define DEFAULT_KALMAN_Q {0.002, 0, 0, 0.1} // Environmental covariance matrix.
+#define DEFAULT_KALMAN_R {100, 0, 0, 0.01} // Measurement covariance matrix.
 #define KALMAN_X0 {0, 0} // Initial state.
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 

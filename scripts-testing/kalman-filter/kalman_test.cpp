@@ -9,6 +9,9 @@
  * @date 2024-07-02
  */
 #include <iostream>
+
+#define taskENTER_CRITICAL(spinlock)
+#define taskEXIT_CRITICAL(spinlock)
 #include "kalman.h"
 
 using namespace BLA;

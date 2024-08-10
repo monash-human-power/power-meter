@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-11
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -139,7 +139,7 @@ void MQTTConnection::m_handleIMUQueue()
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
-    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
+    m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
     // Wait until connected to WiFi.
     do
     {
@@ -169,7 +169,7 @@ State *MQTTConnection::StateWiFiConnect::enter()
 State *MQTTConnection::StateMQTTConnect::enter()
 {
     // Initial setup
-    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
+    m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
     LOGV("Networking", "Connecting to MQTT broker '" MQTT_BROKER "' on port " xstringify(MQTT_PORT) ".");
     mqtt.setServer(MQTT_BROKER, MQTT_PORT);
     mqtt.setCallback(mqttCallback);
@@ -214,7 +214,7 @@ State *MQTTConnection::StateActive::enter()
 {
     // Setup to send data
     sendAboutMQTTMessage();
-    m_connection.m_setConnected(true); // We can start sending data.
+    m_connection.setAllowData(true); // We can start sending data.
 
     // Check for data on the queues regularly and publish if so.
     while (!m_connection.isDisableWaiting(1))
@@ -275,7 +275,7 @@ void MQTTConnection::StateActive::sendAboutMQTTMessage()
 
 State *MQTTConnection::StateShutdown::enter()
 {
-    m_connection.m_setConnected(false); // Stop accepting new data.
+    m_connection.setAllowData(false); // Stop accepting new data.
     mqtt.disconnect();
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
     // TODO: Is disabling OTA updates needed?
@@ -288,4 +288,5 @@ void mqttCallback(const char *topic, byte *payload, unsigned int length)
     config.readJSON((char *)payload, length);
     config.print();
     config.save();
+    LOGI("MQTT", "Finished updating config.");
 }

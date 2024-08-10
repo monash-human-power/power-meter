@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-11
  */
 
 #include "imu.h"
@@ -37,12 +37,12 @@ void IMUManager::startEstimating()
     // Set FIFO watermark to 1 so that we get a constant update rate instead of in batches.
     imu.enableFifoInterrupt(PIN_ACCEL_INTERRUPT, irqIMUActive, 1);
     imu.startAccel(IMU_SAMPLE_RATE, IMU_ACCEL_RANGE);
-    imu.startGyro(IMU_GYRO_RANGE, IMU_GYRO_RANGE);
+    imu.startGyro(IMU_SAMPLE_RATE, IMU_GYRO_RANGE);
 }
 
 void IMUManager::enableMotion()
 {
-    // TODO: Interrupt handler.
+    // TODO: Interrupt handler to wake up.
     imu.startWakeOnMotion(PIN_ACCEL_INTERRUPT, irqIMUWake);
 }
 
@@ -55,13 +55,19 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
         float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[1]), IMU_OFFSET_Y, zGyro);
         // evt->timestamp_fsync is given in 16us resolution.
-        float timeStep = (evt->timestamp_fsync - m_lastTimestamp) * 16e-6;
+        float timeStep = (uint16_t)(evt->timestamp_fsync - m_lastTimestamp) * 16e-6;
+        // float timeStep = 0.01;
         m_lastTimestamp = evt->timestamp_fsync;
 
+
+
         // Add to the Kalman filter
+        float theta = m_calculateAngle(xAccel, yAccel);
+        // LOGD("Accel", "%f", theta);
+        // log_printf("Angle measured: %f\n", theta);
         Matrix<2, 1, float> measurement;
-        measurement(0, 0) = m_calculateAngle(xAccel, yAccel);
-        measurement(0, 1) = zGyro;
+        measurement(0, 0) = -theta;
+        measurement(1, 0) = zGyro;
         m_kalman.update(measurement, timeStep);
 
         // Send the data
@@ -70,7 +76,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         data.timestamp = micros();
         Matrix<2, 1, float> state = m_kalman.getState();
         data.position = state(0, 0);
-        data.velocity = state(0, 1);
+        data.velocity = state(1, 0);
         data.xAccel = xAccel;
         data.yAccel = yAccel;
         data.zGyro = zGyro;

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-11
  */
 #pragma once
 #include "../defines.h"
@@ -30,7 +30,7 @@
 #define MQTT_TOPIC_CONFIG MQTT_TOPIC_PREFIX "conf"
 
 #define MQTT_FAST_BUFFERING 50 // How many datapoints to bundle and send together at a time.
-#define MQTT_FAST_BUFFERING_BUFFER 20
+#define MQTT_FAST_BUFFERING_BUFFER 70
 class MQTTConnection : public Connection
 {
 public:

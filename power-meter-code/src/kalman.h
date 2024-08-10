@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-11
  */
 #pragma once
 // #include "defines.h"
@@ -44,7 +44,7 @@ public:
      * @param pInitialCovariance The covariance matrix of the initial state. Large values in this will allow wildy
      *                           inaccurate initial guesses to be quickly forgotten.
      */
-    Kalman(const Matrix<2, 2, T> qEnvCovariance, const Matrix<2, 2, T> rMeasCovariance, Matrix<2, 1, T> xInitialState,
+    Kalman(Matrix<2, 2, T> &qEnvCovariance, Matrix<2, 2, T> &rMeasCovariance, Matrix<2, 1, T> xInitialState,
         Matrix<2, 2, T> pInitialCovariance) : m_qEnvCovariance(qEnvCovariance), m_rMeasCovariance(rMeasCovariance), m_xState(xInitialState), m_pCovariance(pInitialCovariance) {}
     
     /**
@@ -98,7 +98,7 @@ private:
      */
     Matrix<2, 1, T> subtractStates(Matrix<2, 1, T> state1, Matrix<2, 1, T> state2);
 
-    const Matrix<2, 2, T> m_qEnvCovariance, m_rMeasCovariance;
+    const Matrix<2, 2, T> &m_qEnvCovariance, &m_rMeasCovariance;
 
     /**
      * @brief Current state variables.

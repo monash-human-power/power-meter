@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-11
  */
 #pragma once
 #include "connections.h"
@@ -133,7 +133,7 @@ inline bool Connection::m_isConnected()
     return connected;
 }
 
-void Connection::m_setConnected(bool state)
+void Connection::setAllowData(bool state)
 {
     // Accessing a boolean should be monatomic.
     m_connected = state;
@@ -169,7 +169,7 @@ void Connection::m_createSideQueue(EnumSide side, int length)
 State *Connection::StateDisabled::enter()
 {
     // Make sure we aren't accepting data.
-    m_connection.m_setConnected(false); // Make sure we aren't accepting data until we are ready.
+    m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
     // Wait for a notification that also has the enable bits set.
     while (!isNotificationWaiting(portMAX_DELAY, CONN_NOTIFY_ENABLE)) {
         LOGD("DisabledState", "Notification received, but not to enable");
@@ -183,12 +183,12 @@ void Connection::m_addToQueue(QueueHandle_t queue, void *data)
     // Check we can actually accept the data
     if (m_isConnected())
     {
-        const int MAX_DELAY = 5;
+        const int MAX_DELAY = 0;
         int error = xQueueSend(queue, data, MAX_DELAY);
-        if (error != pdTRUE)
-        {
-            LOGE("Queues", "Couldn't add data to a queue (%d)", error);
-        }
+        // if (error != pdTRUE)
+        // {
+        //     LOGE("Queues", "Couldn't add data to a queue (%d)", error);
+        // }
     }
 }
 

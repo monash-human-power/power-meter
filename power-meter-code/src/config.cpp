@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-11
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
@@ -41,6 +41,7 @@ void Config::save()
     LOGI(CONF_KEY, "Saving preferences");
     prefs.begin(CONF_KEY);
     prefs.putBytes(CONF_KEY, this, sizeof(*this));
+    LOGV(CONF_KEY, "Finished saving");
 }
 
 void Config::print()

@@ -5,10 +5,12 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-04
+ * @date 2024-08-11
  */
 #include "ota.h"
+#include "connections.h"
 extern SemaphoreHandle_t serialMutex;
+extern Connection *connectionBasePtr;
 
 #ifdef OTA_ENABLE
 void OTAManager::setupOTA()
@@ -33,6 +35,8 @@ void OTAManager::setupOTA()
 
 void OTAManager::otaStartCallback()
 {
+    // Disable data to hopefully speed things up.
+    connectionBasePtr->setAllowData(false);
     if (ArduinoOTA.getCommand() == U_FLASH)
     {
         LOGI("OTA", "Sketch updating");

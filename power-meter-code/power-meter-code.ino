@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-11
  */
 
 #include "defines.h"
@@ -77,7 +77,7 @@ void setup()
     xTaskCreatePinnedToCore(
         taskIMU,
         "IMU",
-        2048,
+        4096,
         NULL,
         2, // Make this a higher priority than other tasks.
         &imuTaskHandle,

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-07
+ * @date 2024-08-11
  */
 
 #pragma once
@@ -13,7 +13,10 @@
 #include "../defines.h"
 #include "kalman.h"
 #include "data_points.h"
+#include "config.h"
 #include <ICM42670P.h>
+
+extern Config config;
 
 /**
  * @brief Calculates the acceleration in m/s
@@ -34,7 +37,8 @@ public:
      * @brief Constructs the manager and assigns pins.
      *
      */
-    IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(DEFAULT_KALMAN_Q, DEFAULT_KALMAN_R, KALMAN_X0, KALMAN_P0) {}
+    IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(config.qEnvCovariance, config.rMeasCovariance, KALMAN_X0, KALMAN_P0) {}
+    // IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(DEFAULT_KALMAN_Q, DEFAULT_KALMAN_R, KALMAN_X0, KALMAN_P0) {}
 
     /**
      * @brief Initialises the power meter hardware.

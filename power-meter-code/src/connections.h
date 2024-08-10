@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-05
+ * @date 2024-08-11
  */
 #pragma once
 #include "../defines.h"
@@ -43,7 +43,7 @@ public:
     /**
      * @brief Enables the connection after sleep or on startup.
      *
-     * Sends a notification to the connection task. Remember to call `m_setConnected(true)` when everything is set up to
+     * Sends a notification to the connection task. Remember to call `setAllowData(true)` when everything is set up to
      * start accepting data.
      *
      */
@@ -52,7 +52,7 @@ public:
     /**
      * @brief Stops the connection and enters a low power mode.
      *
-     * Sends a notification to the connection task. Remember to call `m_setConnected(false)` to stop new data being
+     * Sends a notification to the connection task. Remember to call `setAllowData(false)` to stop new data being
      * added to the queue.
      */
     void disable();
@@ -102,6 +102,13 @@ public:
      * @param data is the IMU data.
      */
     void addIMU(IMUData &data);
+
+    /**
+     * @brief Sets whether the connection should accept data to transmit.
+     * 
+     * @param state 
+     */
+    void setAllowData(bool state);
 
 protected:
     /**
@@ -173,19 +180,13 @@ protected:
     /**
      * @brief Checks if the connection is currently active (can the device send data to the outside world)?
      * 
-     * This check is thread safe. It is controlled by the `m_setConnected` method.
+     * This check is thread safe. It is controlled by the `setAllowData` method.
      *
      * @return true connected.
      * @return false not connected.
      */
     bool m_isConnected();
 
-    /**
-     * @brief Sets whether the connection should accept data to transmit.
-     * 
-     * @param state 
-     */
-    void m_setConnected(bool state);
 private:
     /**
      * @brief Attempts to add data to a queue and has a tantrum if it's full.
