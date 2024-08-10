@@ -54,12 +54,13 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         float zGyro = SCALE_GYRO(evt->gyro[2]); // TODO: Work out direction and axis.
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
         float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[1]), IMU_OFFSET_Y, zGyro);
+        
+        // Do stuff with timestamps
         // evt->timestamp_fsync is given in 16us resolution.
         float timeStep = (uint16_t)(evt->timestamp_fsync - m_lastTimestamp) * 16e-6;
-        // float timeStep = 0.01;
         m_lastTimestamp = evt->timestamp_fsync;
-
-
+        IMUData data;
+        data.timestamp = micros();
 
         // Add to the Kalman filter
         float theta = m_calculateAngle(xAccel, yAccel);
@@ -71,9 +72,6 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         m_kalman.update(measurement, timeStep);
 
         // Send the data
-        IMUData data;
-        // data.timestamp = m_lastTimestamp;
-        data.timestamp = micros();
         Matrix<2, 1, float> state = m_kalman.getState();
         data.position = state(0, 0);
         data.velocity = state(1, 0);
@@ -81,6 +79,39 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         data.yAccel = yAccel;
         data.zGyro = zGyro;
         connectionBasePtr->addIMU(data);
+
+        // Calculate the number of rotations.
+        // Calculate the current sector.
+        int8_t rotationSector;
+        if (data.position < -M_PI/3)
+        {
+            rotationSector = 0;
+        }
+        else if (data.position < M_PI/3)
+        {
+            rotationSector = 1;
+        }
+        else
+        {
+            rotationSector = 2;
+        }
+
+        // Arm trigger if crossing from sector 0 to sector 1
+        if (rotationSector == 1 and m_lastRotationSector == 0)
+        {
+            m_armRotationCounter = true;
+        }
+
+        // If trigger is armed and we crossed from sector 2 back to sector 0, increase the count.
+        if (m_armRotationCounter && rotationSector == 0 && m_lastRotationSector == 1)
+        {
+            // We have a complete rotation. // TODO: Confirm direction.
+            m_armRotationCounter = false;
+            m_rotations++;
+            LOGD("IMU", "%d Rotations", m_rotations);
+            // TODO: Notify or something.
+        }
+        m_lastRotationSector = rotationSector;
     }
     else
     {

@@ -87,6 +87,14 @@ private:
      */
     float const m_calculateAngle(float x, float y);
 
+    /**
+     * @brief Stores the last sector of rotation so that complete turns can be detected.
+     * 
+     */
+    int8_t m_lastRotationSector = 0;
+    bool m_armRotationCounter = false;
+    uint32_t m_rotations = 0;
+
     Kalman<float> m_kalman;
     uint16_t m_lastTimestamp = 0;
 };
