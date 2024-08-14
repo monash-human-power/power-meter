@@ -23,6 +23,8 @@ This script behaves the same as the polling script, however it uses the FIFO buf
 This script is based off the [ICM42670P Arduino library `FIFO_Interrupt`](https://github.com/tdk-invn-oss/motion.arduino.ICM42670P/blob/main/examples/FIFO_Interrupt/FIFO_Interrupt.ino) example.
 
 ## Kalman filter development
+[`kalman-compare.py`](./kalman-filter/kalman-compare.py) takes a CSV file from the power meter and plots the reported orientation over time. This script also calculates orientation based on the accelerometer alone, gyroscope alone and a python implementation of the Kalman filter to compare the results.
+
 The [`AccelGyroData.ipynb`](./kalman-filter/AccelGyroData.ipynb) Jupyter notebook contains initial code used to test the Kalman filter algorithm with data recorded from a phone taped to a bicycle crank prior to the actual hardware being available. The data was recorded using the [Sensor Logger app](https://play.google.com/store/apps/details?id=com.kelvin.sensorapp&hl=en_US).
 
 [`kalman_test.cpp`](./kalman-filter/kalman_test.cpp) tests the actual Kalman filter implementation whilst running on a computer. Compile this programme using `make kalman` and run it using `make run`.

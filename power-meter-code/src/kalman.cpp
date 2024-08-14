@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 #include "kalman.h"
 
@@ -13,23 +13,13 @@ extern portMUX_TYPE spinlock;
 #endif
 
 template <typename T>
-void Kalman<T>::update(Matrix<2, 1, T> &measurement, T timestep)
+void Kalman<T>::update(Matrix<2, 1, T> &measurement, uint32_t time)
 {
-    // Get the current states.
-    TAKE_KALMAN_PROTECT();
-    Matrix<2, 1, T> x = m_xState;
-    Matrix<2, 2, T> p = m_pCovariance;
-    GIVE_KALMAN_PROTECT();
-
-    // Prediction step.
-    Matrix<2, 2, T> fPrediction = {1, 0, 0, 1};
-    fPrediction(0, 1) = timestep;
-    // log_printf("fPrediction: {%f, %f, %f, %f}\n", fPrediction(0, 0), fPrediction(0, 1), fPrediction(1, 0), fPrediction(1, 1));
-    x = fPrediction * x;
-    x(0, 0) = limitAngle(x(0, 0)); // Make sure we wrap around if needed.
-    // log_printf("X: {%f, %f}\n", x(0,0), x(1,0));
-    // P[k] = F * P_prev * Transpose(F) + Q
-    p = ((fPrediction * p) * ~fPrediction) + m_qEnvCovariance;
+    // Run the predition
+    Matrix<2, 1, T> x;
+    Matrix<2, 2, T> p;
+    predict(time, x, p);
+    m_lastTimestamp = time; // Should be atomic?
 
     // Refinement step.
     // Assuming that the measurements match the state (h = [[1, 0], [0, 1]]).
@@ -43,6 +33,13 @@ void Kalman<T>::update(Matrix<2, 1, T> &measurement, T timestep)
     m_xState = x;
     m_pCovariance = p;
     GIVE_KALMAN_PROTECT();
+}
+
+template <typename T>
+void Kalman<T>::predict(uint32_t time, Matrix<2, 1, T> &xState)
+{
+    Matrix<2, 2, T> pState; // Matrix that can be chucked away afterwards.
+    predict(time, xState, pState);
 }
 
 template <typename T>
@@ -100,6 +97,27 @@ inline Matrix<2, 1, T> Kalman<T>::getState()
     Matrix<2, 1, T> result = m_xState;
     GIVE_KALMAN_PROTECT();
     return result;
+}
+
+template <typename T>
+void Kalman<T>::predict(uint32_t time, Matrix<2, 1, T> &xState, Matrix<2, 2, T> &pCovariance)
+{
+    // Get the current states.
+    TAKE_KALMAN_PROTECT();
+    xState = m_xState;
+    pCovariance = m_pCovariance;
+    GIVE_KALMAN_PROTECT();
+
+    // Prediction step.
+    Matrix<2, 2, T> fPrediction = {1, 0, 0, 1};
+    T timestep = (time - m_lastTimestamp) * 1e-6; // Calculate the timestep.
+    fPrediction(0, 1) = timestep;
+    // log_printf("fPrediction: {%f, %f, %f, %f}\n", fPrediction(0, 0), fPrediction(0, 1), fPrediction(1, 0), fPrediction(1, 1));
+    xState = fPrediction * xState;
+    xState(0, 0) = limitAngle(xState(0, 0)); // Make sure we wrap around if needed.
+    // log_printf("X: {%f, %f}\n", x(0,0), x(1,0));
+    // P[k] = F * P_prev * Transpose(F) + Q
+    pCovariance = ((fPrediction * pCovariance) * ~fPrediction) + m_qEnvCovariance;
 }
 
 template class Kalman<float>;

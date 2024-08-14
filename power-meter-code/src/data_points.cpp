@@ -4,13 +4,18 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-03
+ * @date 2024-08-14
  */
 #include "data_points.h"
 
 inline float HousekeepingData::averageTemp()
 {
     return (temperatures[SIDE_LEFT] + temperatures[SIDE_RIGHT]) / 2;
+}
+
+float LowSpeedData::cadence()
+{
+    return 60e6/lastRotationDuration;
 }
 
 inline float BaseData::cadence()
@@ -35,22 +40,16 @@ void IMUData::toBytes(uint8_t *buffer)
     ADD_TO_BYTES(zGyro, buffer, 20);
 }
 
-float HighSpeedData::torque()
-{
-    // TODO: The actual scary calibration and calculation bit.
-    return raw;
-}
-
 inline float HighSpeedData::power()
 {
-    return velocity * torque();
+    return velocity * torque;
 }
 
 void HighSpeedData::toBytes(uint8_t *buffer)
 {
     BaseData::toBytes(buffer); // 12 bytes
     ADD_TO_BYTES(raw, buffer, 12);
-    float calcTorque = torque();
+    float calcTorque = torque;
     ADD_TO_BYTES(calcTorque, buffer, 16);
     float calcPower = power();
     ADD_TO_BYTES(calcPower, buffer, 20);

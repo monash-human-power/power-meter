@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-08
+ * @date 2024-08-14
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -95,7 +95,8 @@
 enum EnumSide
 {
     SIDE_LEFT = 0,
-    SIDE_RIGHT = 1
+    SIDE_RIGHT = 1,
+    SIDE_IMU_TEMP = 2
 };
 
 /**

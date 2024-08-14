@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 
 #include "imu.h"
@@ -13,6 +13,7 @@
 extern SemaphoreHandle_t serialMutex;
 extern TaskHandle_t imuTaskHandle;
 extern PowerMeter powerMeter;
+extern portMUX_TYPE spinlock;
 
 #include "connections.h"
 extern Connection *connectionBasePtr;
@@ -54,11 +55,8 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         float zGyro = SCALE_GYRO(evt->gyro[2]); // TODO: Work out direction and axis.
         float xAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[0]), IMU_OFFSET_X, zGyro);
         float yAccel = m_correctCentripedal(SCALE_ACCEL(evt->accel[1]), IMU_OFFSET_Y, zGyro);
-        
+
         // Do stuff with timestamps
-        // evt->timestamp_fsync is given in 16us resolution.
-        float timeStep = (uint16_t)(evt->timestamp_fsync - m_lastTimestamp) * 16e-6;
-        m_lastTimestamp = evt->timestamp_fsync;
         IMUData data;
         data.timestamp = micros();
 
@@ -69,25 +67,33 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         Matrix<2, 1, float> measurement;
         measurement(0, 0) = -theta;
         measurement(1, 0) = zGyro;
-        m_kalman.update(measurement, timeStep);
+        kalman.update(measurement, data.timestamp);
 
-        // Send the data
-        Matrix<2, 1, float> state = m_kalman.getState();
+        // Get ready to send the data
+        Matrix<2, 1, float> state = kalman.getState();
         data.position = state(0, 0);
         data.velocity = state(1, 0);
-        data.xAccel = xAccel;
-        data.yAccel = yAccel;
-        data.zGyro = zGyro;
-        connectionBasePtr->addIMU(data);
+
+        // Check whether it should be sent.
+        if (m_sendCount >= config.imuHowOften)
+        {
+            // We should send this time.
+            data.xAccel = xAccel;
+            data.yAccel = yAccel;
+            data.zGyro = zGyro;
+            connectionBasePtr->addIMU(data);
+            m_sendCount = 0;
+        }
+        m_sendCount++;
 
         // Calculate the number of rotations.
         // Calculate the current sector.
         int8_t rotationSector;
-        if (data.position < -M_PI/3)
+        if (data.position < -M_PI / 3)
         {
             rotationSector = 0;
         }
-        else if (data.position < M_PI/3)
+        else if (data.position < M_PI / 3)
         {
             rotationSector = 1;
         }
@@ -107,9 +113,15 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         {
             // We have a complete rotation. // TODO: Confirm direction.
             m_armRotationCounter = false;
+
+            // Write to variables that need to be protected
+            taskENTER_CRITICAL(&spinlock);
             m_rotations++;
-            LOGD("IMU", "%d Rotations", m_rotations);
-            // TODO: Notify or something.
+            m_lastRotationDuration = data.timestamp - m_lastRotationTime;
+            taskEXIT_CRITICAL(&spinlock);
+
+            // Back to stuff that isn't shared with other tasks.
+            m_lastRotationTime = data.timestamp;
         }
         m_lastRotationSector = rotationSector;
     }
@@ -117,6 +129,16 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
     {
         LOGE("IMU", "Accel or Gyro data invalid");
     }
+}
+
+void IMUManager::setLowSpeedData(LowSpeedData &data)
+{
+    // Safely copy the data in to the object.
+    taskENTER_CRITICAL(&spinlock);
+    data.lastRotationDuration = m_lastRotationDuration;
+    data.lastRotationTime = m_lastRotationTime;
+    data.rotationCount = m_rotations;
+    taskEXIT_CRITICAL(&spinlock);
 }
 
 inline float const IMUManager::m_correctCentripedal(float reading, float radius, float velocity)

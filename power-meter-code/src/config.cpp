@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
@@ -31,7 +31,7 @@ void Config::load()
             prefs.remove(CONF_KEY);
         }
 
-        // Defaults should be set on initialise
+        // Defaults should have been set on initialise
         save();
     }
 }
@@ -65,13 +65,14 @@ void Config::print()
 
     log_printf("  - Q matrix:\n    [[%8.4g, %8.4g]\n     [%8.4g, %8.4g]]\n", qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1));
     log_printf("  - R matrix:\n    [[%8.4g, %8.4g]\n     [%8.4g, %8.4g]]\n", rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1));
+    log_printf("  - imuHowOften: %d\n", imuHowOften);
     SERIAL_GIVE();
 }
 
 bool Config::readJSON(char *text, uint32_t length)
 {
     // Intellisense seems to be broken for ArduinoJSON at the moment. Ignore the red squiggles for now
-    StaticJsonDocument<100> json;
+    StaticJsonDocument<150> json;
     DeserializationError error = deserializeJson(json, text, length);
     if (error)
     {
@@ -92,36 +93,26 @@ bool Config::readJSON(char *text, uint32_t length)
     rMeasCovariance(0, 1) = json["r(0,1)"];
     rMeasCovariance(1, 0) = json["r(1,0)"];
     rMeasCovariance(1, 1) = json["r(1,1)"];
+
+    // How often to send IMU data
+    imuHowOften = json["imuHowOften"];
     return true;
 }
-
-#define CONF_JSON_TEXT "\
-{\
- \"connection\": %d,\
- \"q(0,0)\": %.10g,\
- \"q(0,1)\": %.10g,\
- \"q(1,0)\": %.10g,\
- \"q(1,1)\": %.10g,\
- \"r(0,0)\": %.10g,\
- \"r(0,1)\": %.10g,\
- \"r(1,0)\": %.10g,\
- \"r(1,1)\": %.10g\
-}"
-
-#define CONF_JSON_TEXT_LENGTH (sizeof(CONF_JSON_TEXT) + (- 2 + 3) + 8*(-5 + 12))
 
 void Config::writeJSON(char *text, uint32_t length)
 {
     if (length < CONF_JSON_TEXT_LENGTH)
     {
         LOGE("Config", "Buffer to print to JSON needs to be at least %d long.", CONF_JSON_TEXT_LENGTH);
+        // const int c = CONF_JSON_TEXT_LENGTH;
         return;
     }
     sprintf(
         text, CONF_JSON_TEXT,
         connectionMethod,
         qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1),
-        rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1));
+        rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1),
+        imuHowOften);
 }
 
 // void Config::commandLine()

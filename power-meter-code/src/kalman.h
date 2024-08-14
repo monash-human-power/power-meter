@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 #pragma once
 // #include "defines.h"
@@ -51,9 +51,9 @@ public:
      * @brief Adds a new set of measurements to the model.
      * 
      * @param measurement 2x1 matrix representing the new measurements (position on top, omega on bottom).
-     * @param timestep The timestep in seconds from the previous measurement.
+     * @param time the time of the reading in microseconds (use `micros()` to obtain).
      */
-    void update(Matrix<2, 1, T> &measurement, T timestep);
+    void update(Matrix<2, 1, T> &measurement, uint32_t time);
 
     /**
      * @brief Resets the state to the given values.
@@ -77,6 +77,25 @@ public:
      * @return Matrix<2, 1, T> 2x1 matrix, (0,0) is the angle, (0,1) is the angular velocity.
      */
     Matrix<2, 1, T> getState();
+
+    /**
+     * @brief Predicts the position and velocity based on the last state.
+     * 
+     * @param time the current time in us (use `micros()`).
+     * @param xState is a reference to a 2x1 matrix to put the state in.
+     * @param pCovariance is a reference to a 2x2 matrix to put the covariance in.
+     */
+    void predict(uint32_t time, Matrix<2, 1, T> &xState, Matrix<2, 2, T> &pCovariance);
+
+    /**
+     * @brief Predicts the position and velocity based on the last state.
+     * 
+     * This version hides the covariance matrix to make things seem simpler.
+     * 
+     * @param time the current time in us (use `micros()`).
+     * @param xState is a reference to a 2x1 matrix to put the state in.
+     */
+    void predict(uint32_t time, Matrix<2, 1, T> &xState);
 
 private:
     /**
@@ -106,4 +125,10 @@ private:
      */
     Matrix<2, 1, T> m_xState;
     Matrix<2, 2, T> m_pCovariance;
+
+    /**
+     * @brief The time of the last reading in microseconds
+     * 
+     */
+    uint32_t m_lastTimestamp = 0;
 };

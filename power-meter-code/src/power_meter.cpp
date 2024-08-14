@@ -4,86 +4,81 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-08
+ * @date 2024-08-14
  */
 
 #include "power_meter.h"
+
 extern SemaphoreHandle_t serialMutex;
+extern PowerMeter powerMeter;
 
-void TempSensor::begin()
-{
-    Wire.beginTransmission(m_i2cAddress);
-    // Set the configuration to default conversion time, default fault queue and enable shutdown.
-    Wire.write(PTR_CONF);
-    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD)); // Default R0 and F0 are 1.
-    Wire.endTransmission(true);
-}
-
-float TempSensor::readTemp()
-{
-    startCapture();
-    delay(12);
-    return readTempRegister();
-}
-
-void TempSensor::startCapture()
-{
-    Wire.beginTransmission(m_i2cAddress);
-    Wire.write(PTR_CONF);
-    // Set the configuration register to 55ms conversion time, fault queue length 0, one shot.
-    // Polarity is set as per the desired LED state.
-    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | bit(CONF_BIT_OS) | m_polarity);
-    Wire.endTransmission(true);
-}
-
-float TempSensor::readTempRegister()
-{
-    // Set the pointer to the temperature register.
-    Wire.beginTransmission(m_i2cAddress);
-    Wire.write(PTR_TEMP);
-    Wire.endTransmission(true);
-
-    // Attempt to get the data
-    uint8_t receivedSize = Wire.requestFrom(m_i2cAddress, 2);
-    if (receivedSize == 2)
-    {
-        // We received the expected number of bytes.
-        int16_t rawTemp = Wire.read() << 8;
-        rawTemp |= Wire.read();
-        return rawTemp / 256.0;
-    }
-    else
-    {
-        // Incorrect number of bytes received.
-        LOGE("Temp", "Error reading temperature from %d", m_i2cAddress);
-        return NAN;
-    }
-}
-
-void TempSensor::setLED(bool state)
-{
-    if (state)
-    {
-        m_polarity = bit(CONF_BIT_POL);
-    }
-    else
-    {
-        m_polarity = 0;
-    }
-
-    // Set the LED state now.
-    Wire.beginTransmission(m_i2cAddress);
-    Wire.write(PTR_CONF);
-    // Set the configuration register to 55ms conversion time, fault queue length 0.
-    // Polarity is set as per the desired LED state. Don't start a conversion.
-    Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | m_polarity);
-    Wire.endTransmission(true);
-}
+#include "connections.h"
+extern Connection *connectionBasePtr;
 
 void Side::begin()
 {
     LOGD("Side", "Starting hardware for a side");
     temperature.begin();
+}
+
+void Side::readDataTask()
+{
+    while (true)
+    {
+        // Wait for the interrupt to occur and we get a notification
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        // Interrupt occured, data is ready to read.
+        // Get the current time and position now in case we get interrupter later. We have many ms for the data to sit
+        // in the ADC's buffer, so not too much of a rush.
+        HighSpeedData data;
+        data.timestamp = micros();
+        // Using predict so we can have a lower sample rate on the IMU hopefully.
+        Matrix<2, 1, float> state;
+        powerMeter.imuManager.kalman.predict(data.timestamp, state);
+        data.position = state(0, 0);
+        data.velocity = state(1, 0);
+        data.raw = 0;
+
+        // Start reading
+        uint8_t clockBits = 24;
+        if (m_offsetCalibration)
+        {
+            // Add 2 additional clock pulses to enter offset calibrarion mode.
+            clockBits = 26;
+        }
+        for (uint8_t i = 0; i < clockBits; i++)
+        {
+            // Read 1 bit
+            digitalWrite(m_pinSclk, HIGH);
+            delayMicroseconds(1);
+            data.raw = (data.raw << 1) | digitalRead(m_pinDout);
+            digitalWrite(m_pinSclk, LOW);
+            delayMicroseconds(1);
+        }
+
+        // Send the contents of raw somewhere as needed.
+        if (m_offsetCalibration)
+        {
+            // Remove the extra 2 bits
+            data.raw >>= 2;
+            m_offsetCalibration = false; // Disable automatically.
+        }
+
+        // Finish calculating and send raw to where it needs to go.
+        data.torque = m_calculateTorque(data.raw);
+        connectionBasePtr->addHighSpeed(data, m_side);
+    }
+}
+
+inline void Side::enableOffsetCalibration()
+{
+    m_offsetCalibration = true;
+}
+
+float Side::m_calculateTorque(uint32_t raw)
+{
+    return raw / 1e3f; // TODO: Scary calibration part.
 }
 
 void PowerMeter::begin()
@@ -121,7 +116,7 @@ void PowerMeter::powerUp()
 
     pinMode(PIN_LED1, OUTPUT);
     pinMode(PIN_LED2, OUTPUT);
-    
+
     // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.
     delay(5);                           // Way longer than required, but should let the reference and strain gauge voltages settle.

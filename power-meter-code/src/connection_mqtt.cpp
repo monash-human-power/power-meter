@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -46,12 +46,13 @@ void MQTTConnection::runActive()
     if (xQueueReceive(m_housekeepingQueue, &housekeeping, 0))
     {
         // Housekeeping data can be sent. Generate a json string.
-        char payload[60];
+        char payload[80];
         sprintf(
             payload,
-            "{\"temps\":{\"left\":%.2f,\"right\":%.2f},\"battery\":%.2f}",
+            "{\"temps\":{\"left\":%.2f,\"right\":%.2f, \"imu\":%.2f},\"battery\":%.2f}",
             housekeeping.temperatures[SIDE_LEFT],
             housekeeping.temperatures[SIDE_RIGHT],
+            housekeeping.temperatures[SIDE_IMU_TEMP],
             housekeeping.battery);
 
         // Publish
@@ -63,12 +64,13 @@ void MQTTConnection::runActive()
     if (xQueueReceive(m_lowSpeedQueue, &lowSpeed, 0))
     {
         // Low-speed data can be sent. Generate a json string.
-        char payload[60];
+        char payload[80];
         sprintf(
             payload,
-            "{\"power\": %.1f, \"cadence\": %.1f, \"balance\": %.2f}",
+            "{\"cadence\":%.1f,\"rotations\":%lu,\"power\":%.1f,\"balance\":%.2f}",
+            lowSpeed.rotationCount,
+            lowSpeed.cadence(),
             lowSpeed.power,
-            lowSpeed.cadence,
             lowSpeed.balance);
 
         // Publish
@@ -252,14 +254,14 @@ State *MQTTConnection::StateActive::enter()
  \"calibration\": %s,\
  \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\
 }"
-#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2) + 214) // Remove placeholders, add enough for time and MAC.
+#define ABOUT_STR_BUFFER_SIZE (sizeof(ABOUT_STR) + (-3 + 10) + 6 * (-4 + 2) + CONF_JSON_TEXT_LENGTH) // Remove placeholders, add enough for time and MAC.
 void MQTTConnection::StateActive::sendAboutMQTTMessage()
 {
     // About info can be sent. Generate a json string.
     uint8_t baseMac[6];
     esp_wifi_get_mac(WIFI_IF_STA, baseMac);
-    char confJSON[214];
-    config.writeJSON(confJSON, 214);
+    char confJSON[CONF_JSON_TEXT_LENGTH];
+    config.writeJSON(confJSON, CONF_JSON_TEXT_LENGTH);
     char payload[ABOUT_STR_BUFFER_SIZE];
     sprintf(
         payload,

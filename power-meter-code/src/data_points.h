@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-03
+ * @date 2024-08-14
  */
 #pragma once
 #include "../defines.h"
@@ -30,7 +30,7 @@ public:
      * @brief Temperature of each side in degrees C.
      *
      */
-    float temperatures[2];
+    float temperatures[3];
 
     /**
      * @brief Battery voltage in V.
@@ -54,6 +54,33 @@ class LowSpeedData
 {
 public:
     /**
+     * @brief The number of rotations counted.
+     * 
+     */
+    uint32_t rotationCount;
+
+    /**
+     * @brief The duration it took to complete the last rotation (us).
+     * 
+     */
+    uint32_t lastRotationDuration;
+
+    /**
+     * @brief The time at which the last rotation occured (us).
+     * 
+     */
+    uint32_t lastRotationTime;
+
+    /**
+     * @brief Calculates the instantanerous cadence (angular velocity) in revolutions per minute.
+     *
+     * For some reason cyclists don't work exclusively in radians per second.
+     *
+     * @return float the cadence.
+     */
+    float cadence();
+
+    /**
      * @brief The average power in W.
      *
      */
@@ -63,7 +90,7 @@ public:
      * @brief The average cadance in RPM.
      *
      */
-    float cadence;
+    // float cadence;
 
     /**
      * @brief The pedal balance.
@@ -147,9 +174,12 @@ public:
 
     /**
      * @brief Calculates the torque in Nm.
+     * 
+     * This is calculated as part of the side cloass to aid in getting the correct configs and calibration for each
+     * side.
      *
      */
-    float torque();
+    float torque;
 
     /**
      * @brief Calculates the power in W.

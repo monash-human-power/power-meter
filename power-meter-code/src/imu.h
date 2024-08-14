@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-14
  */
 
 #pragma once
@@ -30,6 +30,10 @@ extern Config config;
  */
 #define SCALE_GYRO(raw) ((raw / (float)((1 << 15) - 1)) * IMU_GYRO_RANGE * M_PI / 180)
 
+/**
+ * @brief Class that communicates with the IMU and calculates the current position and velocity using a Kalman filter.
+ * 
+ */
 class IMUManager
 {
 public:
@@ -37,8 +41,8 @@ public:
      * @brief Constructs the manager and assigns pins.
      *
      */
-    IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(config.qEnvCovariance, config.rMeasCovariance, KALMAN_X0, KALMAN_P0) {}
-    // IMUManager() : imu(SPI, PIN_SPI_AC_CS), m_kalman(DEFAULT_KALMAN_Q, DEFAULT_KALMAN_R, KALMAN_X0, KALMAN_P0) {}
+    IMUManager() : imu(SPI, PIN_SPI_AC_CS), kalman(config.qEnvCovariance, config.rMeasCovariance, KALMAN_X0, KALMAN_P0) {}
+    // IMUManager() : imu(SPI, PIN_SPI_AC_CS), kalman(DEFAULT_KALMAN_Q, DEFAULT_KALMAN_R, KALMAN_X0, KALMAN_P0) {}
 
     /**
      * @brief Initialises the power meter hardware.
@@ -64,8 +68,15 @@ public:
      */
     void processIMUEvent(inv_imu_sensor_event_t *evt);
 
-    ICM42670 imu;
+    /**
+     * @brief Set the rotation count and last rotation duration in a low speed data object.
+     * 
+     * @param data the data to update.
+     */
+    void setLowSpeedData(LowSpeedData &data);
 
+    ICM42670 imu;
+    Kalman<float> kalman;
 private:
     /**
      * @brief Corrects a given reading for an axis for centripedal acceleration due to the offset of the IMU relative
@@ -94,9 +105,9 @@ private:
     int8_t m_lastRotationSector = 0;
     bool m_armRotationCounter = false;
     uint32_t m_rotations = 0;
-
-    Kalman<float> m_kalman;
-    uint16_t m_lastTimestamp = 0;
+    uint32_t m_lastRotationDuration = 0;
+    uint32_t m_lastRotationTime = 0;
+    uint8_t m_sendCount = 0; // Only send once every so often, defined in the config.
 };
 
 /**
