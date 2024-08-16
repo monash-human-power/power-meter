@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-08
+ * @date 2024-08-16
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -17,6 +17,8 @@ extern SemaphoreHandle_t serialMutex;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 extern PowerMeter powerMeter;
+
+#include "soc/rtc_cntl_reg.h"
 
 State *StateActive::enter()
 {
@@ -35,6 +37,14 @@ State *StateActive::enter()
         {
             float temp = powerMeter.sides[SIDE_RIGHT].temperature.readTemp();
             LOGD("Temp", "Temperature is %f C", temp);
+            if (Serial.available() && Serial.read() == 'P')
+            {
+                LOGI("Programming", "'P' was sent on the serial port. About to reboot into DFU mode.");
+                connectionBasePtr->disable();
+                delay(5000);
+                REG_WRITE(RTC_CNTL_OPTION1_REG, RTC_CNTL_FORCE_DOWNLOAD_BOOT);
+                esp_restart();
+            }
             delay(1000);
         }
     }

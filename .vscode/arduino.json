@@ -1,7 +1,7 @@
 {
-    "configuration": "USBMode=default,UploadMode=default,PartitionScheme=default,DebugLevel=debug,EraseFlash=none",
+    "configuration": "USBMode=hwcdc,UploadMode=cdc,PartitionScheme=default,DebugLevel=verbose,EraseFlash=none",
     "board": "esp32:esp32:esp32s3usbotg",
     "sketch": "power-meter-code/power-meter-code.ino",
     "output": "../build",
-    "port": "/dev/ttyUSB0"
+    "port": "/dev/ttyACM0"
 }
