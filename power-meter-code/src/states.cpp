@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-16
+ * @date 2024-08-17
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -37,6 +37,7 @@ State *StateActive::enter()
         {
             float temp = powerMeter.sides[SIDE_RIGHT].temperature.readTemp();
             LOGD("Temp", "Temperature is %f C", temp);
+            LOGD("Battery", "Battery voltage is %ld.", powerMeter.batteryVoltage());
             if (Serial.available() && Serial.read() == 'P')
             {
                 LOGI("Programming", "'P' was sent on the serial port. About to reboot into DFU mode.");

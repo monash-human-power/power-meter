@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-17
  */
 #pragma once
 
@@ -123,6 +123,13 @@ public:
      * After calling this function, wait until data ready goes low before reading data.
      */
     void powerUp();
+
+    /**
+     * @brief Calculates the battery voltage.
+     * 
+     * @return uint32_t the battery voltage in mV.
+     */
+    uint32_t batteryVoltage();
 
     /**
      * @brief Keeps a record of the current orientation and speed.

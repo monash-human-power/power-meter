@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-17
  */
 
 #include "power_meter.h"
@@ -130,4 +130,10 @@ void PowerMeter::powerUp()
 
     // Start the IMU
     imuManager.startEstimating();
+}
+
+uint32_t PowerMeter::batteryVoltage()
+{
+    // return analogRead(PIN_BATTERY_VOLTAGE);
+    return (analogRead(PIN_BATTERY_VOLTAGE) * SUPPLY_VOLTAGE) >> 12;
 }
