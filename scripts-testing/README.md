@@ -22,6 +22,17 @@ This script behaves the same as the polling script, however it uses the FIFO buf
 
 This script is based off the [ICM42670P Arduino library `FIFO_Interrupt`](https://github.com/tdk-invn-oss/motion.arduino.ICM42670P/blob/main/examples/FIFO_Interrupt/FIFO_Interrupt.ino) example.
 
+### 4. [GPIO Testing for the ADC pins](./gpio-testing/)
+> Relies on [LED testing](#1-led-testing) and USB / the ability to accept numbers from `Serial.parseInt()`.
+
+This script toggles pins as given over the serial port. This can be used to check that they were soldered correctly and are not disconnected or shorted out.
+
+Usage instructions:
+- Red light indicates waiting for a pin number to be typed in the serial console.
+- Flashing green indicates that a pin is being tested (on is high, off is low).
+- Press 'q' to got back and select another pin.
+- All pins other than LEDs are left in high impedance states after testing that pin concludes.
+
 ## Kalman filter development
 [`kalman-compare.py`](./kalman-filter/kalman-compare.py) takes a CSV file from the power meter and plots the reported orientation over time. This script also calculates orientation based on the accelerometer alone, gyroscope alone and a python implementation of the Kalman filter to compare the results.
 
