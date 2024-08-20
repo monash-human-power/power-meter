@@ -163,7 +163,7 @@ class GraphHandler(DataHandler):
         self.cadence = []
         self.line = ax.plot(self.theta, self.cadence)[0]
         self.latest = ax.plot(self.theta, self.cadence, "ro")[0]
-        ax.set_ylim(0, 340)
+        ax.set_ylim(0, 160)
         ax.set_title(f"Cadence [rpm] vs pedal angle [$^\circ$]")
 
         def animate():
