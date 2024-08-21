@@ -1,6 +1,8 @@
 # Testing scripts and development
-## Logging data to a file
+## Logging data to a file and plotting it.
 The python scripts in the [`python-clients`](./python-clients/) directory allow data to be saved, unpacked into human-readable form and saved as needed.
+- [`log_power_meter.py`](./python-clients/log_power_meter.py) logs data to a folder of files or displays it live.
+- [`plot_imu_timeseries.py`](./python-clients/plot_imu_timeseries.py) plots IMU data.
 
 ## Board testing
 These scripts help to verify that the hardware is working correctly. It is recommended to run these scripts in the following order. The next one usually depends on the previous working.
@@ -32,6 +34,11 @@ Usage instructions:
 - Flashing green indicates that a pin is being tested (on is high, off is low).
 - Press 'q' to got back and select another pin.
 - All pins other than LEDs are left in high impedance states after testing that pin concludes.
+
+### 5. Temperature sensor and LED testing
+> Relies on [LED testing](#1-led-testing) for pretty lights and a serial connection to show temperatures.
+
+This script reads the temperatures on both I2C sensors and flashes the temperature sensor and built in LEDs.
 
 ## Kalman filter development
 [`kalman-compare.py`](./kalman-filter/kalman-compare.py) takes a CSV file from the power meter and plots the reported orientation over time. This script also calculates orientation based on the accelerometer alone, gyroscope alone and a python implementation of the Kalman filter to compare the results.
