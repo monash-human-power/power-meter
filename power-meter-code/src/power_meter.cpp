@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-17
+ * @date 2024-08-23
  */
 
 #include "power_meter.h"
@@ -21,8 +21,23 @@ void Side::begin()
     temperature.begin();
 }
 
+void Side::createDataTask(uint8_t id)
+{
+    char buff[6];
+    sprintf(buff, "Amp%d", id);
+    xTaskCreatePinnedToCore(
+        taskAmp,
+        buff,
+        4096,
+        this,
+        2,
+        &taskHandle,
+        1);
+}
+
 void Side::readDataTask()
 {
+    LOGI("AMP", "Starting to read data");
     while (true)
     {
         // Wait for the interrupt to occur and we get a notification
@@ -66,6 +81,7 @@ void Side::readDataTask()
         }
 
         // Finish calculating and send raw to where it needs to go.
+        LOGI("AMP", "Raw: %ld", data.raw);
         data.torque = m_calculateTorque(data.raw);
         connectionBasePtr->addHighSpeed(data, m_side);
     }
@@ -76,9 +92,39 @@ inline void Side::enableOffsetCalibration()
     m_offsetCalibration = true;
 }
 
+void Side::startAmp()
+{
+    LOGD("AMP", "Starting amplifier");
+    attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
+}
+
 float Side::m_calculateTorque(uint32_t raw)
 {
     return raw / 1e3f; // TODO: Scary calibration part.
+}
+
+void taskAmp(void *pvParameters)
+{
+    Side *side = (Side *)pvParameters;
+    side->readDataTask();
+}
+
+void irqAmp1()
+{
+    // Notify the task for ADC 1. If the ADC 1 task has a higher priority than the one currently running, force a
+    // context switch.
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(powerMeter.sides[1].taskHandle, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+void irqAmp2()
+{
+    // Notify the task for ADC 2. If the ADC 2 task has a higher priority than the one currently running, force a
+    // context switch.
+    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(powerMeter.sides[0].taskHandle, &xHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 void PowerMeter::begin()
@@ -127,6 +173,10 @@ void PowerMeter::powerUp()
     digitalWrite(PIN_AMP_PWDN, LOW);
     delayMicroseconds(26);
     digitalWrite(PIN_AMP_PWDN, HIGH);
+
+    // Enable interrupts for the amplifiers
+    sides[0].startAmp();
+    sides[1].startAmp();
 
     // Start the IMU
     imuManager.startEstimating();

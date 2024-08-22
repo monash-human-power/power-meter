@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-23
  */
 
 #include "defines.h"
@@ -72,6 +72,7 @@ void setup()
         1);
     // TODO: Avoid race condition where the task handle is not initialised to enable or disable the connection.
     delay(100); // Very dodgy way to make sure the condition is avoided.
+
     // Start tasks
     // TODO: Determine RAM allocations
     xTaskCreatePinnedToCore(
@@ -79,10 +80,12 @@ void setup()
         "IMU",
         4096,
         NULL,
-        2, // Make this a higher priority than other tasks.
+        3, // Make this a higher priority than other tasks.
         &imuTaskHandle,
         1);
     delay(100);
+    powerMeter.sides[SIDE_LEFT].createDataTask(0);
+    powerMeter.sides[SIDE_RIGHT].createDataTask(1);
 }
 
 void loop()

@@ -4,12 +4,17 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-08-23
  */
 #pragma once
 #include "../defines.h"
 #include "states.h"
 #include "data_points.h"
+
+
+#define DELAY_WITH_DISABLE(ticks)             \
+    if (m_connection.isDisableWaiting(ticks)) \
+    return &m_connection.m_stateShutdown
 
 /**
  * @brief Abstract base class for a connection that handles incoming data and publishes it elsewhere.

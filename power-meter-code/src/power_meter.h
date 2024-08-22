@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-17
+ * @date 2024-08-23
  */
 #pragma once
 
@@ -25,17 +25,24 @@ public:
      *
      * @param pinDout the data out / data ready pin to use (input).
      * @param pinSclk the clock pin to use (output).
+     * @param irqAmp the interrupt handler to use when more data is available from the ADC.
      * @param i2cAddress the I2C address of the temperature sensor on this side, set by physical jumpers / solder
      *                   bridges.
      */
-    Side(const EnumSide side, const uint8_t pinDout, const uint8_t pinSclk, const uint8_t i2cAddress)
-        : m_side(side), m_pinDout(pinDout), m_pinSclk(pinSclk), temperature(i2cAddress) {}
+    Side(const EnumSide side, const uint8_t pinDout, const uint8_t pinSclk, void(*irqAmp)(), const uint8_t i2cAddress)
+        : m_side(side), m_pinDout(pinDout), m_pinSclk(pinSclk), m_irq(irqAmp), temperature(i2cAddress) {}
 
     /**
      * @brief Initialises the hardware specific to the side.
      *
      */
     void begin();
+
+    /**
+     * @brief Creates a freeRTOS task to handle data input from the ADC.
+     * 
+     */
+    void createDataTask(uint8_t id);
 
     /**
      * @brief Reads data and runs as the main task for the side.
@@ -54,10 +61,22 @@ public:
     void enableOffsetCalibration();
 
     /**
+     * @brief Starts listening to strain gauge amplifier data.
+     * 
+     */
+    void startAmp();
+
+    /**
      * @brief The temperature sensor used for temperature compensation on this side.
      * 
      */
     TempSensor temperature;
+
+    /**
+     * @brief The handle of the task collecting data from the ADC.
+     * 
+     */
+    TaskHandle_t taskHandle;
 
 private:
     /**
@@ -76,20 +95,28 @@ private:
     bool m_offsetCalibration = false;
 
     const EnumSide m_side;
+
+    void(*m_irq)();
 };
 
 /**
- * @brief Task for operating the IMU.
+ * @brief Task for reading ADC data from a side.
  *
- * @param pvParameters
+ * @param pvParameters is a pointer to the side to operate on.
  */
-void taskIMU(void *pvParameters);
+void taskAmp(void *pvParameters);
 
 /**
- * @brief Interrupt called when the IMU has new data during tracking.
- *
+ * @brief Interrupt for when AMP1 has data.
+ * 
  */
-void irqIMUActive();
+void irqAmp1();
+
+/**
+ * @brief Interrupt for when AMP2 has data.
+ * 
+ */
+void irqAmp2();
 
 /**
  * @brief Class for interfacing with all strain gauges.
@@ -102,8 +129,8 @@ public:
      * @brief Construct a new All Strain Gauges object. The left and right strain gauge objects are also initialised.
      *
      */
-    PowerMeter() : sides{Side(SIDE_LEFT, PIN_AMP2_DOUT, PIN_AMP2_SCLK, TEMP2_I2C),
-                        Side(SIDE_RIGHT, PIN_AMP1_DOUT, PIN_AMP1_SCLK, TEMP1_I2C)} {}
+    PowerMeter() : sides{Side(SIDE_LEFT, PIN_AMP2_DOUT, PIN_AMP2_SCLK, &irqAmp2, TEMP2_I2C),
+                        Side(SIDE_RIGHT, PIN_AMP1_DOUT, PIN_AMP1_SCLK, &irqAmp1, TEMP1_I2C)} {}
 
     /**
      * @brief Initialises the power meter hardware.

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-23
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -134,10 +134,6 @@ void MQTTConnection::m_handleIMUQueue()
         MQTT_LOG_PUBLISH_BUF(MQTT_TOPIC_IMU, buffer, PAYLOAD_SIZE);
     }
 }
-
-#define DELAY_WITH_DISABLE(ticks)             \
-    if (m_connection.isDisableWaiting(ticks)) \
-    return &m_connection.m_stateShutdown
 
 State *MQTTConnection::StateWiFiConnect::enter()
 {
