@@ -31,13 +31,24 @@ void MQTTConnection::begin()
     }
 }
 
-#define MQTT_LOG_PUBLISH(topic, payload) \
-    LOGV(topic, "%s", payload);          \
-    mqtt.publish(topic, payload)
+// Logging takes too long, so unless trying to debug stuff, do a simple version.
+// #define MQTT_LOG_PUBLISH(topic, payload) \
+//     LOGV(topic, "%s", payload);          \
+//     uint32_t start = micros();           \
+//     mqtt.publish(topic, payload);        \
+//     uint32_t end = micros();             \
+//     LOGI(topic, "%ldus to publish.", end - start)
 
-#define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
-    LOGV(topic, "Binary data of length %d", length); \
-    mqtt.publish(topic, payload, length)
+#define MQTT_LOG_PUBLISH(topic, payload) mqtt.publish(topic, payload)
+
+// #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
+//     LOGV(topic, "Binary data of length %d", length); \
+//     uint32_t start = micros();                       \
+//     mqtt.publish(topic, payload, length);            \
+//     uint32_t end = micros();                         \
+//     LOGI(topic, "%ldus to publish.", end - start)
+
+#define MQTT_LOG_PUBLISH_BUF(topic, payload, length) mqtt.publish(topic, payload, length)
 
 void MQTTConnection::runActive()
 {

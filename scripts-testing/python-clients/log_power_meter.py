@@ -132,15 +132,18 @@ class CSVHandler(DataHandler):
         # Create the IMU file
         self.imu_file = open(f"{output}/imu.csv", "w")
         self.imu_file.write(
-            "Timestamp [us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Gyro Z [rad/s]\n"
+            "Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Gyro Z [rad/s]\n"
         )
+        self.last_imu_timestamp = 0
 
     def add_imu(self, data: bytes) -> None:
         converted = self._process_imu(data)
         for i in converted:
-            print(i)
+            timestep = i.timestamp - self.last_imu_timestamp
+            self.last_imu_timestamp = i.timestamp
+            print(f"({timestep:>10d}) {i}")
             self.imu_file.write(
-                f"{i.timestamp},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.gyro_z}\n"
+                f"{i.timestamp},{timestep},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.gyro_z}\n"
             )
 
     def add_about(self, data: str) -> None:

@@ -29,7 +29,7 @@ public:
      * @param i2cAddress the I2C address of the temperature sensor on this side, set by physical jumpers / solder
      *                   bridges.
      */
-    Side(const EnumSide side, const uint8_t pinDout, const uint8_t pinSclk, void(*irqAmp)(), const uint8_t i2cAddress)
+    Side(const EnumSide side, const uint8_t pinDout, const uint8_t pinSclk, void (*irqAmp)(), const uint8_t i2cAddress)
         : m_side(side), m_pinDout(pinDout), m_pinSclk(pinSclk), m_irq(irqAmp), temperature(i2cAddress) {}
 
     /**
@@ -40,41 +40,41 @@ public:
 
     /**
      * @brief Creates a freeRTOS task to handle data input from the ADC.
-     * 
+     *
      */
     void createDataTask(uint8_t id);
 
     /**
      * @brief Reads data and runs as the main task for the side.
-     * 
+     *
      * Waits for an interrupt when DOUT/DREADY goes low and receives a notification from it.
-     * 
+     *
      */
     void readDataTask();
 
     /**
      * @brief Tells the ADC to perform offset calibration the next time data is read.
-     * 
+     *
      * This state will be automaticalyl cleared afterwards.
-     * 
+     *
      */
     void enableOffsetCalibration();
 
     /**
      * @brief Starts listening to strain gauge amplifier data.
-     * 
+     *
      */
     void startAmp();
 
     /**
      * @brief The temperature sensor used for temperature compensation on this side.
-     * 
+     *
      */
     TempSensor temperature;
 
     /**
      * @brief The handle of the task collecting data from the ADC.
-     * 
+     *
      */
     TaskHandle_t taskHandle;
 
@@ -87,7 +87,7 @@ private:
 
     /**
      * @brief Handles a new raw data point.
-     * 
+     *
      * @param raw the reading to convert to a torque.
      */
     float m_calculateTorque(uint32_t raw);
@@ -96,7 +96,7 @@ private:
 
     const EnumSide m_side;
 
-    void(*m_irq)();
+    void (*m_irq)();
 };
 
 /**
@@ -107,16 +107,13 @@ private:
 void taskAmp(void *pvParameters);
 
 /**
- * @brief Interrupt for when AMP1 has data.
- * 
+ * @brief Interrupt for when an amplifier / ADC has data.
+ *
+ * Using a template so there will be a fixed address / passing function pointers works as expected.
+ *
  */
-void irqAmp1();
-
-/**
- * @brief Interrupt for when AMP2 has data.
- * 
- */
-void irqAmp2();
+template <EnumSide sideEnum, uint8_t pinDout>
+void irqAmp();
 
 /**
  * @brief Class for interfacing with all strain gauges.
@@ -129,8 +126,8 @@ public:
      * @brief Construct a new All Strain Gauges object. The left and right strain gauge objects are also initialised.
      *
      */
-    PowerMeter() : sides{Side(SIDE_LEFT, PIN_AMP2_DOUT, PIN_AMP2_SCLK, &irqAmp2, TEMP2_I2C),
-                        Side(SIDE_RIGHT, PIN_AMP1_DOUT, PIN_AMP1_SCLK, &irqAmp1, TEMP1_I2C)} {}
+    PowerMeter() : sides{Side(SIDE_LEFT, PIN_AMP2_DOUT, PIN_AMP2_SCLK, &irqAmp<SIDE_LEFT, PIN_AMP2_DOUT>, TEMP2_I2C),
+                         Side(SIDE_RIGHT, PIN_AMP1_DOUT, PIN_AMP1_SCLK, &irqAmp<SIDE_RIGHT, PIN_AMP1_DOUT>, TEMP1_I2C)} {}
 
     /**
      * @brief Initialises the power meter hardware.
@@ -153,20 +150,20 @@ public:
 
     /**
      * @brief Calculates the battery voltage.
-     * 
+     *
      * @return uint32_t the battery voltage in mV.
      */
     uint32_t batteryVoltage();
 
     /**
      * @brief Keeps a record of the current orientation and speed.
-     * 
+     *
      */
     IMUManager imuManager;
 
     /**
      * @brief Each side of the power meter. Using an array for easy manipulation later.
-     * 
+     *
      */
     Side sides[2];
 };

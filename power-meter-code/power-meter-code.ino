@@ -101,8 +101,9 @@ void setup()
     delay(100);
 
     // Create tasks to read data from ADCs
-    powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
-    powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
+    // TODO
+    // powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
+    // powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
 }
 
 void loop()

@@ -40,14 +40,13 @@ void Side::readDataTask()
     LOGI("AMP", "Starting to read data");
     while (true)
     {
-        // Wait for the interrupt to occur and we get a notification
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-
-        // Interrupt occured, data is ready to read.
-        // Get the current time and position now in case we get interrupter later. We have many ms for the data to sit
-        // in the ADC's buffer, so not too much of a rush.
+        // Wait for the interrupt to occur and we get a notification. The time of the interrupt is passed using the
+        // notification.
         HighSpeedData data;
-        data.timestamp = micros();
+        xTaskNotifyWait(0, 0xffffffff, &data.timestamp, portMAX_DELAY);
+        // Interrupt occured, data is ready to read. We have many ms for the data to sit in the ADC's buffer, so not too
+        // much of a rush now we have the time that the reading was made available by the ADC.
+        
         // Using predict so we can have a lower sample rate on the IMU hopefully.
         Matrix<2, 1, float> state;
         powerMeter.imuManager.kalman.predict(data.timestamp, state);
@@ -114,33 +113,25 @@ void taskAmp(void *pvParameters)
     side->readDataTask();
 }
 
-void irqAmp1()
+template <EnumSide sideEnum, uint8_t pinDout>
+void irqAmp()
 {
     // Notify the task for ADC 1. If the ADC 1 task has a higher priority than the one currently running, force a
     // context switch.
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     
     // Disable this interrupt being called again until the data is retrieved.
-    detachInterrupt(digitalPinToInterrupt(PIN_AMP1_DOUT));
+    detachInterrupt(digitalPinToInterrupt(pinDout));
     
     // Give the notification and perform a context switch if necessary.
-    vTaskNotifyGiveFromISR(powerMeter.sides[SIDE_RIGHT].taskHandle, &xHigherPriorityTaskWoken);
+    uint32_t time = micros();
+    xTaskNotifyFromISR(powerMeter.sides[sideEnum].taskHandle, time, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
-void irqAmp2()
-{
-    // Notify the task for ADC 2. If the ADC 2 task has a higher priority than the one currently running, force a
-    // context switch.
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-
-    // Disable this interrupt being called again until the data is retrieved.
-    detachInterrupt(digitalPinToInterrupt(PIN_AMP2_DOUT));
-    
-    // Give the notification and perform a context switch if necessary.
-    vTaskNotifyGiveFromISR(powerMeter.sides[SIDE_LEFT].taskHandle, &xHigherPriorityTaskWoken);
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-}
+// Instantiate the functions / irqs
+template void irqAmp<SIDE_LEFT, PIN_AMP2_DOUT>();
+template void irqAmp<SIDE_RIGHT, PIN_AMP1_DOUT>();
 
 void PowerMeter::begin()
 {
@@ -227,7 +218,6 @@ void taskLowSpeed(void *pvParameters)
         }
 
         // Send data
-        LOGD("LS", "Sending low speed, %d rotations", lowSpeed.rotationCount);
         connectionBasePtr->addLowSpeed(lowSpeed);
     }
 }

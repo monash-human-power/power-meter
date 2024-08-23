@@ -18,6 +18,8 @@ extern portMUX_TYPE spinlock;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 
+volatile uint32_t imuTime;
+
 void IMUManager::begin()
 {
     LOGD("IMU", "Starting IMU");
@@ -58,7 +60,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
 
         // Do stuff with timestamps
         IMUData data;
-        data.timestamp = micros();
+        data.timestamp = imuTime;
 
         // Save the temperature.
         taskENTER_CRITICAL(&spinlock);
@@ -113,7 +115,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
             m_lastRotationDuration = data.timestamp - m_lastRotationTime;
             m_lastRotationTime = data.timestamp;
             taskEXIT_CRITICAL(&spinlock);
-            LOGV("IMU", "%d rotations", m_rotations);
+
             // Send a notification to the low speed task that a rotation has occured.
             xTaskNotifyGive(lowSpeedTaskHandle);
         }
@@ -227,6 +229,7 @@ void irqIMUActive()
 {
     // Notify the IMU task. If the IMU task has a higher priority than the one currently running, force a context
     // switch.
+    imuTime = micros();
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
     vTaskNotifyGiveFromISR(imuTaskHandle, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
