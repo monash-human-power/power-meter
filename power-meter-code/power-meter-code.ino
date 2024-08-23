@@ -84,8 +84,8 @@ void setup()
         &imuTaskHandle,
         1);
     delay(100);
-    powerMeter.sides[SIDE_LEFT].createDataTask(0);
-    powerMeter.sides[SIDE_RIGHT].createDataTask(1);
+    powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
+    powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
 }
 
 void loop()

@@ -22,12 +22,16 @@ void BLEConnection::begin()
     {
         LOGE("BLE", "Starting BLE failed");
     }
+
+    LOGD("BLE", "Measurement characteristic is '0x%x'", BLEMeasCharacteristic::CHARACTERISTIC);
+    LOGD("BLE", "Feature characteristic is '0x%lx'", BLEFeatureCharacteristic::CHARACTERISTIC);
+
     BLE.setLocalName(DEVICE_NAME);
     BLE.setAdvertisedService(m_cyclingPowerService);
     m_cyclingPowerService.addCharacteristic(m_cpsMeasurement);
     m_cyclingPowerService.addCharacteristic(m_cpsFeature);
     m_cyclingPowerService.addCharacteristic(m_cpsLocation);
-    BLE.addService(m_cyclingPowerService);
+    BLE.addService(m_cyclingPowerService); // TODO: Add battery service
     // TODO: Finish up
 }
 
