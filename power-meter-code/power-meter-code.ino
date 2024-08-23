@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-23
+ * @date 2024-08-24
  */
 
 #include "defines.h"
@@ -17,7 +17,7 @@
 #include "src/config.h"
 
 SemaphoreHandle_t serialMutex;
-TaskHandle_t imuTaskHandle;
+TaskHandle_t imuTaskHandle, lowSpeedTaskHandle;
 portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 Preferences prefs;
 
@@ -48,6 +48,7 @@ void setup()
 
     // Start the hardware.
     powerMeter.begin();
+    pinMode(PIN_BOOT, INPUT);
 
     // Initialise the selected connection.
     switch (config.connectionMethod)
@@ -75,6 +76,20 @@ void setup()
 
     // Start tasks
     // TODO: Determine RAM allocations
+
+    // Communications need to have started before creating low speed. This also relies on queues created in power meter
+    // Side::begin()
+    xTaskCreatePinnedToCore(
+        taskLowSpeed,
+        "LowSpeed",
+        4096,
+        NULL,
+        1, // Low priority.
+        &lowSpeedTaskHandle,
+        1);
+    delay(100);
+
+    // Low speed and communications need to have started before IMU.
     xTaskCreatePinnedToCore(
         taskIMU,
         "IMU",
@@ -84,6 +99,8 @@ void setup()
         &imuTaskHandle,
         1);
     delay(100);
+
+    // Create tasks to read data from ADCs
     powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
     powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
 }

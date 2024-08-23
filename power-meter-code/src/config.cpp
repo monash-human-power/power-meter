@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-24
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
@@ -113,6 +113,20 @@ void Config::writeJSON(char *text, uint32_t length)
         qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1),
         rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1),
         imuHowOften);
+}
+
+void Config::toggleConnection()
+{
+    if (connectionMethod == CONNECTION_MQTT)
+    {
+        connectionMethod = CONNECTION_BLE;
+        LOGI("Config", "Setting connection method to BLE.");
+    }
+    else
+    {
+        connectionMethod = CONNECTION_MQTT;
+        LOGI("Config", "Setting connection method to MQTT");
+    }
 }
 
 // void Config::commandLine()

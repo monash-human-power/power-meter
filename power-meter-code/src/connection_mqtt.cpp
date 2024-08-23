@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-23
+ * @date 2024-08-24
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -64,12 +64,13 @@ void MQTTConnection::runActive()
     if (xQueueReceive(m_lowSpeedQueue, &lowSpeed, 0))
     {
         // Low-speed data can be sent. Generate a json string.
-        char payload[80];
+        char payload[100];
         sprintf(
             payload,
-            "{\"cadence\":%.1f,\"rotations\":%lu,\"power\":%.1f,\"balance\":%.2f}",
-            lowSpeed.rotationCount,
+            "{\"timestamp\":%lu,\"cadence\":%.1f,\"rotations\":%lu,\"power\":%.1f,\"balance\":%.1f}",
+            lowSpeed.timestamp,
             lowSpeed.cadence(),
+            lowSpeed.rotationCount,
             lowSpeed.power,
             lowSpeed.balance);
 

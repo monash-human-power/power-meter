@@ -4,14 +4,14 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-24
  */
 
 #include "imu.h"
 // Power meter requires that the IMUManager class is defined, so put the include here.
 #include "power_meter.h"
 extern SemaphoreHandle_t serialMutex;
-extern TaskHandle_t imuTaskHandle;
+extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle;
 extern PowerMeter powerMeter;
 extern portMUX_TYPE spinlock;
 
@@ -60,6 +60,11 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         IMUData data;
         data.timestamp = micros();
 
+        // Save the temperature.
+        taskENTER_CRITICAL(&spinlock);
+        m_lastTemperature = evt->temperature;
+        taskEXIT_CRITICAL(&spinlock);
+
         // Add to the Kalman filter
         float theta = m_calculateAngle(xAccel, yAccel);
         // LOGD("Accel", "%f", theta);
@@ -88,19 +93,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
 
         // Calculate the number of rotations.
         // Calculate the current sector.
-        int8_t rotationSector;
-        if (data.position < -M_PI / 3)
-        {
-            rotationSector = 0;
-        }
-        else if (data.position < M_PI / 3)
-        {
-            rotationSector = 1;
-        }
-        else
-        {
-            rotationSector = 2;
-        }
+        int8_t rotationSector = m_angleToSector(data.position);
 
         // Arm trigger if crossing from sector 0 to sector 1
         if (rotationSector == 1 and m_lastRotationSector == 0)
@@ -109,7 +102,7 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
         }
 
         // If trigger is armed and we crossed from sector 2 back to sector 0, increase the count.
-        if (m_armRotationCounter && rotationSector == 0 && m_lastRotationSector == 1)
+        if (m_armRotationCounter && rotationSector == 0 && m_lastRotationSector == 2)
         {
             // We have a complete rotation. // TODO: Confirm direction.
             m_armRotationCounter = false;
@@ -118,10 +111,11 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
             taskENTER_CRITICAL(&spinlock);
             m_rotations++;
             m_lastRotationDuration = data.timestamp - m_lastRotationTime;
-            taskEXIT_CRITICAL(&spinlock);
-
-            // Back to stuff that isn't shared with other tasks.
             m_lastRotationTime = data.timestamp;
+            taskEXIT_CRITICAL(&spinlock);
+            LOGV("IMU", "%d rotations", m_rotations);
+            // Send a notification to the low speed task that a rotation has occured.
+            xTaskNotifyGive(lowSpeedTaskHandle);
         }
         m_lastRotationSector = rotationSector;
     }
@@ -136,9 +130,18 @@ void IMUManager::setLowSpeedData(LowSpeedData &data)
     // Safely copy the data in to the object.
     taskENTER_CRITICAL(&spinlock);
     data.lastRotationDuration = m_lastRotationDuration;
-    data.lastRotationTime = m_lastRotationTime;
+    data.timestamp = m_lastRotationTime;
     data.rotationCount = m_rotations;
     taskEXIT_CRITICAL(&spinlock);
+}
+
+float IMUManager::getLastTemperature()
+{
+    // Safely copy the data in to the object.
+    taskENTER_CRITICAL(&spinlock);
+    float temp = m_lastTemperature / 2 + 25;
+    taskEXIT_CRITICAL(&spinlock);
+    return temp;
 }
 
 inline float const IMUManager::m_correctCentripedal(float reading, float radius, float velocity)
@@ -185,6 +188,22 @@ float const IMUManager::m_calculateAngle(float x, float y)
             // Straight down.
             return -M_PI_2;
         }
+    }
+}
+
+inline int8_t IMUManager::m_angleToSector(float angle)
+{
+    if (angle < -M_PI / 3)
+    {
+        return 0;
+    }
+    else if (angle < M_PI / 3)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
     }
 }
 

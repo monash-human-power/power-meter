@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-07-31
+ * @date 2024-08-24
  */
 #pragma once
 #include "../defines.h"
@@ -71,6 +71,13 @@ public:
 private:
     State &m_activeState;
 };
+
+/**
+ * @brief Shuts down the system and reboots.
+ * 
+ * @param dfu if true, will reboot into DFU mode. If false, will restart into application mode.
+ */
+void reboot(bool dfu = false);
 
 /**
  * @brief Runs the state machine.

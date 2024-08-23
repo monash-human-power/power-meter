@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-23
+ * @date 2024-08-24
  */
 #pragma once
 
@@ -170,3 +170,10 @@ public:
      */
     Side sides[2];
 };
+
+/**
+ * @brief Task for processing low speed data.
+ *
+ * @param pvParameters is any data given (currently unused).
+ */
+void taskLowSpeed(void *pvParameters);

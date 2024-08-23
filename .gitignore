@@ -1,10 +1,11 @@
-### VSCode (ignore in this case as Arduino files are computer specific) ###
+### VSCode and project logs (ignore in this case as Arduino files are computer specific) ###
 \.vscode
 docs
 power-meter-code/constants.h
 .ipynb_checkpoints
 log.txt
 imu.csv
+about.txt
 
 ### KICAD ###
 power-meter-pcb/out

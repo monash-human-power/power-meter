@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-23
+ * @date 2024-08-24
  */
 
 #include "power_meter.h"
@@ -72,6 +72,9 @@ void Side::readDataTask()
             delayMicroseconds(1);
         }
 
+        // Enable interrupts again
+        attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
+
         // Send the contents of raw somewhere as needed.
         if (m_offsetCalibration)
         {
@@ -84,6 +87,8 @@ void Side::readDataTask()
         LOGI("AMP", "Raw: %ld", data.raw);
         data.torque = m_calculateTorque(data.raw);
         connectionBasePtr->addHighSpeed(data, m_side);
+
+        // TODO: Add the data to a queue to be read and aggregated by the low speed task.
     }
 }
 
@@ -92,9 +97,9 @@ inline void Side::enableOffsetCalibration()
     m_offsetCalibration = true;
 }
 
-void Side::startAmp()
+inline void Side::startAmp()
 {
-    LOGD("AMP", "Starting amplifier");
+    enableOffsetCalibration();
     attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
 }
 
@@ -114,7 +119,12 @@ void irqAmp1()
     // Notify the task for ADC 1. If the ADC 1 task has a higher priority than the one currently running, force a
     // context switch.
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    vTaskNotifyGiveFromISR(powerMeter.sides[1].taskHandle, &xHigherPriorityTaskWoken);
+    
+    // Disable this interrupt being called again until the data is retrieved.
+    detachInterrupt(digitalPinToInterrupt(PIN_AMP1_DOUT));
+    
+    // Give the notification and perform a context switch if necessary.
+    vTaskNotifyGiveFromISR(powerMeter.sides[SIDE_RIGHT].taskHandle, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
@@ -123,7 +133,12 @@ void irqAmp2()
     // Notify the task for ADC 2. If the ADC 2 task has a higher priority than the one currently running, force a
     // context switch.
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    vTaskNotifyGiveFromISR(powerMeter.sides[0].taskHandle, &xHigherPriorityTaskWoken);
+
+    // Disable this interrupt being called again until the data is retrieved.
+    detachInterrupt(digitalPinToInterrupt(PIN_AMP2_DOUT));
+    
+    // Give the notification and perform a context switch if necessary.
+    vTaskNotifyGiveFromISR(powerMeter.sides[SIDE_LEFT].taskHandle, &xHigherPriorityTaskWoken);
     portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
@@ -175,8 +190,8 @@ void PowerMeter::powerUp()
     digitalWrite(PIN_AMP_PWDN, HIGH);
 
     // Enable interrupts for the amplifiers
-    sides[0].startAmp();
-    sides[1].startAmp();
+    sides[SIDE_LEFT].startAmp();
+    sides[SIDE_RIGHT].startAmp();
 
     // Start the IMU
     imuManager.startEstimating();
@@ -186,4 +201,33 @@ uint32_t PowerMeter::batteryVoltage()
 {
     // return analogRead(PIN_BATTERY_VOLTAGE);
     return (analogRead(PIN_BATTERY_VOLTAGE) * SUPPLY_VOLTAGE) >> 12;
+}
+
+void taskLowSpeed(void *pvParameters)
+{
+    LOGI("LS", "Low speed task started");
+    while (true)
+    {
+        LowSpeedData lowSpeed;
+        // Wait for a rotation or once every 5 seconds, whatever comes first.
+        if(ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(5000)))
+        {
+            // We had a rotation.
+            powerMeter.imuManager.setLowSpeedData(lowSpeed);
+            // TODO: Do power calculation and stuff.
+            lowSpeed.balance = 50;
+            lowSpeed.power = 0;
+        }
+        else
+        {
+            // No rotation. Get the last known values, set power to 0.
+            powerMeter.imuManager.setLowSpeedData(lowSpeed);
+            lowSpeed.balance = 50;
+            lowSpeed.power = 0;
+        }
+
+        // Send data
+        LOGD("LS", "Sending low speed, %d rotations", lowSpeed.rotationCount);
+        connectionBasePtr->addLowSpeed(lowSpeed);
+    }
 }

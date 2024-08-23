@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-24
  */
 #pragma once
 #include "../defines.h"
@@ -69,7 +69,7 @@ public:
      * @brief The time at which the last rotation occured (us).
      * 
      */
-    uint32_t lastRotationTime;
+    uint32_t timestamp;
 
     /**
      * @brief Calculates the instantanerous cadence (angular velocity) in revolutions per minute.

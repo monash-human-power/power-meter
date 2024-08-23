@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-24
  */
 #pragma once
 #include "../defines.h"
@@ -76,6 +76,12 @@ public:
      * @param length the maximum length. Should be at least `CONF_JSON_TEXT_LENGTH`.
      */
     void writeJSON(char *text, uint32_t length);
+
+    /**
+     * @brief Toggles the connection between WiFi / MQTT and BLE.
+     * 
+     */
+    void toggleConnection();
 
     EnumConnection connectionMethod = CONNECTION_MQTT;
     Matrix<2, 2, float> qEnvCovariance = DEFAULT_KALMAN_Q;

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-23
+ * @date 2024-08-24
  */
 #pragma once
 #include "../defines.h"
@@ -21,8 +21,8 @@
  */
 namespace BLEMeasCharacteristic
 {
-    const uint8_t PEDAL_POWER_BALANCE = 0;       // Bit 0, Not present when 0, present when 1.
-    const uint8_t PEDAL_POWER_BALANCE_REF = 0;   // Bit 1, Unkown when 0, Left when 1.
+    const uint8_t PEDAL_POWER_BALANCE = 1;       // Bit 0, Not present when 0, present when 1.
+    const uint8_t PEDAL_POWER_BALANCE_REF = 1;   // Bit 1, Unkown when 0, Left when 1.
     const uint8_t ACCUMULATED_TORQUE = 0;        // Bit 2, Present when 1.
     const uint8_t ACCUMULATED_TORQUE_SOURCE = 0; // Bit 3, Wheel based when 0, crank based when 1.
     const uint8_t WHEEL_REVOLUTION_DATA = 0;     // Bit 4, Present when 1.
@@ -59,7 +59,7 @@ namespace BLEMeasCharacteristic
  */
 namespace BLEFeatureCharacteristic
 {
-    const uint8_t PEDAL_POWER_BALANCE = 0; // Pedal power balance supported
+    const uint8_t PEDAL_POWER_BALANCE = 1; // Pedal power balance supported
     const uint8_t ACCUMULATED_TORQUE = 0;
     const uint8_t WHEEL_REVOLUTION_DATA = 0;
     const uint8_t CRANK_REVOLUTION_DATA = 1;
@@ -121,6 +121,12 @@ public:
     virtual void begin();
 
 protected:
+    /**
+     * @brief Checks the queues and acts on any new messages to publish.
+     *
+     */
+    void runActive();
+
     /**
      * @brief State for connecting to a central BLE device (bike computer).
      *
@@ -216,7 +222,7 @@ protected:
 
     /**
      * @brief Required characteristics for the CPS.
-     *
+     * The sensor location characteristic is defined in section 3.196 of the GATT Specification Supplement.
      */
     BLEByteCharacteristic m_cpsLocation;
     BLECharacteristic m_cpsFeature;
@@ -237,10 +243,10 @@ protected:
      * @brief Array that holds the data to send over BLE as part of the measurement characteristic.
      *
      * These are some comments and notes based on section 3.65 of the GATT specification supplement.
-     * 
+     *
      * Data (varies based on BLEMeasCharacterisitc):
      *   - Flags (`boolean[16]`) - See BLEMeasCharacteristic.
-     *   - Power (`sint16`) - Instantaneous power.
+     *   - Power (`sint16`) - Instantaneous power in W.
      *   - Pedal power balance (`uint8`) - Power balance in 0.5% steps, only present if BLEMeasCharacteristic::PEDAL_POWER_BALANCE=1.
      *   - Accumulated torque (`uint16`) - Unit is 1/32 Nm, only present if BLEMeasCharacteristic::ACCUMULATED_TORQUE=1.
      *   - Wheel revolution data (`struct 6`) - Only present if BLEMeasCharacteristic::WHEEL_REVOLUTION_DATA=1.
@@ -251,18 +257,18 @@ protected:
      *   - Top dead spot angle (`uint16`) - Only present if BLEMeasCharacteristic::TOP_DEAD_SPOT_ANGLE=1.
      *   - Bottom dead spot angle (`uint16`) - Only present if BLEMeasCharacteristic::BOTTOM_DEAD_SPOT_ANGLE=1.
      *   - Accumulated energy (`uint16`) - Unit is kJ, only present if BLEMeasCharacteristic::ACCUMULATED_ENERGY=1.
-     * 
+     *
      * Crank revolution data:
-     *   - Cumulative wheel revolutions (`uint16`)
-     *   - Last wheel event time (`uint16`) - Unit is in 1/1048 seconds.
-     * 
+     *   - Cumulative crank revolutions (`uint16`)
+     *   - Last crank event time (`uint16`) - Unit is in 1/1024 seconds.
+     *
      * Extreme forces and torques:
      *   - Maximum (`sint16`) - In N for force, Nm for torque.
      *   - Minimum (`sint16`) - In N for force, Nm for torque.
-     * 
+     *
      * // TODO: Document all the other stuff as this power meter will be capable of most of it.
      */
-    uint8_t m_measData[8] = {
+    uint8_t m_measData[9] = {
         (uint8_t)(BLEMeasCharacteristic::CHARACTERISTIC & 0xff),
         (uint8_t)(BLEMeasCharacteristic::CHARACTERISTIC >> 8),
         0,
@@ -273,4 +279,13 @@ protected:
         0};
 
     BLEDevice m_central;
+
+private:
+    /**
+     * @brief Scales the given time in us to 1/1024 second units for BLE transmission.
+     *
+     * @param us the input time in us.
+     * @return uint16_t the time in 1024 second units. This will overflow as expected / consitently.
+     */
+    uint16_t m_scaleTime1024(uint32_t us);
 };

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-08-24
  */
 
 #pragma once
@@ -75,6 +75,13 @@ public:
      */
     void setLowSpeedData(LowSpeedData &data);
 
+    /**
+     * @brief Calculates and returns the last reported temperature in a thread-safe manner.
+     * 
+     * @return float the temperature in Celcius.
+     */
+    float getLastTemperature();
+
     ICM42670 imu;
     Kalman<float> kalman;
 private:
@@ -99,6 +106,14 @@ private:
     float const m_calculateAngle(float x, float y);
 
     /**
+     * @brief Assigns an angle to one of 3 sectors.
+     * 
+     * @param angle the input angle.
+     * @return int8_t the sector (0, 1 or 2)
+     */
+    int8_t m_angleToSector(float angle);
+
+    /**
      * @brief Stores the last sector of rotation so that complete turns can be detected.
      * 
      */
@@ -108,6 +123,7 @@ private:
     uint32_t m_lastRotationDuration = 0;
     uint32_t m_lastRotationTime = 0;
     uint8_t m_sendCount = 0; // Only send once every so often, defined in the config.
+    uint16_t m_lastTemperature;
 };
 
 /**

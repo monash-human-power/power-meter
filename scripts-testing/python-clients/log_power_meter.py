@@ -162,9 +162,35 @@ class GraphHandler(DataHandler):
         self.theta = []
         self.cadence = []
         self.line = ax.plot(self.theta, self.cadence)[0]
-        self.latest = ax.plot(self.theta, self.cadence, "ro")[0]
+        self.latest = ax.axvline(0, color="r")
         ax.set_ylim(0, 160)
         ax.set_title(f"Cadence [rpm] vs pedal angle [$^\circ$]")
+
+        def format_radians_label(float_in):
+            """Converts a float value in radians into a string representation of that float.
+            From https://stackoverflow.com/a/63667851
+            """
+            if (float_in > math.pi):
+                float_in = -(2*math.pi - float_in)
+            string_out = str(float_in / (math.pi))+"π"
+            
+            return string_out
+
+        def convert_polar_xticks_to_radians(ax):
+            """Converts x-tick labels from degrees to radians
+            From https://stackoverflow.com/a/63667851
+            """
+            
+            # Get the x-tick positions (returns in radians)
+            label_positions = ax.get_xticks()
+            
+            # Convert to a list since we want to change the type of the elements
+            labels = list(label_positions)
+            
+            # Format each label (edit this function however you'd like)
+            labels = [format_radians_label(label) for label in labels]
+            
+            ax.set_xticklabels(labels)
 
         def animate():
             """Animate and block in a function to allow for multiple processing."""
@@ -173,6 +199,7 @@ class GraphHandler(DataHandler):
             )
             plt.show()
 
+        convert_polar_xticks_to_radians(ax)
         self.queue = Queue()
         self.animate_process = Process(target=animate)
         self.animate_process.start() # TODO: Handle keyboard interrupts.
@@ -194,7 +221,7 @@ class GraphHandler(DataHandler):
         self.line.set_xdata(self.theta)
         self.line.set_ydata(self.cadence)
         self.latest.set_xdata([self.theta[-1]])
-        self.latest.set_ydata([self.cadence[-1]])
+        # self.latest.set_ydata([self.cadence[-1]])
         print(f"{self.theta[-1]=}\t{self.cadence[-1]=}")
         return self.line, self.latest
 
