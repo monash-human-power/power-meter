@@ -111,8 +111,8 @@ public:
      */
     BLEConnection()
         : Connection(m_stateBLEConnect), m_stateBLEConnect(*this), m_stateActive(*this), m_stateShutdown(*this),
-          m_cyclingPowerService("1818"), m_cpsLocation("2A5D", BLERead), m_cpsFeature("2A65", BLERead, 4),
-          m_cpsMeasurement("2A63", BLERead | BLENotify, 8) {}
+          m_cyclingPowerService("1818"), m_cpsLocation("2A5D", BLERead), m_cpsFeature("2A65", BLERead, sizeof(m_featData)),
+          m_cpsMeasurement("2A63", BLERead | BLENotify, sizeof(m_measData)) {}
 
     /**
      * @brief Initialises the connection
@@ -169,7 +169,7 @@ protected:
          * @param connection is the BLEConnection object to operate on.
          */
         StateActive(BLEConnection &connection)
-            : State("Shutdown"),
+            : State("Active"),
               m_connection(connection) {}
 
         /**

@@ -93,6 +93,7 @@ uint16_t BLEConnection::m_scaleTime1024(uint32_t us)
 
 State *BLEConnection::StateBLEConnect::enter()
 {
+    m_connection.setAllowData(false);
     // Start connection process
     BLE.advertise();
     LOGI("BLE", "Waiting for central to connect");
@@ -111,6 +112,7 @@ State *BLEConnection::StateBLEConnect::enter()
 
 State *BLEConnection::StateActive::enter()
 {
+    m_connection.setAllowData(true);
     while (m_connection.m_central.connected() && !m_connection.isDisableWaiting(1))
     {
         // Check each queue and send data if present. Queue sets could be useful here.
@@ -123,7 +125,9 @@ State *BLEConnection::StateActive::enter()
 
 State *BLEConnection::StateShutdown::enter()
 {
+    m_connection.setAllowData(false);
+    m_connection.m_central.disconnect();
     LOGI("BLE", "Shutting BLE down.");
-    BLE.stopAdvertise();
-    // TODO
+    BLE.stopAdvertise(); // TODO: Any other power saving required?
+    return &m_connection.m_stateDisabled;
 }
