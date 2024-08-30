@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-08-30
  */
 
 #include "power_meter.h"
@@ -83,7 +83,6 @@ void Side::readDataTask()
         }
 
         // Finish calculating and send raw to where it needs to go.
-        LOGI("AMP", "Raw: %ld", data.raw);
         data.torque = m_calculateTorque(data.raw);
         connectionBasePtr->addHighSpeed(data, m_side);
 
@@ -104,7 +103,7 @@ inline void Side::startAmp()
 
 float Side::m_calculateTorque(uint32_t raw)
 {
-    return raw / 1e3f; // TODO: Scary calibration part.
+    return 0; // raw / 1e3f; // TODO: Scary calibration part.
 }
 
 void taskAmp(void *pvParameters)

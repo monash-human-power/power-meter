@@ -29,6 +29,13 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from multiprocessing import Process, Queue
 import math
+from enum import Enum
+
+
+# Sides
+class Side(Enum):
+    LEFT = "left"
+    RIGHT = "right"
 
 
 # Topics
@@ -38,8 +45,8 @@ MQTT_TOPIC_HOUSEKEEPING = MQTT_TOPIC_PREFIX + "housekeeping"
 MQTT_TOPIC_LOW_SPEED = MQTT_TOPIC_PREFIX + "power"
 MQTT_TOPIC_HIGH_SPEED = MQTT_TOPIC_PREFIX + "fast/"
 MQTT_TOPIC_IMU = MQTT_TOPIC_PREFIX + "imu"
-MQTT_TOPIC_LEFT = MQTT_TOPIC_HIGH_SPEED + "left"
-MQTT_TOPIC_RIGHT = MQTT_TOPIC_HIGH_SPEED + "right"
+MQTT_TOPIC_LEFT = MQTT_TOPIC_HIGH_SPEED + Side.LEFT.value
+MQTT_TOPIC_RIGHT = MQTT_TOPIC_HIGH_SPEED + Side.RIGHT.value
 
 
 class IMUData:
@@ -74,6 +81,30 @@ class IMUData:
         return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad {self.accel_x:>8.2f}x_m/s {self.accel_y:>8.2f}y_m/s {self.gyro_z:>8.2f}z_rad/s"
 
 
+class StrainData:
+    """Class for storing and processing data from a strain gauge"""
+
+    SIZE = 24
+
+    def __init__(self, data: bytes) -> None:
+        """Initialises the object.
+
+        Args:
+            data (bytes): The raw data (trimmed to just that containing this object).
+        """
+        (
+            self.timestamp,
+            self.velocity,
+            self.position,
+            self.raw,
+            self.torque,
+            self.power,
+        ) = struct.unpack("<LffLff", data)
+
+    def __str__(self) -> str:
+        return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad {self.raw:>11d}raw {self.torque:>8.2f}Nm {self.power:>8.2f}W"
+
+
 class DataHandler(ABC):
     """Class for accepting and processing data from the power meter."""
 
@@ -92,6 +123,15 @@ class DataHandler(ABC):
 
         Args:
             data (str): The MQTT message string containing the about message.
+        """
+        pass
+
+    def add_fast(self, data: str, side: Side) -> None:
+        """Accepts a message from a side and handles it.
+
+        Args:
+            data (str): The MQTT message string containing the about message.
+            side (Side): The side the data applies to.
         """
         pass
 
@@ -116,6 +156,63 @@ class DataHandler(ABC):
         ]
         return result
 
+    def _process_strain(self, data: bytes) -> List[StrainData]:
+        """Accepts a blob of bytes and converterts these into an array of
+        StrainData objects.
+
+        Args:
+            data (bytes): The raw data (full MQTT message).
+
+        Returns:
+            List[StrainData]: A list of StrainData objects that were contained
+            in the data.
+        """
+        # For each data object, extract it and add it to an array.
+        result = [
+            StrainData(data[i : i + StrainData.SIZE])
+            for i in range(0, len(data), StrainData.SIZE)
+        ]
+        return result
+
+class CSVSide:
+    def __init__(self, side:Side, output_dir:str):
+        """Opens a file ready to write with the given name.
+
+        Args:
+            side (Side): The side this will represent.
+            output_dir (str): The output directory to place the file in.
+        """
+        # Open the file and write a heading.
+        self.file = open(f"{output_dir}/{side.value}_strain.csv", "w")
+        self.file.write(
+            "Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
+        )
+
+        # Initialise time step calculation
+        self.last_timestamp = 0
+        self.side = side
+
+    def add_fast(self, data:List[StrainData]) -> None:
+        """Adds high speed data to the side.
+
+        Args:
+            data (List[StrainData]): The data to add.
+
+        Returns:
+            None
+        """
+        # Select which file to write to
+        for i in data:
+            timestep = i.timestamp - self.last_timestamp
+            self.last_timestamp = i.timestamp
+            print(f"{self.side.name}: ({timestep:>10d}) {i}")
+            self.file.write(
+                f"{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
+            )
+    
+    def close(self) -> None:
+        self.file.close()
+
 
 class CSVHandler(DataHandler):
     """Class for accepting data and saving this to a folder of CSVs."""
@@ -136,6 +233,11 @@ class CSVHandler(DataHandler):
         )
         self.last_imu_timestamp = 0
 
+        # Create the strain gauge files
+        self.left = CSVSide(Side.LEFT, output)
+        self.right = CSVSide(Side.RIGHT, output)
+
+
     def add_imu(self, data: bytes) -> None:
         converted = self._process_imu(data)
         for i in converted:
@@ -149,6 +251,15 @@ class CSVHandler(DataHandler):
     def add_about(self, data: str) -> None:
         print(f"About: {data}")
         self.about_file.write(data)
+
+    def add_fast(self, data: str, side: Side) -> None:
+        # Process the data.
+        converted = self._process_strain(data)
+        
+        if side == Side.LEFT:
+            self.left.add_fast(converted)
+        else:
+            self.right.add_fast(converted)
 
     def close(self):
         print("Closing CSV Handler")
@@ -173,26 +284,26 @@ class GraphHandler(DataHandler):
             """Converts a float value in radians into a string representation of that float.
             From https://stackoverflow.com/a/63667851
             """
-            if (float_in > math.pi):
-                float_in = -(2*math.pi - float_in)
-            string_out = str(float_in / (math.pi))+"π"
-            
+            if float_in > math.pi:
+                float_in = -(2 * math.pi - float_in)
+            string_out = str(float_in / (math.pi)) + "π"
+
             return string_out
 
         def convert_polar_xticks_to_radians(ax):
             """Converts x-tick labels from degrees to radians
             From https://stackoverflow.com/a/63667851
             """
-            
+
             # Get the x-tick positions (returns in radians)
             label_positions = ax.get_xticks()
-            
+
             # Convert to a list since we want to change the type of the elements
             labels = list(label_positions)
-            
+
             # Format each label (edit this function however you'd like)
             labels = [format_radians_label(label) for label in labels]
-            
+
             ax.set_xticklabels(labels)
 
         def animate():
@@ -205,7 +316,7 @@ class GraphHandler(DataHandler):
         convert_polar_xticks_to_radians(ax)
         self.queue = Queue()
         self.animate_process = Process(target=animate)
-        self.animate_process.start() # TODO: Handle keyboard interrupts.
+        self.animate_process.start()  # TODO: Handle keyboard interrupts.
 
     def update_graph(self, frame):
         print(f"Frame {frame}")
@@ -234,7 +345,7 @@ class GraphHandler(DataHandler):
 
     def add_about(self, data: str) -> None:
         return super().add_about(data)
-    
+
     def close(self) -> None:
         self.animate_process.kill()
 
@@ -256,6 +367,10 @@ class MultiHandler(DataHandler):
         for h in self.handlers:
             h.add_about(data)
 
+    def add_fast(self, data: str, side: Side) -> None:
+        for h in self.handlers:
+            h.add_fast(data, side)
+
     def close(self) -> None:
         for h in self.handlers:
             h.close()
@@ -269,12 +384,35 @@ def on_connect(
 ) -> None:
     """Called when connected to the broker."""
     print("Connected to MQTT")
-    mqtt_client.subscribe(MQTT_TOPIC_ABOUT)
-    mqtt_client.subscribe(MQTT_TOPIC_HOUSEKEEPING)
-    mqtt_client.subscribe(MQTT_TOPIC_LOW_SPEED)
-    mqtt_client.subscribe(MQTT_TOPIC_LEFT)
-    mqtt_client.subscribe(MQTT_TOPIC_RIGHT)
-    mqtt_client.subscribe(MQTT_TOPIC_IMU)
+    if not args.no_about:
+        mqtt_client.subscribe(MQTT_TOPIC_ABOUT)
+    else:
+        print("Not subscribing to about messages.")
+
+    if not args.no_housekeeping:
+        mqtt_client.subscribe(MQTT_TOPIC_HOUSEKEEPING)
+    else:
+        print("Not subscribing to housekeeping messages.")
+
+    if not args.no_power:
+        mqtt_client.subscribe(MQTT_TOPIC_LOW_SPEED)
+    else:
+        print("Not subscribing to low-speed power messages.")
+
+    if not args.no_left:
+        mqtt_client.subscribe(MQTT_TOPIC_LEFT)
+    else:
+        print("Not subscribing to high-speed left ADC messages.")
+
+    if not args.no_right:
+        mqtt_client.subscribe(MQTT_TOPIC_RIGHT)
+    else:
+        print("Not subscribing to high-speed right ADC messages.")
+
+    if not args.no_imu:
+        mqtt_client.subscribe(MQTT_TOPIC_IMU)
+    else:
+        print("Not subscribing to high-speed IMU messages.")
 
 
 def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> None:
@@ -290,6 +428,10 @@ def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> No
         handler.add_about(msg.payload.decode())
     elif msg.topic == MQTT_TOPIC_IMU:
         handler.add_imu(msg.payload)
+    elif msg.topic == MQTT_TOPIC_LEFT:
+        handler.add_fast(msg.payload, Side.LEFT)
+    elif msg.topic == MQTT_TOPIC_RIGHT:
+        handler.add_fast(msg.payload, Side.RIGHT)
 
 
 if __name__ == "__main__":
@@ -298,7 +440,7 @@ if __name__ == "__main__":
         description="Subscribes to MQTT data from the power meter, decodes it and saves the data to a file and or draws it on a live graph.",
         conflict_handler="resolve",  # Cope with -h being used for host like mosquitto clients
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
-        epilog="Written by Jotham Gates and Oscar Varney for MHP, 2024",
+        epilog="Written by Jotham Gates and Oscar Varney for MHP, 2024. For more information, please see here: https://github.com/monash-human-power/power-meter",
     )
     parser.add_argument(
         "-h",
@@ -328,6 +470,42 @@ if __name__ == "__main__":
         help="The folder to create and write CSV files into.",
         type=str,
         default=datetime.now().strftime("%Y%m%d_%H%M%S_PowerMeter"),
+    )
+
+    # What to include
+    group = parser.add_argument_group(
+        title="Topics to include",
+        description="All topics are included by default, set these to False to not subscribe to a particular topic.",
+    )
+    group.add_argument(
+        "--no-about",
+        help="If present, does not subscribe to about messages.",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no-housekeeping",
+        help="If present, does not subscribe to housekeeping messages.",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no-imu",
+        help="If present, does not subscribe to messages containing high speed IMU data.",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no-left",
+        help="If present, does not subscribe to messages containing high speed data from the left ADC.",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no-right",
+        help="If present, does not subscribe to messages containing high speed data from the right ADC.",
+        action="store_true",
+    )
+    group.add_argument(
+        "--no-power",
+        help="If present, does not subscribe to messages containing slow power data.",
+        action="store_true",
     )
     args = parser.parse_args()
 

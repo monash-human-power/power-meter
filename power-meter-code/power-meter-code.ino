@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-08-30
  */
 
 #include "defines.h"
@@ -101,9 +101,8 @@ void setup()
     delay(100);
 
     // Create tasks to read data from ADCs
-    // TODO
-    // powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
-    // powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
+    powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
+    powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
 }
 
 void loop()
