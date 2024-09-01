@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-30
+ * @date 2024-09-01
  */
 
 #include "power_meter.h"
@@ -18,7 +18,7 @@ extern Connection *connectionBasePtr;
 void Side::begin()
 {
     LOGD("Side", "Starting hardware for a side");
-    temperature.begin();
+    tempSensor.begin();
 }
 
 void Side::createDataTask(uint8_t id)
@@ -83,7 +83,7 @@ void Side::readDataTask()
         }
 
         // Finish calculating and send raw to where it needs to go.
-        data.torque = m_calculateTorque(data.raw);
+        data.torque = m_calculateTorque(data.raw, tempSensor.getLastTemp());
         connectionBasePtr->addHighSpeed(data, m_side);
 
         // TODO: Add the data to a queue to be read and aggregated by the low speed task.
@@ -101,9 +101,15 @@ inline void Side::startAmp()
     attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
 }
 
-float Side::m_calculateTorque(uint32_t raw)
+float Side::m_calculateTorque(uint32_t raw, float temperature)
 {
-    return 0; // raw / 1e3f; // TODO: Scary calibration part.
+    StrainConf &conf = config.strain[m_side];
+    // There is a relatively linear relationship between the raw value and the torque.
+    float torque = (raw-conf.offset) * conf.coefficient;
+
+    // Thermal compensation. // TODO: In the strain gauge datasheet, this looks like it may be quadratic?
+    torque *= (1 - conf.tempCoefficient*(temperature - conf.tempTest));
+    return torque;
 }
 
 void taskAmp(void *pvParameters)

@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-01
  */
 #pragma once
 #include "../defines.h"
@@ -86,3 +86,9 @@ void reboot(bool dfu = false);
  * @param initial the initial state.
  */
 void runStateMachine(const char *name, State *initial);
+
+/**
+ * @brief Prints some help text to use the serial command line.
+ * 
+ */
+void printHelp();

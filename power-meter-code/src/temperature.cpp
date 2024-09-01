@@ -5,12 +5,13 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-09-01
  */
 
 #include "temperature.h"
 
 extern SemaphoreHandle_t serialMutex;
+extern portMUX_TYPE spinlock;
 
 void TempSensor::begin()
 {
@@ -47,19 +48,28 @@ float TempSensor::readTempRegister()
 
     // Attempt to get the data
     uint8_t receivedSize = Wire.requestFrom(m_i2cAddress, 2);
+    float temperature;
     if (receivedSize == 2)
     {
         // We received the expected number of bytes.
         int16_t rawTemp = Wire.read() << 8;
         rawTemp |= Wire.read();
-        return rawTemp / 256.0;
+        temperature = rawTemp / 256.0;
     }
     else
     {
         // Incorrect number of bytes received.
         LOGE("Temp", "Error reading temperature from %d", m_i2cAddress);
-        return NAN;
+        temperature = NAN;
     }
+
+    // Store the temperature as the most recent.
+    taskENTER_CRITICAL(&spinlock);
+    m_lastTemp = temperature;
+    taskEXIT_CRITICAL(&spinlock);
+
+    // Return the temperature as well.
+    return temperature;
 }
 
 void TempSensor::setLED(bool state)
@@ -80,4 +90,12 @@ void TempSensor::setLED(bool state)
     // Polarity is set as per the desired LED state. Don't start a conversion.
     Wire.write(bit(CONF_BIT_R0) | bit(CONF_BIT_F0) | bit(CONF_BIT_SD) | m_polarity);
     Wire.endTransmission(true);
+}
+
+float TempSensor::getLastTemp()
+{
+    taskENTER_CRITICAL(&spinlock);
+    float temp = m_lastTemp;
+    taskEXIT_CRITICAL(&spinlock);
+    return temp;
 }

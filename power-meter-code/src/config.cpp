@@ -4,11 +4,30 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-01
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
 extern Preferences prefs;
+
+void StrainConf::writeJSON(char *text, uint32_t length)
+{
+    if (length < CONF_SG_JSON_TEXT_LENGTH)
+    {
+        LOGE("Config", "Buffer to print to JSON needs to be at least %d long.", CONF_SG_JSON_TEXT_LENGTH);
+        return;
+    }
+    sprintf(text, CONF_SG_JSON_TEXT, offset, coefficient, tempTest, tempCoefficient);
+}
+
+void StrainConf::readJSON(JsonDocument doc)
+{
+    offset = doc["offset"];
+    coefficient = doc["coef"];
+    tempTest = doc["temp-test"];
+    tempCoefficient = doc["temp-coef"];
+}
+
 void Config::load()
 {
     LOGI(CONF_KEY, "Loading preferences");
@@ -28,7 +47,7 @@ void Config::load()
         if (keyExists)
         {
             // Key exists, clear it.
-            prefs.remove(CONF_KEY);
+            removeKey();
         }
 
         // Defaults should have been set on initialise
@@ -46,27 +65,25 @@ void Config::save()
 
 void Config::print()
 {
-    SERIAL_TAKE();
-    log_printf("Current config:\n");
+    char text[CONF_JSON_TEXT_LENGTH];
+    writeJSON(text, CONF_JSON_TEXT_LENGTH);
+    LOGI(CONF_KEY, "Current config: %s", text);
+}
 
-    // Print the connection type in easy to read text.
-    log_printf("  - Connection:");
-    switch (connectionMethod)
+void Config::serialRead()
+{
+    print();
+    // Stop all other distracting logging for now:
+    LOGI(CONF_KEY, "Paste the new config here:\n");
+    char text[CONF_JSON_TEXT_LENGTH];
+    Serial.readBytesUntil('\n', text, CONF_JSON_TEXT_LENGTH);
+    LOGI(CONF_KEY, "Given '%s'", text);
+    if (readJSON(text, CONF_JSON_TEXT_LENGTH))
     {
-    case CONNECTION_MQTT:
-        log_printf("MQTT\n");
-        break;
-    case CONNECTION_BLE:
-        log_printf("BLE\n");
-        break;
-    default:
-        log_printf("Unknown (%d)\n", connectionMethod);
-    }
-
-    log_printf("  - Q matrix:\n    [[%8.4g, %8.4g]\n     [%8.4g, %8.4g]]\n", qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1));
-    log_printf("  - R matrix:\n    [[%8.4g, %8.4g]\n     [%8.4g, %8.4g]]\n", rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1));
-    log_printf("  - imuHowOften: %d\n", imuHowOften);
-    SERIAL_GIVE();
+        LOGI(CONF_KEY, "Successfully set.");
+        save();
+        print();
+    };
 }
 
 bool Config::readJSON(char *text, uint32_t length)
@@ -96,23 +113,36 @@ bool Config::readJSON(char *text, uint32_t length)
 
     // How often to send IMU data
     imuHowOften = json["imuHowOften"];
+
+    // Read the strain gauge input data.
+    strain[SIDE_LEFT].readJSON(json["left-strain"]);
+    strain[SIDE_RIGHT].readJSON(json["right-strain"]);
     return true;
 }
 
 void Config::writeJSON(char *text, uint32_t length)
 {
+    // Check that text is long enough to work with.
     if (length < CONF_JSON_TEXT_LENGTH)
     {
         LOGE("Config", "Buffer to print to JSON needs to be at least %d long.", CONF_JSON_TEXT_LENGTH);
-        // const int c = CONF_JSON_TEXT_LENGTH;
         return;
     }
+
+    // Get the JSON text for each side.
+    char leftText[CONF_SG_JSON_TEXT_LENGTH];
+    char rightText[CONF_SG_JSON_TEXT_LENGTH];
+    strain[SIDE_LEFT].writeJSON(leftText, CONF_SG_JSON_TEXT_LENGTH);
+    strain[SIDE_RIGHT].writeJSON(rightText, CONF_SG_JSON_TEXT_LENGTH);
+
+    // Write to the original text.
     sprintf(
         text, CONF_JSON_TEXT,
         connectionMethod,
         qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1),
         rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1),
-        imuHowOften);
+        imuHowOften,
+        leftText, rightText); // TODO
 }
 
 void Config::toggleConnection()
@@ -127,6 +157,12 @@ void Config::toggleConnection()
         connectionMethod = CONNECTION_MQTT;
         LOGI("Config", "Setting connection method to MQTT");
     }
+}
+
+void Config::removeKey()
+{
+    LOGI(CONF_KEY, "Removing key from storage.");
+    prefs.remove(CONF_KEY);
 }
 
 // void Config::commandLine()

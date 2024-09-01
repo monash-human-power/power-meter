@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-17
+ * @date 2024-09-01
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -119,6 +119,10 @@ enum EnumConnection
 
 // Constant constants.
 #define GRAVITY 9.81 // Accelerometer operates in g, calculations are done in SI units.
+#define KALMAN_X0 {0, 0} // Initial state.
+#define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
+
+#define SUPPLY_VOLTAGE 3300 // Power supply in mV, used to calculate the battery voltage.
 
 #include "constants.h"
 #include "Arduino.h"

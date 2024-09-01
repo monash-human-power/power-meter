@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-30
+ * @date 2024-09-01
  */
 
 #include "defines.h"
@@ -40,6 +40,7 @@ void setup()
     serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
     // Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
     Serial.setDebugOutput(true);
+    Serial.setTimeout(30000);
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
 
     // Load config

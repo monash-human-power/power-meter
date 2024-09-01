@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-14
+ * @date 2024-09-01
  */
 
 #pragma once
@@ -64,6 +64,12 @@ public:
      */
     void setLED(bool state);
 
+    /**
+     * @brief Get the most recent temperature saved, thread safe.
+     * 
+     */
+    float getLastTemp();
+
 private:
     /**
      * @brief Enumerator to store the pointers for each register in the sensor.
@@ -95,4 +101,6 @@ private:
     const uint8_t m_i2cAddress;
 
     uint8_t m_polarity;
+
+    float m_lastTemp;
 };

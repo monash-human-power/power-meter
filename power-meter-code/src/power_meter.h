@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-01
  */
 #pragma once
 
@@ -30,7 +30,7 @@ public:
      *                   bridges.
      */
     Side(const EnumSide side, const uint8_t pinDout, const uint8_t pinSclk, void (*irqAmp)(), const uint8_t i2cAddress)
-        : m_side(side), m_pinDout(pinDout), m_pinSclk(pinSclk), m_irq(irqAmp), temperature(i2cAddress) {}
+        : m_side(side), m_pinDout(pinDout), m_pinSclk(pinSclk), m_irq(irqAmp), tempSensor(i2cAddress) {}
 
     /**
      * @brief Initialises the hardware specific to the side.
@@ -70,14 +70,13 @@ public:
      * @brief The temperature sensor used for temperature compensation on this side.
      *
      */
-    TempSensor temperature;
+    TempSensor tempSensor;
 
     /**
      * @brief The handle of the task collecting data from the ADC.
      *
      */
     TaskHandle_t taskHandle;
-
 private:
     /**
      * @brief Pins specific to this amplifier.
@@ -89,8 +88,9 @@ private:
      * @brief Handles a new raw data point.
      *
      * @param raw the reading to convert to a torque.
+     * @param temperature the temperature of the gauges.
      */
-    float m_calculateTorque(uint32_t raw);
+    float m_calculateTorque(uint32_t raw, float temperature);
 
     bool m_offsetCalibration = false;
 

@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-01
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -29,21 +29,13 @@ State *StateActive::enter()
     // Main housekeeping loop
     while (true)
     {
-        // Populate and send the housekeeping data
+        // Populate and send the housekeeping data. Update the temperatures at the same time.
         HousekeepingData housekeeping;
-        // TODO: Store these so they can be accessed in the strain gauge calibration.
-        housekeeping.temperatures[SIDE_LEFT] = powerMeter.sides[SIDE_LEFT].temperature.readTemp();
-        housekeeping.temperatures[SIDE_RIGHT] = powerMeter.sides[SIDE_RIGHT].temperature.readTemp();
+        housekeeping.temperatures[SIDE_LEFT] = powerMeter.sides[SIDE_LEFT].tempSensor.readTemp();
+        housekeeping.temperatures[SIDE_RIGHT] = powerMeter.sides[SIDE_RIGHT].tempSensor.readTemp();
         housekeeping.temperatures[SIDE_IMU_TEMP] = powerMeter.imuManager.getLastTemperature();
         housekeeping.battery = powerMeter.batteryVoltage();
         connectionBasePtr->addHousekeeping(housekeeping);
-
-        // Check if we want to reboot into download mode.
-        if (Serial.available() && Serial.read() == 'P')
-        {
-            LOGI("Housekeeping", "'P' was sent on the serial port. About to reboot into DFU mode.");
-            reboot(true);
-        }
 
         // If the boot button is pressed, toggle the connection method on next boot.
         if (digitalRead(PIN_BOOT) == LOW)
@@ -55,10 +47,49 @@ State *StateActive::enter()
             reboot(false);
         }
 
-        // Housekeeping data isn't really frequent.
-        delay(10000);
+        // Check if we received anything on the serial port and if so, act on it.
+        if (Serial.available())
+        {
+            char value = Serial.read();
+            switch (value)
+            {
+            case 'p':
+                // Reboot into download mode.
+                reboot(true);
+                break;
+            case 'g':
+                // Gets the config and prints them.
+                config.print();
+                break;
+            case 's':
+                // Read configs from the serial port and update them.
+                config.serialRead();
+                break;
+            case 'r':
+                // Reset config to defaults
+                config.removeKey();
+                LOGI("Housekeeping", "Config will be reset on next boot.");
+                break;
+            default:
+                // Unrecognised, print an unrecognised message and follow on to the help text.
+                LOGW("Housekeeping", "Unrecognised instruction '%c'.", value);
+            case 'h':
+                printHelp();
+            }
+
+            // Clear the buffer
+            while (Serial.available())
+            {
+                Serial.read();
+            }
+        }
+        else
+        {
+            // No serial message. Housekeeping data isn't really all that frequent, so delay for a while.
+            // Don't delay when there is a message so we can respond to it faster.
+            delay(10000);
+        }
     }
-    // delay(30000);
     return &m_sleepState;
 }
 
@@ -86,16 +117,16 @@ void reboot(bool dfu)
     // Allow plenty of time to shut everything down nicely. Flash the LEDs so it is a bit more obvious.
     for (uint8_t i = 0; i < 25; i++)
     {
-        powerMeter.sides[SIDE_LEFT].temperature.setLED(true);
-        powerMeter.sides[SIDE_LEFT].temperature.setLED(true);
+        powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
+        powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
         digitalWrite(PIN_LED1, HIGH);
         digitalWrite(PIN_LED2, HIGH);
-        delay (100);
-        powerMeter.sides[SIDE_LEFT].temperature.setLED(false);
-        powerMeter.sides[SIDE_LEFT].temperature.setLED(false);
+        delay(100);
+        powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
+        powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
         digitalWrite(PIN_LED1, LOW);
         digitalWrite(PIN_LED2, LOW);
-        delay (100);
+        delay(100);
     }
 
     // Enough warning, should be ok to reboot.
@@ -113,4 +144,11 @@ void runStateMachine(const char *name, State *initial)
 
     // Was given a null state, so fall through.
     LOGI(name, "State machine finished.");
+}
+
+inline void printHelp()
+{
+    SERIAL_TAKE();
+    log_printf("Usage:\n  - 'p' reboots into DFU mode.\n  - 'g' gets the current config.\n  - 's' sets the latest config.\n  - 'r' removes saved presences so they will be set to defaults on next boot.\n  - 'h' prints this help message.\n");
+    SERIAL_GIVE();
 }
