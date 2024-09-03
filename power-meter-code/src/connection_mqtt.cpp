@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-03
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -14,6 +14,10 @@ extern Config config;
 // MQTT client
 WiFiClient wifi;
 PubSubClient mqtt(wifi);
+
+// Power meter
+#include "power_meter.h"
+extern PowerMeter powerMeter;
 
 void MQTTConnection::begin()
 {
@@ -217,6 +221,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
     // Successfully connected to MQTT
     LOGI("Networking", "Connected to MQTT broker.");
     mqtt.subscribe(MQTT_TOPIC_CONFIG);
+    mqtt.subscribe(MQTT_TOPIC_OFFSET_COMPENSATE);
     return &m_connection.m_stateActive;
 }
 
@@ -292,11 +297,23 @@ State *MQTTConnection::StateShutdown::enter()
     return &m_connection.m_stateDisabled;
 }
 
-void mqttCallback(const char *topic, byte *payload, unsigned int length)
+inline void mqttUpdateConf(char *payload, unsigned int length)
 {
-    LOGI("MQTT", "Received a message with topic '%s'.", topic);
     config.readJSON((char *)payload, length);
     config.print();
     config.save();
     LOGI("MQTT", "Finished updating config.");
+}
+
+void mqttCallback(const char *topic, byte *payload, unsigned int length)
+{
+    LOGI("MQTT", "Received a message with topic '%s'.", topic);
+    if (STRINGS_MATCH(topic, MQTT_TOPIC_CONFIG))
+    {
+        mqttUpdateConf((char *)payload, length);
+    }
+    else if (STRINGS_MATCH(topic, MQTT_TOPIC_OFFSET_COMPENSATE))
+    {
+        powerMeter.offsetCompensate();
+    }
 }

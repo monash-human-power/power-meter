@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-03
  */
 
 #pragma once
@@ -84,6 +84,8 @@ public:
 
     ICM42670 imu;
     Kalman<float> kalman;
+    uint32_t rotations = 0;
+
 private:
     /**
      * @brief Corrects a given reading for an axis for centripedal acceleration due to the offset of the IMU relative
@@ -119,7 +121,6 @@ private:
      */
     int8_t m_lastRotationSector = 0;
     bool m_armRotationCounter = false;
-    uint32_t m_rotations = 0;
     uint32_t m_lastRotationDuration = 0;
     uint32_t m_lastRotationTime = 0;
     uint8_t m_sendCount = 0; // Only send once every so often, defined in the config.

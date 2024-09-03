@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-11
+ * @date 2024-09-03
  */
 #pragma once
 #include "../defines.h"
@@ -28,6 +28,7 @@
 #define MQTT_TOPIC_LEFT "left"
 #define MQTT_TOPIC_RIGHT "right"
 #define MQTT_TOPIC_CONFIG MQTT_TOPIC_PREFIX "conf"
+#define MQTT_TOPIC_OFFSET_COMPENSATE MQTT_TOPIC_PREFIX "offset"
 
 #define MQTT_FAST_BUFFERING 50 // How many datapoints to bundle and send together at a time.
 #define MQTT_FAST_BUFFERING_BUFFER 70
@@ -191,5 +192,15 @@ private:
 
     } m_stateShutdown;
 };
+
+#define STRINGS_MATCH(A, B) (strcmp(A, B) == 0)
+
+/**
+ * @brief Updates and saves the config.
+ * 
+ * @param payload the JSON formatted config.
+ * @param length the length of the string.
+ */
+void mqttUpdateConf(char *payload, unsigned int length);
 
 void mqttCallback(const char* topic, byte* payload, unsigned int length);

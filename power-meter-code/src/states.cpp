@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-09-01
+ * @date 2024-09-03
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -37,57 +37,78 @@ State *StateActive::enter()
         housekeeping.battery = powerMeter.batteryVoltage();
         connectionBasePtr->addHousekeeping(housekeeping);
 
-        // If the boot button is pressed, toggle the connection method on next boot.
-        if (digitalRead(PIN_BOOT) == LOW)
+        // Delay for ~10s whilst checking UI regularly.
+        for (int i = 0; i < 100; i++)
         {
-            // Boot button is pressed.
-            LOGI("Housekeeping", "Boot button pressed. Will toggle connection mode.");
-            config.toggleConnection();
-            config.save();
-            reboot(false);
-        }
-
-        // Check if we received anything on the serial port and if so, act on it.
-        if (Serial.available())
-        {
-            char value = Serial.read();
-            switch (value)
+            // If the boot button is pressed, toggle the connection method on next boot.
+            if (digitalRead(PIN_BOOT) == LOW)
             {
-            case 'p':
-                // Reboot into download mode.
-                reboot(true);
-                break;
-            case 'g':
-                // Gets the config and prints them.
-                config.print();
-                break;
-            case 's':
-                // Read configs from the serial port and update them.
-                config.serialRead();
-                break;
-            case 'r':
-                // Reset config to defaults
-                config.removeKey();
-                LOGI("Housekeeping", "Config will be reset on next boot.");
-                break;
-            default:
-                // Unrecognised, print an unrecognised message and follow on to the help text.
-                LOGW("Housekeeping", "Unrecognised instruction '%c'.", value);
-            case 'h':
-                printHelp();
+                // Boot button is pressed.
+                LOGI("Housekeeping", "Boot button pressed. Will toggle connection mode.");
+                config.toggleConnection();
+                config.save();
+                reboot(false);
             }
 
-            // Clear the buffer
-            while (Serial.available())
+            // Check if we received anything on the serial port and if so, act on it.
+            if (Serial.available())
             {
-                Serial.read();
+                char value = Serial.read();
+                switch (value)
+                {
+                case 'r':
+                case 'R':
+                    // Reboot normally.
+                    reboot(false);
+                    break;
+
+                case 'p':
+                case 'P':
+                    // Reboot into download mode.
+                    reboot(true);
+                    break;
+
+                case 'g':
+                case 'G':
+                    // Gets the config and prints them.
+                    config.print();
+                    break;
+
+                case 's':
+                case 'S':
+                    // Read configs from the serial port and update them.
+                    config.serialRead();
+                    break;
+
+                case 'f':
+                case 'F':
+                    // Reset config to defaults.
+                    config.removeKey();
+                    LOGI("Housekeeping", "Config will be reset on next boot.");
+                    break;
+                
+                case 'c':
+                case 'C':
+                    // Perform offset compensation.
+                    powerMeter.offsetCompensate();
+                    break;
+
+                default:
+                    // Unrecognised, print an unrecognised message and follow on to the help text.
+                    LOGW("Housekeeping", "Unrecognised instruction '%c'.", value);
+                case 'h':
+                case 'H':
+                    printHelp();
+                }
+
+                // Clear the buffer
+                while (Serial.available())
+                {
+                    Serial.read();
+                }
             }
-        }
-        else
-        {
-            // No serial message. Housekeeping data isn't really all that frequent, so delay for a while.
-            // Don't delay when there is a message so we can respond to it faster.
-            delay(10000);
+
+            delay(100);
         }
     }
     return &m_sleepState;
@@ -149,6 +170,6 @@ void runStateMachine(const char *name, State *initial)
 inline void printHelp()
 {
     SERIAL_TAKE();
-    log_printf("Usage:\n  - 'p' reboots into DFU mode.\n  - 'g' gets the current config.\n  - 's' sets the latest config.\n  - 'r' removes saved presences so they will be set to defaults on next boot.\n  - 'h' prints this help message.\n");
+    log_printf("Usage:\n  - 'r' reboots.\n  - 'p' reboots into DFU mode.\n  - 'g' gets the current config.\n  - 's' sets the latest config.\n  - 'f' removes saved presences so they will be set to defaults on next boot.\n  - 'c' performs offset compensation.\n  - 'h' prints this help message.\n");
     SERIAL_GIVE();
 }

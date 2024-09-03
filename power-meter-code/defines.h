@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-09-01
+ * @date 2024-09-03
  */
 #pragma once
 #define VERSION "0.0.1"
@@ -123,6 +123,6 @@ enum EnumConnection
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 
 #define SUPPLY_VOLTAGE 3300 // Power supply in mV, used to calculate the battery voltage.
-
+#define OFFSET_COMPENSATION_SAMPLES 10 // How many samples to average to calculate the offset.
 #include "constants.h"
 #include "Arduino.h"

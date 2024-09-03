@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-09-01
+ * @date 2024-09-03
  */
 #pragma once
 #include "../defines.h"
@@ -18,7 +18,7 @@ using namespace BLA;
 // Text to use when printing to JSON.
 #define CONF_SG_JSON_TEXT "\
 {\
- \"offset\": %.10g,\
+ \"offset\": %10lu,\
  \"coef\": %.10g,\
  \"temp-test\": %.10g,\
  \"temp-coef\": %.10g\
@@ -35,7 +35,7 @@ using namespace BLA;
  \"r(0,1)\": %.10g,\
  \"r(1,0)\": %.10g,\
  \"r(1,1)\": %.10g,\
- \"imuHowOften\": %d\
+ \"imuHowOften\": %d,\
  \"left-strain\": %s,\
  \"right-strain\": %s\
 }"
@@ -66,7 +66,7 @@ public:
      */
     void readJSON(JsonDocument doc);
 
-    float offset = DEFAULT_STRAIN_OFFSET;
+    uint32_t offset = DEFAULT_STRAIN_OFFSET;
     float coefficient = DEFAULT_STRAIN_COEFFICIENT;
     float tempTest = DEFAULT_STRAIN_TEST_TEMP;
     float tempCoefficient = DEFAULT_STRAIN_TEMP_CO;

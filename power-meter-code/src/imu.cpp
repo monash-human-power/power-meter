@@ -4,14 +4,14 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-08-24
+ * @date 2024-09-03
  */
 
 #include "imu.h"
 // Power meter requires that the IMUManager class is defined, so put the include here.
 #include "power_meter.h"
 extern SemaphoreHandle_t serialMutex;
-extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle;
+extern TaskHandle_t imuTaskHandle;
 extern PowerMeter powerMeter;
 extern portMUX_TYPE spinlock;
 
@@ -111,13 +111,10 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
 
             // Write to variables that need to be protected
             taskENTER_CRITICAL(&spinlock);
-            m_rotations++;
+            rotations++;
             m_lastRotationDuration = data.timestamp - m_lastRotationTime;
             m_lastRotationTime = data.timestamp;
             taskEXIT_CRITICAL(&spinlock);
-
-            // Send a notification to the low speed task that a rotation has occured.
-            xTaskNotifyGive(lowSpeedTaskHandle);
         }
         m_lastRotationSector = rotationSector;
     }
@@ -133,7 +130,7 @@ void IMUManager::setLowSpeedData(LowSpeedData &data)
     taskENTER_CRITICAL(&spinlock);
     data.lastRotationDuration = m_lastRotationDuration;
     data.timestamp = m_lastRotationTime;
-    data.rotationCount = m_rotations;
+    data.rotationCount = rotations;
     taskEXIT_CRITICAL(&spinlock);
 }
 

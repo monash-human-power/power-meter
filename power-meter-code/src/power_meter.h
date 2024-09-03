@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.0.0
- * @date 2024-09-01
+ * @date 2024-09-03
  */
 #pragma once
 
@@ -53,12 +53,31 @@ public:
     void readDataTask();
 
     /**
+     * @brief Handles a raw data point.
+     * 
+     * Calculates the torque, sends high speed data and sums energy to calculate average power.
+     * 
+     * @param timestamp the timestamp in microseconds.
+     * @param position the angle and velocity.
+     * @param raw the raw value from the ADC.
+     */
+    void processData(uint32_t timestamp, Matrix<2, 1, float> position, uint32_t raw);
+
+    /**
      * @brief Tells the ADC to perform offset calibration the next time data is read.
      *
      * This state will be automaticalyl cleared afterwards.
      *
      */
-    void enableOffsetCalibration();
+    void enableADCOffsetCalibration();
+
+    /**
+     * @brief Averages the next OFFSET_COMPENSATION_SAMPLES to get a zero reading.
+     * 
+     * No force must be present on the cranks.
+     * 
+     */
+    void enableStrainOffsetCalibration();
 
     /**
      * @brief Starts listening to strain gauge amplifier data.
@@ -77,12 +96,22 @@ public:
      *
      */
     TaskHandle_t taskHandle;
+
+    float averagePower; // The average power for the previous rotation.
 private:
     /**
      * @brief Pins specific to this amplifier.
      *
      */
     const uint8_t m_pinDout, m_pinSclk;
+
+    /**
+     * @brief Reads the ADC.
+     * Note that there is a short window to call this in between samples - only call this in the interrupt /
+     * notification task.
+     * @return uint32_t the raw value.
+     */
+    uint32_t m_readADC();
 
     /**
      * @brief Handles a new raw data point.
@@ -92,11 +121,31 @@ private:
      */
     float m_calculateTorque(uint32_t raw, float temperature);
 
-    bool m_offsetCalibration = false;
+    /**
+     * @brief If this is the first reading in a new rotation, update the average power.
+     * 
+     * @param timestamp 
+     */
+    void m_updateAveragePower(uint32_t timestamp);
+
+    bool m_adcOffsetCalibration = false;
 
     const EnumSide m_side;
 
     void (*m_irq)();
+
+    // Variables for accumulating energy
+    uint32_t m_lastTime, m_segStartTime; // Time that the last sample occurred and time that the current period started.
+    float m_energy; // Accumulator for the energy.
+    uint32_t m_lastRotation; // What the last rotation was on.
+
+    /**
+     * @brief Number of samples remaining to complete offset compensation.
+     * 
+     * If set to zero, operates in normal mode. Set to OFFSET_COMPENSATION_SAMPLES by calling  to begin.
+     * 
+     */
+    uint8_t m_offsetSteps = 0;
 };
 
 /**
@@ -149,6 +198,12 @@ public:
     void powerUp();
 
     /**
+     * @brief Enables offset compensation for the strain gauge.
+     * 
+     */
+    void offsetCompensate();
+
+    /**
      * @brief Calculates the battery voltage.
      *
      * @return uint32_t the battery voltage in mV.
@@ -167,6 +222,14 @@ public:
      */
     Side sides[2];
 };
+
+/**
+ * @brief Waits until a full revolution has been completed and both tasks have calculated their average power.
+ * 
+ * @param timeout the timeout in ticks. As two notifications are expected, the maximum timeout could theoretically be
+ *                double this value.
+ */
+bool waitLowSpeedNofity(uint32_t timeout);
 
 /**
  * @brief Task for processing low speed data.
