@@ -29,7 +29,7 @@ void MQTTConnection::begin()
     Connection::begin(housekeeping, lowSpeed, highSpeed, imu);
 
     // Set the buffer to be big enough for the high speed data.
-    if (!mqtt.setBufferSize(1300))
+    if (!mqtt.setBufferSize(MQTT_BUFFER_LENGTH))
     {
         LOGE("MQTT", "Couldn't resize the MQTT buffer. Long messages mightn't send");
     }

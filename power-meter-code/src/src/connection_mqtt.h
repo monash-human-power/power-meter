@@ -32,6 +32,12 @@
 
 #define MQTT_FAST_BUFFERING 50 // How many datapoints to bundle and send together at a time.
 #define MQTT_FAST_BUFFERING_BUFFER 70
+#define MQTT_BUFFER_LENGTH (MQTT_FAST_BUFFERING*IMUData::IMU_BYTES_SIZE + 100)
+
+/**
+ * @brief Connection that handles MQTT messages.
+ * 
+ */
 class MQTTConnection : public Connection
 {
 public:

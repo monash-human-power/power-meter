@@ -23,7 +23,7 @@ inline float BaseData::cadence()
     return VELOCITY_TO_CADENCE(velocity);
 }
 
-void BaseData::toBytes(uint8_t *buffer)
+void BaseData::baseBytes(uint8_t *buffer)
 {
     // We can't just copy the entire struct due to the potential for byte packing.
     ADD_TO_BYTES(timestamp, buffer, 0); // Add the timestamp
@@ -34,10 +34,13 @@ void BaseData::toBytes(uint8_t *buffer)
 
 void IMUData::toBytes(uint8_t *buffer)
 {
-    BaseData::toBytes(buffer); // 12 bytes
-    ADD_TO_BYTES(xAccel, buffer, 12);
-    ADD_TO_BYTES(yAccel, buffer, 16);
-    ADD_TO_BYTES(zGyro, buffer, 20);
+    BaseData::baseBytes(buffer); // 12 bytes
+    ADD_TO_BYTES(xAccel, buffer, BASE_BYTES_SIZE);
+    ADD_TO_BYTES(yAccel, buffer, BASE_BYTES_SIZE + 4);
+    ADD_TO_BYTES(zAccel, buffer, BASE_BYTES_SIZE + 8);
+    ADD_TO_BYTES(xGyro, buffer, BASE_BYTES_SIZE + 12);
+    ADD_TO_BYTES(yGyro, buffer, BASE_BYTES_SIZE + 16);
+    ADD_TO_BYTES(zGyro, buffer, BASE_BYTES_SIZE + 20);
 }
 
 inline float HighSpeedData::power()
@@ -47,10 +50,10 @@ inline float HighSpeedData::power()
 
 void HighSpeedData::toBytes(uint8_t *buffer)
 {
-    BaseData::toBytes(buffer); // 12 bytes
-    ADD_TO_BYTES(raw, buffer, 12);
+    baseBytes(buffer); // 12 bytes
+    ADD_TO_BYTES(raw, buffer, BASE_BYTES_SIZE);
     float calcTorque = torque;
-    ADD_TO_BYTES(calcTorque, buffer, 16);
+    ADD_TO_BYTES(calcTorque, buffer, BASE_BYTES_SIZE + 4);
     float calcPower = power();
-    ADD_TO_BYTES(calcPower, buffer, 20);
+    ADD_TO_BYTES(calcPower, buffer, BASE_BYTES_SIZE + 8);
 }

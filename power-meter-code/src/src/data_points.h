@@ -134,9 +134,11 @@ public:
     /**
      * @brief Adds the current data point to a buffer for transmission.
      *
-     * @param buffer is the buffer to put the data in. Needs to be at least 12 bytes long.
+     * @param buffer is the buffer to put the data in. Needs to be at least BASE_BYTE_SIZE bytes long.
      */
-    virtual void toBytes(uint8_t *buffer);
+    void baseBytes(uint8_t *buffer);
+
+    static const int BASE_BYTES_SIZE = 12;
 };
 
 /**
@@ -148,14 +150,19 @@ class IMUData : public BaseData
 public:
     float xAccel;
     float yAccel;
+    float zAccel;
+    float xGyro;
+    float yGyro;
     float zGyro;
 
     /**
      * @brief Adds the current data point to a buffer for transmission.
      *
-     * @param buffer is the buffer to put the data in. This needs to be at least 24 bytes long.
+     * @param buffer is the buffer to put the data in. This needs to be at least IMU_BYTES_SIZE bytes long.
      */
-    virtual void toBytes(uint8_t *buffer);
+    void toBytes(uint8_t *buffer);
+
+    static const int IMU_BYTES_SIZE = 6*4 + BASE_BYTES_SIZE;
 };
 
 /**
@@ -191,7 +198,9 @@ public:
     /**
      * @brief Adds the current data point to a buffer for transmission.
      *
-     * @param buffer is the buffer to put the data in. This needs to be at least 24 bytes long.
+     * @param buffer is the buffer to put the data in. This needs to be at least FAST_BYTES_SIZE bytes long.
      */
-    virtual void toBytes(uint8_t *buffer);
+    void toBytes(uint8_t *buffer);
+
+    static const int FAST_BYTES_SIZE = 4 + 4 + 4 + BASE_BYTES_SIZE;
 };

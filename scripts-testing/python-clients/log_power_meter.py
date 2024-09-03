@@ -30,6 +30,7 @@ import matplotlib.animation as animation
 from multiprocessing import Process, Queue
 import math
 from enum import Enum
+import time
 
 
 # Sides
@@ -52,7 +53,7 @@ MQTT_TOPIC_RIGHT = MQTT_TOPIC_HIGH_SPEED + Side.RIGHT.value
 class IMUData:
     """Class for storing and processing data from the IMU."""
 
-    SIZE = 24
+    SIZE = 36
 
     def __init__(self, data: bytes) -> None:
         """Initialises the object.
@@ -66,8 +67,11 @@ class IMUData:
             self.position,
             self.accel_x,
             self.accel_y,
+            self.accel_z,
+            self.gyro_x,
+            self.gyro_y,
             self.gyro_z,
-        ) = struct.unpack("<Lfffff", data)
+        ) = struct.unpack("<Lffffffff", data)
 
     def cadence(self) -> float:
         """Calculates the current cadence from the velocity.
@@ -78,7 +82,7 @@ class IMUData:
         return abs(self.velocity) / (2 * math.pi) * 60
 
     def __str__(self) -> str:
-        return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad {self.accel_x:>8.2f}x_m/s {self.accel_y:>8.2f}y_m/s {self.gyro_z:>8.2f}z_rad/s"
+        return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad [{self.accel_x:>8.2f}, {self.accel_y:>8.2f}, {self.accel_z:>8.2f}]m/s [{self.gyro_x:>8.2f}, {self.gyro_y:>8.2f}, {self.gyro_z:>8.2f}]rad/s"
 
 
 class StrainData:
@@ -126,7 +130,15 @@ class DataHandler(ABC):
         """
         pass
 
-    def add_fast(self, data: str, side: Side) -> None:
+    def add_housekeeping(self, unix_time:float, data: str) -> None:
+        """Accepts housekeeping data and handles it.
+
+        Args:
+            data (str): The MQTT message string containing the housekeeping data.
+        """
+        pass
+
+    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
         """Accepts a message from a side and handles it.
 
         Args:
@@ -174,8 +186,9 @@ class DataHandler(ABC):
         ]
         return result
 
+
 class CSVSide:
-    def __init__(self, side:Side, output_dir:str):
+    def __init__(self, side: Side, output_dir: str):
         """Opens a file ready to write with the given name.
 
         Args:
@@ -185,14 +198,14 @@ class CSVSide:
         # Open the file and write a heading.
         self.file = open(f"{output_dir}/{side.value}_strain.csv", "w")
         self.file.write(
-            "Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
+            "Unix Timestamp [us],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
         )
 
         # Initialise time step calculation
         self.last_timestamp = 0
         self.side = side
 
-    def add_fast(self, data:List[StrainData]) -> None:
+    def add_fast(self, unix_time:float, data: List[StrainData]) -> None:
         """Adds high speed data to the side.
 
         Args:
@@ -207,9 +220,9 @@ class CSVSide:
             self.last_timestamp = i.timestamp
             print(f"{self.side.name}: ({timestep:>10d}) {i}")
             self.file.write(
-                f"{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
+                f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
             )
-    
+
     def close(self) -> None:
         self.file.close()
 
@@ -224,12 +237,18 @@ class CSVHandler(DataHandler):
             os.makedirs(output)
 
         # Create the about file
-        self.about_file = open(f"{output}/about.txt", "w")
+        json_str_header = "Unix Timestamp [us],Message"
+        self.about_file = open(f"{output}/about.csv", "w")
+        self.about_file.write(json_str_header)
+
+        # Create the housekeeping file
+        self.housekeeping_file = open(f"{output}/housekeeping.csv", "w")
+        self.housekeeping_file.write(json_str_header)
 
         # Create the IMU file
         self.imu_file = open(f"{output}/imu.csv", "w")
         self.imu_file.write(
-            "Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Gyro Z [rad/s]\n"
+            "Unix Timestamp [us],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Acceleration Z [m/s^2],Gyro A [rad/s],Gyro B [rad/s],Gyro Z [rad/s]\n"
         )
         self.last_imu_timestamp = 0
 
@@ -237,34 +256,38 @@ class CSVHandler(DataHandler):
         self.left = CSVSide(Side.LEFT, output)
         self.right = CSVSide(Side.RIGHT, output)
 
-
-    def add_imu(self, data: bytes) -> None:
+    def add_imu(self, unix_time:float, data: bytes) -> None:
         converted = self._process_imu(data)
         for i in converted:
             timestep = i.timestamp - self.last_imu_timestamp
             self.last_imu_timestamp = i.timestamp
             print(f"({timestep:>10d}) {i}")
             self.imu_file.write(
-                f"{i.timestamp},{timestep},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.gyro_z}\n"
+                f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.accel_z},{i.gyro_x},{i.gyro_y},{i.gyro_z}\n"
             )
 
-    def add_about(self, data: str) -> None:
+    def add_about(self, unix_time:float, data: str) -> None:
         print(f"About: {data}")
-        self.about_file.write(data)
+        self.about_file.write(f"{unix_time},{data}")
 
-    def add_fast(self, data: str, side: Side) -> None:
+    def add_housekeeping(self, unix_time:float, data: str) -> None:
+        print(f"Housekeeping: {data}")
+        self.housekeeping_file.write(f"{unix_time},{data}")
+
+    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
         # Process the data.
         converted = self._process_strain(data)
-        
+
         if side == Side.LEFT:
-            self.left.add_fast(converted)
+            self.left.add_fast(unix_time, converted)
         else:
-            self.right.add_fast(converted)
+            self.right.add_fast(unix_time, converted)
 
     def close(self):
         print("Closing CSV Handler")
         self.imu_file.close()
         self.about_file.close()
+        self.housekeeping_file.close()
 
 
 class GraphHandler(DataHandler):
@@ -339,11 +362,11 @@ class GraphHandler(DataHandler):
         print(f"{self.theta[-1]=}\t{self.cadence[-1]=}")
         return self.line, self.latest
 
-    def add_imu(self, data: bytes) -> None:
+    def add_imu(self, unix_time:float, data: bytes) -> None:
         converted = self._process_imu(data)
         self.queue.put(converted)
 
-    def add_about(self, data: str) -> None:
+    def add_about(self, unix_time:float, data: str) -> None:
         return super().add_about(data)
 
     def close(self) -> None:
@@ -359,17 +382,21 @@ class MultiHandler(DataHandler):
         """
         self.handlers = handlers
 
-    def add_imu(self, data: bytes) -> None:
+    def add_imu(self, unix_time:float, data: bytes) -> None:
         for h in self.handlers:
-            h.add_imu(data)
+            h.add_imu(unix_time, data)
 
-    def add_about(self, data: str) -> None:
+    def add_about(self, unix_time:float, data: str) -> None:
         for h in self.handlers:
-            h.add_about(data)
+            h.add_about(unix_time, data)
 
-    def add_fast(self, data: str, side: Side) -> None:
+    def add_housekeeping(self, unix_time: float, data: str) -> None:
         for h in self.handlers:
-            h.add_fast(data, side)
+            h.add_housekeeping(unix_time, data)
+
+    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
+        for h in self.handlers:
+            h.add_fast(unix_time, data, side)
 
     def close(self) -> None:
         for h in self.handlers:
@@ -423,15 +450,18 @@ def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> No
         userdata (None): The user data.
         msg (mqtt.MQTTMessage): The message structure.
     """
+    t = time.time()
     if msg.topic == MQTT_TOPIC_ABOUT:
         print("About this device: " + msg.payload.decode())
-        handler.add_about(msg.payload.decode())
+        handler.add_about(t, msg.payload.decode())
     elif msg.topic == MQTT_TOPIC_IMU:
-        handler.add_imu(msg.payload)
+        handler.add_imu(t, msg.payload)
+    elif msg.topic == MQTT_TOPIC_HOUSEKEEPING:
+        handler.add_housekeeping(t, msg.payload.decode())
     elif msg.topic == MQTT_TOPIC_LEFT:
-        handler.add_fast(msg.payload, Side.LEFT)
+        handler.add_fast(t, msg.payload, Side.LEFT)
     elif msg.topic == MQTT_TOPIC_RIGHT:
-        handler.add_fast(msg.payload, Side.RIGHT)
+        handler.add_fast(t, msg.payload, Side.RIGHT)
 
 
 if __name__ == "__main__":
@@ -526,5 +556,6 @@ if __name__ == "__main__":
     mqtt_client.connect(args.host)
     try:
         mqtt_client.loop_forever()
-    except:
+    except Exception as e:
+        print(e)
         handler.close()

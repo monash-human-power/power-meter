@@ -102,6 +102,10 @@ namespace BLEFeatureCharacteristic
                                     (DISTRIBUTED_SYSTEM << 20);
 }
 
+/**
+ * @brief Connection that implements a power meter over BLE.
+ * 
+ */
 class BLEConnection : public Connection
 {
 public:

@@ -87,6 +87,9 @@ void IMUManager::processIMUEvent(inv_imu_sensor_event_t *evt)
             // We should send this time.
             data.xAccel = xAccel;
             data.yAccel = yAccel;
+            data.zAccel = SCALE_ACCEL(evt->accel[2]);
+            data.xGyro = SCALE_GYRO(evt->gyro[0]);
+            data.yGyro = SCALE_GYRO(evt->gyro[1]);
             data.zGyro = zGyro;
             connectionBasePtr->addIMU(data);
             m_sendCount = 0;
