@@ -7,8 +7,8 @@
  *
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-09-03
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -172,4 +172,9 @@ inline void printHelp()
     SERIAL_TAKE();
     log_printf("Usage:\n  - 'r' reboots.\n  - 'p' reboots into DFU mode.\n  - 'g' gets the current config.\n  - 's' sets the latest config.\n  - 'f' removes saved presences so they will be set to defaults on next boot.\n  - 'c' performs offset compensation.\n  - 'h' prints this help message.\n");
     SERIAL_GIVE();
+}
+
+State *State::enter()
+{
+    return nullptr;
 }

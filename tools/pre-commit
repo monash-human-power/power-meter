@@ -20,7 +20,7 @@ if [ ! -z "$changed_files" ]; then
     expected=$(date -I)
     echo "$changed_files" | while read line ; do
         actual=$(awk "/^ *\\* *\\@date/ {print \$3}" "$line")
-        if [ "$actual" != "$expected" ]; then
+        if [ "$actual" != "" && "$actual" != "$expected" ]; then
             echo "In '$line', the date is '$actual'. Expected '$expected'. Please update this by running the update_date.sh script or fix this script." 
             exit 1
         fi

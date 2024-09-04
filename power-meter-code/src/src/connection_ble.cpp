@@ -3,8 +3,8 @@
  * @brief Class to handle sending data to the outside world over Bluetooth Low Energy (BLE).
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-08-24
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #include "connection_ble.h"
 extern SemaphoreHandle_t serialMutex;

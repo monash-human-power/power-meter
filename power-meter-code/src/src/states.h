@@ -7,8 +7,8 @@
  *
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-09-01
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #pragma once
 #include "../defines.h"
@@ -26,7 +26,7 @@ public:
      * @return State* the next state to run. To break out of the state
      *         machine, return nullptr.
      */
-    virtual State *enter() {}
+    virtual State *enter();
 
     /**
      * @brief A string representing the name of the state. Useful for debugging purposes.

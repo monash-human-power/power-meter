@@ -3,8 +3,8 @@
  * @brief Implementation of a Kalman filter for predicting orientation and angular velocity.
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-08-14
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #include "kalman.h"
 

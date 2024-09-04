@@ -4,11 +4,11 @@
  *
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-09-03
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #pragma once
-#define VERSION "0.0.1"
+#define VERSION "0.1.0"
 
 /**
  * Pins and hardware details

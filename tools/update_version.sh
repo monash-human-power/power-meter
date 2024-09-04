@@ -15,7 +15,7 @@ if [ ! -z "$1" ]; then
     find "$code_folder" -type 'f' -exec sed -i "s/^\\( *\\* *\\@version \\+\\)[0-9a-zA-Z.\\-]*/\\1${1}/g" {} +
 
     # Update VERSION define
-    sed -i "s/^\\( *\\#define \\+VERSION \\+\\)\"[0-9a-zA-Z.\\-]*\"/\\1\"${1}\"/g" "$code_folder/defines.h"
+    sed -i "s/^\\( *\\#define \\+VERSION \\+\\)\"[0-9a-zA-Z.\\-]*\"/\\1\"${1}\"/g" "$code_folder/src/defines.h"
 
     # Update the doxygen version
     sed -i "s/^\\(PROJECT_NUMBER \\+= *\\)\"[0-9a-zA-Z.\\-]*\"/\\1\"${1}\"/g" "Doxyfile"

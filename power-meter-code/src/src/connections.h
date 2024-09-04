@@ -3,8 +3,8 @@
  * @brief Classes to handle sending data to the outside world.
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-08-23
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #pragma once
 #include "../defines.h"

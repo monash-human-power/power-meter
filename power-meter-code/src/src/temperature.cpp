@@ -4,8 +4,8 @@
  *
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-09-01
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 
 #include "temperature.h"

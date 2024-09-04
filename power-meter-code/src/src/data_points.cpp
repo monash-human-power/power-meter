@@ -3,8 +3,8 @@
  * @brief Classes that represent data from a single point.
  *
  * @author Jotham Gates and Oscar Varney, MHP
- * @version 0.0.0
- * @date 2024-08-14
+ * @version 0.1.0
+ * @date 2024-09-04
  */
 #include "data_points.h"
 
