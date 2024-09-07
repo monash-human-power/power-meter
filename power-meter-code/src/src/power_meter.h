@@ -237,3 +237,8 @@ bool waitLowSpeedNofity(uint32_t timeout);
  * @param pvParameters is any data given (currently unused).
  */
 void taskLowSpeed(void *pvParameters);
+
+/**
+ * @brief Prints memory usage info.
+ */
+void debugMemory();

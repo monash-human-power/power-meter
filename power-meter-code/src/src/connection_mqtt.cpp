@@ -106,15 +106,14 @@ void MQTTConnection::m_handleSideQueue(EnumSide side)
     if (uxQueueMessagesWaiting(m_sideQueues[side]) >= MQTT_FAST_BUFFERING)
     {
         // We have enough data to add.
-        const unsigned int POINT_SIZE = 24;
-        const unsigned int PAYLOAD_SIZE = POINT_SIZE * MQTT_FAST_BUFFERING;
+        const unsigned int PAYLOAD_SIZE = HighSpeedData::FAST_BYTES_SIZE * MQTT_FAST_BUFFERING;
         uint8_t buffer[PAYLOAD_SIZE];
         for (int i = 0; i < MQTT_FAST_BUFFERING; i++)
         {
             // For each point in the queue, get it and add it to the packet buffer.
             HighSpeedData data;
             xQueueReceive(m_sideQueues[side], &data, portMAX_DELAY);
-            data.toBytes(buffer + POINT_SIZE * i);
+            data.toBytes(buffer + HighSpeedData::FAST_BYTES_SIZE * i);
         }
 
         // Send the buffer on the correct topic
@@ -135,15 +134,14 @@ void MQTTConnection::m_handleIMUQueue()
     if (uxQueueMessagesWaiting(m_imuQueue) >= MQTT_FAST_BUFFERING)
     {
         // We have enough data to add.
-        const unsigned int POINT_SIZE = 24;
-        const unsigned int PAYLOAD_SIZE = POINT_SIZE * MQTT_FAST_BUFFERING;
+        const unsigned int PAYLOAD_SIZE = IMUData::IMU_BYTES_SIZE * MQTT_FAST_BUFFERING;
         uint8_t buffer[PAYLOAD_SIZE];
         for (int i = 0; i < MQTT_FAST_BUFFERING; i++)
         {
             // For each point in the queue, get it and add it to the packet buffer.
             IMUData data;
             xQueueReceive(m_imuQueue, &data, portMAX_DELAY);
-            data.toBytes(buffer + POINT_SIZE * i);
+            data.toBytes(buffer + IMUData::IMU_BYTES_SIZE * i);
         }
 
         // Send the buffer on the correct topic

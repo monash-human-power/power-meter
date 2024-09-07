@@ -37,9 +37,11 @@ State *StateActive::enter()
         housekeeping.battery = powerMeter.batteryVoltage();
         connectionBasePtr->addHousekeeping(housekeeping);
 
+        debugMemory();
+
         // Delay for ~10s whilst checking UI regularly.
         for (int i = 0; i < 100; i++)
-        {
+        { 
             // If the boot button is pressed, toggle the connection method on next boot.
             if (digitalRead(PIN_BOOT) == LOW)
             {
@@ -51,7 +53,7 @@ State *StateActive::enter()
             }
 
             // Check if we received anything on the serial port and if so, act on it.
-            if (Serial.available())
+            if (Serial && Serial.available())
             {
                 char value = Serial.read();
                 switch (value)

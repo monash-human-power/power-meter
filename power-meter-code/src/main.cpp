@@ -17,7 +17,7 @@
 #include "src/config.h"
 
 SemaphoreHandle_t serialMutex;
-TaskHandle_t imuTaskHandle, lowSpeedTaskHandle;
+TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle;
 portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 Preferences prefs;
 
@@ -38,8 +38,7 @@ void setup()
 {
     // Initialise mutexes
     serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
-    // Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
-    Serial.setDebugOutput(true);
+    Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
     Serial.setTimeout(30000);
     LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
 
@@ -70,7 +69,7 @@ void setup()
         9000,
         connectionBasePtr,
         1,
-        NULL,
+        &connectionTaskHandle,
         1);
     // TODO: Avoid race condition where the task handle is not initialised to enable or disable the connection.
     delay(100); // Very dodgy way to make sure the condition is avoided.

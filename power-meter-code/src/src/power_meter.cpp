@@ -15,7 +15,7 @@ extern PowerMeter powerMeter;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 
-extern TaskHandle_t lowSpeedTaskHandle;
+extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle;
 extern portMUX_TYPE spinlock;
 
 void Side::begin()
@@ -342,4 +342,15 @@ void taskLowSpeed(void *pvParameters)
         // Send data
         connectionBasePtr->addLowSpeed(lowSpeed);
     }
+}
+
+void debugMemory()
+{
+    SERIAL_TAKE();
+    log_printf("Free memory: %lu\n", esp_get_free_heap_size());
+    log_printf("  - LS:   %lu\n", uxTaskGetStackHighWaterMark(lowSpeedTaskHandle));
+    log_printf("  - IMU:  %lu\n", uxTaskGetStackHighWaterMark(imuTaskHandle));
+    log_printf("  - Conn: %lu\n", uxTaskGetStackHighWaterMark(connectionTaskHandle));
+    log_printf("  - This: %lu\n", uxTaskGetStackHighWaterMark(NULL));
+    SERIAL_GIVE();
 }
