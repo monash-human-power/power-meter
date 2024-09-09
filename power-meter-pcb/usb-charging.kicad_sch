@@ -6,8 +6,8 @@
 	(paper "A4")
 	(title_block
 		(title "Cycling power meter FYP - USB and power supply")
-		(date "2024-08-08")
-		(rev "V1.1.0")
+		(date "2024-09-10")
+		(rev "V1.1.1")
 		(company "Monash Human Power - Jotham Gates & Oscar Varney")
 	)
 	(lib_symbols
@@ -5246,7 +5246,7 @@
 				)
 			)
 		)
-		(property "Footprint" "DRL0006A"
+		(property "Footprint" "TPS61023DRLR:DRL0006A"
 			(at 153.162 56.896 0)
 			(effects
 				(font
