@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #pragma once
 #include "../defines.h"
@@ -37,12 +37,15 @@ using namespace BLA;
  \"r(1,1)\": %.10g,\
  \"imuHowOften\": %d,\
  \"left-strain\": %s,\
- \"right-strain\": %s\
+ \"right-strain\": %s,\
+ \"mqtt\": {\
+  \"length\": %u\
+  }\
 }"
 
 // Maximum length of the text to print to JSON.
 #define CONF_SG_JSON_TEXT_LENGTH (sizeof(CONF_SG_JSON_TEXT) + 4*(-5 + 12))
-#define CONF_JSON_TEXT_LENGTH (sizeof(CONF_JSON_TEXT) + (-2 + 3) + 8 * (-5 + 12)) + (-2 + 4) + 2*(-2 + CONF_SG_JSON_TEXT_LENGTH)
+#define CONF_JSON_TEXT_LENGTH (sizeof(CONF_JSON_TEXT) + (-2 + 3) + 8 * (-5 + 12)) + (-2 + 4) + 2*(-2 + CONF_SG_JSON_TEXT_LENGTH) + (-2+5)
 
 /**
  * @brief Class that bundles all the configs / calibration settings for a strain gauge.
@@ -138,6 +141,7 @@ public:
     Matrix<2, 2, float> rMeasCovariance = DEFAULT_KALMAN_R;
     int8_t imuHowOften = 1; // Set to -1 to disable sending IMU data.
     StrainConf strain[2];
+    uint16_t mqttPacketSize = 50;
 
     // TODO: MQTT and WiFi settings, device name, MQTT prefix.
 };

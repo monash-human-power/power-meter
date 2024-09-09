@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -24,8 +24,8 @@ void MQTTConnection::begin()
     // Initialise the queues
     const int housekeeping = 1;
     const int lowSpeed = 1;
-    const int highSpeed = MQTT_FAST_BUFFERING + MQTT_FAST_BUFFERING_BUFFER;
-    const int imu = MQTT_FAST_BUFFERING + MQTT_FAST_BUFFERING_BUFFER;
+    const int highSpeed = config.mqttPacketSize + MQTT_FAST_BUFFER;
+    const int imu = config.mqttPacketSize + MQTT_FAST_BUFFER;
     Connection::begin(housekeeping, lowSpeed, highSpeed, imu);
 
     // Set the buffer to be big enough for the high speed data.
@@ -43,7 +43,10 @@ void MQTTConnection::begin()
 //     uint32_t end = micros();             \
 //     LOGI(topic, "%ldus to publish.", end - start)
 
-#define MQTT_LOG_PUBLISH(topic, payload) mqtt.publish(topic, payload)
+#define MQTT_LOG_PUBLISH(topic, payload)    \
+    digitalWrite(PIN_CONNECTION_LED, HIGH); \
+    mqtt.publish(topic, payload);           \
+    digitalWrite(PIN_CONNECTION_LED, LOW)
 
 // #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
 //     LOGV(topic, "Binary data of length %d", length); \
@@ -52,7 +55,10 @@ void MQTTConnection::begin()
 //     uint32_t end = micros();                         \
 //     LOGI(topic, "%ldus to publish.", end - start)
 
-#define MQTT_LOG_PUBLISH_BUF(topic, payload, length) mqtt.publish(topic, payload, length)
+#define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
+    digitalWrite(PIN_CONNECTION_LED, HIGH);          \
+    mqtt.publish(topic, payload, length);            \
+    digitalWrite(PIN_CONNECTION_LED, LOW)
 
 void MQTTConnection::runActive()
 {
@@ -103,12 +109,12 @@ void MQTTConnection::runActive()
 
 void MQTTConnection::m_handleSideQueue(EnumSide side)
 {
-    if (uxQueueMessagesWaiting(m_sideQueues[side]) >= MQTT_FAST_BUFFERING)
+    if (uxQueueMessagesWaiting(m_sideQueues[side]) >= config.mqttPacketSize)
     {
         // We have enough data to add.
-        const unsigned int PAYLOAD_SIZE = HighSpeedData::FAST_BYTES_SIZE * MQTT_FAST_BUFFERING;
+        const unsigned int PAYLOAD_SIZE = HighSpeedData::FAST_BYTES_SIZE * config.mqttPacketSize;
         uint8_t buffer[PAYLOAD_SIZE];
-        for (int i = 0; i < MQTT_FAST_BUFFERING; i++)
+        for (int i = 0; i < config.mqttPacketSize; i++)
         {
             // For each point in the queue, get it and add it to the packet buffer.
             HighSpeedData data;
@@ -131,12 +137,12 @@ void MQTTConnection::m_handleSideQueue(EnumSide side)
 
 void MQTTConnection::m_handleIMUQueue()
 {
-    if (uxQueueMessagesWaiting(m_imuQueue) >= MQTT_FAST_BUFFERING)
+    if (uxQueueMessagesWaiting(m_imuQueue) >= config.mqttPacketSize)
     {
         // We have enough data to add.
-        const unsigned int PAYLOAD_SIZE = IMUData::IMU_BYTES_SIZE * MQTT_FAST_BUFFERING;
+        const unsigned int PAYLOAD_SIZE = IMUData::IMU_BYTES_SIZE * config.mqttPacketSize;
         uint8_t buffer[PAYLOAD_SIZE];
-        for (int i = 0; i < MQTT_FAST_BUFFERING; i++)
+        for (int i = 0; i < config.mqttPacketSize; i++)
         {
             // For each point in the queue, get it and add it to the packet buffer.
             IMUData data;

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #pragma once
 #include "../defines.h"
@@ -30,9 +30,8 @@
 #define MQTT_TOPIC_CONFIG MQTT_TOPIC_PREFIX "conf"
 #define MQTT_TOPIC_OFFSET_COMPENSATE MQTT_TOPIC_PREFIX "offset"
 
-#define MQTT_FAST_BUFFERING 15 // How many datapoints to bundle and send together at a time.
-#define MQTT_FAST_BUFFERING_BUFFER 35 + 70
-#define MQTT_BUFFER_LENGTH (MQTT_FAST_BUFFERING*IMUData::IMU_BYTES_SIZE + 100)
+#define MQTT_FAST_BUFFER 160
+#define MQTT_BUFFER_LENGTH (MQTT_FAST_BUFFER*IMUData::IMU_BYTES_SIZE + 100)
 
 /**
  * @brief Connection that handles MQTT messages.

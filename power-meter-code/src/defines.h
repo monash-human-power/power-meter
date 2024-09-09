@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #pragma once
 #define VERSION "0.1.0"
@@ -27,6 +27,8 @@
 #define PIN_LED2 9
 #define PIN_BOOT 0
 
+#define PIN_CONNECTION_LED PIN_LED2
+
 // I2C for temperature sensor
 #define PIN_I2C_SDA 10
 #define PIN_I2C_SCL 11
@@ -45,7 +47,8 @@
 #define IMU_GYRO_RANGE 2000 // Options are 250, 500, 1000, 2000 dps (any other value defaults to 2000 dps).
 
 // Power management
-#define PIN_BATTERY_VOLTAGE 12
+// #define PIN_BATTERY_VOLTAGE 12 // As per design.
+#define PIN_BATTERY_VOLTAGE 15 // Bodge wire as original is shorted to ground.
 
 // Communications
 #define PIN_UART_TX0

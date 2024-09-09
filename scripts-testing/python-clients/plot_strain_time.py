@@ -68,8 +68,8 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
     """
 
     # Convert the times to nicer units.
-    left_df["Time"] = left_df["Timestamp [us]"]*1e-6
-    right_df["Time"] = right_df["Timestamp [us]"]*1e-6
+    left_df["Time"] = left_df["Device Timestamp [us]"]*1e-6
+    right_df["Time"] = right_df["Device Timestamp [us]"]*1e-6
 
     if show_raw:
         # Create a figure with a raw subplot.

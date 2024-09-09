@@ -31,7 +31,8 @@ from multiprocessing import Process, Queue
 import math
 from enum import Enum
 import time
-
+import json
+import traceback
 
 # Sides
 class Side(Enum):
@@ -147,6 +148,15 @@ class DataHandler(ABC):
         """
         pass
 
+    def add_slow(self, unix_time:float, data: str) -> None:
+        """Adds slow speed data (power, balance, cadence...)
+
+        Args:
+            unix_time (float): The time the message was received.
+            data (str): The data in the message.
+        """
+        pass
+
     def close(self) -> None:
         """Closes the handler safely."""
 
@@ -237,13 +247,13 @@ class CSVHandler(DataHandler):
             os.makedirs(output)
 
         # Create the about file
-        json_str_header = "Unix Timestamp [us],Message"
+        json_str_header = "Unix Timestamp [us],Message\n"
         self.about_file = open(f"{output}/about.csv", "w")
         self.about_file.write(json_str_header)
 
         # Create the housekeeping file
         self.housekeeping_file = open(f"{output}/housekeeping.csv", "w")
-        self.housekeeping_file.write(json_str_header)
+        self.housekeeping_file.write("Unix Timestamp [us],Left Temperature [C],Right Temperature [C],IMU Temperature [C],Battery [mV]\n")
 
         # Create the IMU file
         self.imu_file = open(f"{output}/imu.csv", "w")
@@ -255,6 +265,12 @@ class CSVHandler(DataHandler):
         # Create the strain gauge files
         self.left = CSVSide(Side.LEFT, output)
         self.right = CSVSide(Side.RIGHT, output)
+
+        # Create the slow file
+        self.slow = open(f"{output}/slow.csv", "w")
+        self.slow.write(
+            "Unix Timestamp [us],Device Timestamp [us],Cadence [rpm],Rotations [#],Power [W],Balance [%]\n"
+        )
 
     def add_imu(self, unix_time:float, data: bytes) -> None:
         converted = self._process_imu(data)
@@ -268,11 +284,12 @@ class CSVHandler(DataHandler):
 
     def add_about(self, unix_time:float, data: str) -> None:
         print(f"About: {data}")
-        self.about_file.write(f"{unix_time},{data}")
+        self.about_file.write(f"{unix_time},'{data}'\n")
 
     def add_housekeeping(self, unix_time:float, data: str) -> None:
         print(f"Housekeeping: {data}")
-        self.housekeeping_file.write(f"{unix_time},{data}")
+        data = json.loads(data)
+        self.housekeeping_file.write(f"{unix_time},{data['temps']['left']},{data['temps']['right']},{data['temps']['imu']},{data['battery']}\n")
 
     def add_fast(self, unix_time:float, data: str, side: Side) -> None:
         # Process the data.
@@ -282,12 +299,17 @@ class CSVHandler(DataHandler):
             self.left.add_fast(unix_time, converted)
         else:
             self.right.add_fast(unix_time, converted)
+    
+    def add_slow(self, unix_time: float, data: str) -> None:
+        data = json.loads(data)
+        self.slow.write(f"{unix_time},{data['timestamp']},{data['cadence']},{data['rotations']},{data['power']},{data['balance']}\n")
 
     def close(self):
         print("Closing CSV Handler")
         self.imu_file.close()
         self.about_file.close()
         self.housekeeping_file.close()
+        self.slow.close()
 
 
 class GraphHandler(DataHandler):
@@ -332,7 +354,7 @@ class GraphHandler(DataHandler):
         def animate():
             """Animate and block in a function to allow for multiple processing."""
             ani = animation.FuncAnimation(
-                fig=fig, func=self.update_graph, interval=100, cache_frame_data=False
+                fig=fig, func=self.update_graph, interval=1, cache_frame_data=False
             )
             plt.show()
 
@@ -462,6 +484,8 @@ def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> No
         handler.add_fast(t, msg.payload, Side.LEFT)
     elif msg.topic == MQTT_TOPIC_RIGHT:
         handler.add_fast(t, msg.payload, Side.RIGHT)
+    elif msg.topic == MQTT_TOPIC_LOW_SPEED:
+        handler.add_slow(t, msg.payload)
 
 
 if __name__ == "__main__":
@@ -557,5 +581,6 @@ if __name__ == "__main__":
     try:
         mqtt_client.loop_forever()
     except Exception as e:
-        print(e)
+        print(f"Exception causing data recording to stop: '{e}'")
+        traceback.print_exc()
         handler.close()

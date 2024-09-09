@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #include "connection_ble.h"
 extern SemaphoreHandle_t serialMutex;
@@ -51,6 +51,7 @@ void BLEConnection::runActive()
     LowSpeedData lowSpeed;
     if (xQueueReceive(m_lowSpeedQueue, &lowSpeed, 0))
     {
+        digitalWrite(PIN_CONNECTION_LED, HIGH);
         // We have data to send.
         // Update the data array.
         // Power
@@ -78,6 +79,7 @@ void BLEConnection::runActive()
         // (7 & 8) may be fitted, so don't wish to cause confusion by using these locations. See section 3.196.1 of the
         // GATT specification supplement for more options.
         m_cpsLocation.writeValue(5);
+        digitalWrite(PIN_CONNECTION_LED, LOW);
     }
 }
 

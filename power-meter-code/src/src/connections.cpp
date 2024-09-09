@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #pragma once
 #include "connections.h"
@@ -12,6 +12,9 @@ extern SemaphoreHandle_t serialMutex;
 
 void Connection::begin(const int housekeepingLength, const int lowSpeedLength, const int highSpeedLength, const int imuLength)
 {
+    // Initialise the LEDs
+    pinMode(PIN_CONNECTION_LED, OUTPUT);
+
     // Housekeeping queue
     // Check if the queue has already been created.
     if (!m_housekeepingQueue)
@@ -115,9 +118,7 @@ void Connection::addIMU(IMUData &data)
 {
     if (m_imuQueue)
     {
-        digitalWrite(PIN_LED2, HIGH);
         m_addToQueue(m_imuQueue, &data);
-        digitalWrite(PIN_LED2, LOW);
     }
 }
 

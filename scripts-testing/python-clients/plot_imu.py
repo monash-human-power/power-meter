@@ -208,7 +208,7 @@ def plot_imu(df: pd.DataFrame, name: str = ""):
         name (str): Name of the dataset to print in the figure title.
     """
     # Extract the data from the device.
-    times = df["Timestamp [us]"].values / 1e6
+    times = df["Device Timestamp [us]"].values / 1e6
     accel_x = df["Acceleration X [m/s^2]"].values
     accel_y = df["Acceleration Y [m/s^2]"].values
     gyro_z = df["Gyro Z [rad/s]"].values

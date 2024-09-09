@@ -4,11 +4,14 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-10
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
 extern Preferences prefs;
+
+// Uses this to limit the maximum number of packets to queue.
+#include "connection_mqtt.h"
 
 void StrainConf::writeJSON(char *text, uint32_t length)
 {
@@ -117,6 +120,20 @@ bool Config::readJSON(char *text, uint32_t length)
     // Read the strain gauge input data.
     strain[SIDE_LEFT].readJSON(json["left-strain"]);
     strain[SIDE_RIGHT].readJSON(json["right-strain"]);
+
+    // MQTT
+    JsonDocument mqttDoc = json["mqtt"];
+
+    // Get the length, checking that we have sufficient buffer to accomodate it.
+    uint16_t proposedSize = mqttDoc["length"];
+    if (proposedSize <= MQTT_FAST_BUFFER)
+    {
+        mqttPacketSize = mqttDoc["length"];
+    }
+    else
+    {
+        LOGW(CONF_KEY, "MQTT size of %u is greater than buffer of " stringify(MQTT_FAST_BUFFER) ". Ignoring this field.", proposedSize);
+    }
     return true;
 }
 
@@ -142,7 +159,8 @@ void Config::writeJSON(char *text, uint32_t length)
         qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1),
         rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1),
         imuHowOften,
-        leftText, rightText); // TODO
+        leftText, rightText,
+        mqttPacketSize); // TODO
 }
 
 void Config::toggleConnection()
@@ -164,35 +182,3 @@ void Config::removeKey()
     LOGI(CONF_KEY, "Removing key from storage.");
     prefs.remove(CONF_KEY);
 }
-
-// void Config::commandLine()
-// {
-//     SERIAL_TAKE();
-//     Serial.setTimeout(30000); // 30s timeout.
-//     Serial.println("Set configuration values. Type `set FIELD ");
-//     SERIAL_GIVE();
-
-//     // Read the response.
-//     char buffer[MAX_INPUT_LENGTH];
-//     size_t length = Serial.readBytesUntil('\n', buffer, MAX_INPUT_LENGTH);
-//     char name[MAX_INPUT_LENGTH];
-//     float value;
-//     int row, column;
-//     int len = sscanf("set %s(%d,%d) %f", name, &row, &column, &value);
-
-//     if (len > 0)
-//     {
-//         if (strcmp(name, "R"))
-//         {
-//             rMeasCovariance(row, column) = value;
-//         }
-//         else if (strcmp(name, "Q"))
-//         {
-//             qEnvCovariance(row, column) = value;
-//         }
-//         else if (strcmp(name, "conn"))
-//         {
-//             // TODO: Round and set connection method.
-//         }
-//     }
-// }
