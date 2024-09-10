@@ -1185,6 +1185,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 143.51 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "4"
 			(uuid "0a6faeca-0157-4968-9c37-62bc2e492ce0")
 		)
@@ -1574,6 +1583,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 196.85 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 196.85 95.25 0)
 			(effects
 				(font

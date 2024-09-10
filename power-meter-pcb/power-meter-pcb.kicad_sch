@@ -7991,6 +7991,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 20.32 173.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "89687d8e-f934-423a-9a33-5ffb9e7cace9")
 		)
@@ -8146,6 +8155,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 219.71 38.1 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 219.71 38.1 0)
 			(effects
 				(font
@@ -8402,6 +8420,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 140.97 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(instances
 			(project "power-meter-pcb"
 				(path "/73d1dc3f-3725-4767-8c11-2d32e15ee0d6"
@@ -8486,6 +8513,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 152.4 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 152.4 176.53 0)
 			(effects
 				(font
@@ -8643,6 +8679,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 30.48 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 30.48 175.26 0)
 			(effects
 				(font
@@ -8880,6 +8925,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 118.11 170.18 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "a49e63cc-e582-4669-941d-5b324fd4bcf3")
 		)
@@ -9008,7 +9062,25 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "RGB LED"
+			(at 93.98 167.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 93.98 167.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.1.1"
 			(at 93.98 167.64 0)
 			(effects
 				(font
@@ -9115,6 +9187,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 36.83 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 36.83 50.8 0)
 			(effects
 				(font
@@ -9305,6 +9386,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 76.2 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "159eeb65-f694-407f-a575-06230cbaecf6")
 		)
@@ -9468,6 +9558,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 30.48 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "b67da9a8-555c-44c0-95c8-284e12c10e67")
 		)
@@ -9502,7 +9601,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "5.1k"
 			(at 143.51 123.1899 0)
 			(effects
 				(font
@@ -9557,6 +9656,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 140.97 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.1.1"
 			(at 140.97 121.92 0)
 			(effects
 				(font
@@ -9625,6 +9733,24 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x06, script generated"
+			(at 118.11 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "PlaceOnSecondary" "No"
+			(at 118.11 53.34 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 118.11 53.34 0)
 			(effects
 				(font
@@ -9742,6 +9868,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 55.88 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "970119f1-f781-4c07-84d4-a5e1b3676e6f")
 		)
@@ -9831,6 +9966,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 185.42 123.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 185.42 123.19 0)
 			(effects
 				(font
@@ -10125,6 +10269,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 86.36 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "f5af1ee9-0459-41f5-9c5d-be459a276c78")
 		)
@@ -10211,6 +10364,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 82.55 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 82.55 55.88 0)
 			(effects
 				(font
@@ -10326,6 +10488,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 93.98 107.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "50ec5b2e-11bc-49e3-98d7-e47e402962fd")
 		)
@@ -10415,6 +10586,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 45.72 173.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 45.72 173.99 0)
 			(effects
 				(font
@@ -10520,6 +10700,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.1.1"
+			(at 96.52 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "0c58a540-09a5-4999-9ca1-09b1f8831e58")
 		)
@@ -10609,6 +10798,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 262.89 52.07 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 262.89 52.07 0)
 			(effects
 				(font
@@ -10783,6 +10981,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 76.2 158.75 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "c2aad8ed-0e45-439b-8122-9662c78dfa96")
 		)
@@ -10880,6 +11087,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 118.11 161.29 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "1"
 			(uuid "9100c163-b157-4d9b-9385-4ee27f8ace26")
 		)
@@ -10914,7 +11130,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "4.7k"
+		(property "Value" "5.1k"
 			(at 153.67 123.1899 0)
 			(effects
 				(font
@@ -10969,6 +11185,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 151.13 121.92 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.1.1"
 			(at 151.13 121.92 0)
 			(effects
 				(font
@@ -11074,6 +11299,15 @@
 				(hide yes)
 			)
 		)
+		(property "SchematicVersionModified" "V1.0.4"
+			(at 55.88 175.26 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
 		(pin "2"
 			(uuid "041e54a6-4973-4ed9-bf56-515391a138c1")
 		)
@@ -11164,6 +11398,15 @@
 			)
 		)
 		(property "Sim.Pins" ""
+			(at 163.83 176.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "SchematicVersionModified" "V1.0.4"
 			(at 163.83 176.53 0)
 			(effects
 				(font
