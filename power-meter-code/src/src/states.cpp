@@ -142,13 +142,13 @@ void reboot(bool dfu)
     {
         powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
         powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
-        digitalWrite(PIN_LED1, HIGH);
-        digitalWrite(PIN_LED2, HIGH);
+        digitalWrite(PIN_LEDR, HIGH);
+        digitalWrite(PIN_LEDG, HIGH);
         delay(100);
         powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
         powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
-        digitalWrite(PIN_LED1, LOW);
-        digitalWrite(PIN_LED2, LOW);
+        digitalWrite(PIN_LEDR, LOW);
+        digitalWrite(PIN_LEDG, LOW);
         delay(100);
     }
 

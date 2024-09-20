@@ -6,18 +6,25 @@ void setup() {
   // put your setup code here, to run once:
   pinMode(8, OUTPUT);
   pinMode(9, OUTPUT);
-  pinMode(7, OUTPUT);
-  pinMode(10, OUTPUT);
+  pinMode(12, OUTPUT);
 
-  digitalWrite(7, HIGH);
-  digitalWrite(10, HIGH);
+  digitalWrite(8, HIGH);
+  digitalWrite(9, HIGH);
+  digitalWrite(12, HIGH);
+  delay(1000);
 }
 
 void loop() {
   digitalWrite(8, HIGH);
   digitalWrite(9, LOW);
+  digitalWrite(12, LOW);
   delay(500);
   digitalWrite(8, LOW);
   digitalWrite(9, HIGH);
+  digitalWrite(12, LOW);
+  delay(500);
+  digitalWrite(8, LOW);
+  digitalWrite(9, LOW);
+  digitalWrite(12, HIGH);
   delay(500);
 }

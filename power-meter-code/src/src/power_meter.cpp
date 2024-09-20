@@ -259,8 +259,8 @@ void PowerMeter::powerUp()
     pinMode(PIN_AMP2_DOUT, INPUT);
     pinMode(PIN_ACCEL_INTERRUPT, INPUT);
 
-    pinMode(PIN_LED1, OUTPUT);
-    pinMode(PIN_LED2, OUTPUT);
+    pinMode(PIN_LEDR, OUTPUT);
+    pinMode(PIN_LEDG, OUTPUT);
 
     // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.

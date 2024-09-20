@@ -8,7 +8,25 @@
  * @date 2024-09-10
  */
 #pragma once
-#define VERSION "0.1.0"
+#define SW_VERSION "s0.1.0"
+#include "constants.h"
+
+/**
+ * Hardware versions
+ */
+#define HW_VERSION_ENCODE (MAJOR, MINOR, PATCH) MAJOR ## 000 ## MINOR ## 000 ## PATCH
+#define HW_VERSION_ID # HW_VERSION_ENCODE(HW_MAJOR_VERSION, HW_MINOR_VERSION, HW_PATCH_VERSION)
+#define HW_VERSION_V1_0_4 # HW_VERSION_ENCODE(1, 0, 4)
+#define HW_VERSION_V1_0_5 # HW_VERSION_ENCODE(1, 0, 5)
+#define HW_VERSION_V1_1_1 # HW_VERSION_ENCODE(1, 1, 1)
+#define HW_VERSION_STR "v" stringify(HW_MAJOR_VERSION) "." stringify(HW_MINOR_VERSION) "." stringify(HW_PATCH_VERSION)
+// Check the versions are valid.
+#if !defined(HW_MAJOR_VERSION) || !defined(HW_MINOR_VERSION) || !defined(HW_PATCH_VERSION)
+#error "No hardware version specified (set this in constants.h)."
+#endif
+#if (HW_VERSION_ID != HW_VERSION_V1_0_4) && (HW_VERSION != HW_VERSION_V1_0_5) && (HW_VERSION != HW_VERSION_V1_1_1)
+#error "Unsupported hardware version specified (set this in constants.h)"
+#endif
 
 /**
  * Pins and hardware details
@@ -23,11 +41,19 @@
 #define AMP_BIT_DEPTH 24
 
 // Buttons and LEDs
-#define PIN_LED1 8
-#define PIN_LED2 9
-#define PIN_BOOT 0
+#if (HW_VERSION_ID == HW_VERSION_V1_0_4) || (HW_VERSION_ID == HW_VERSION_V1_0_5)
+#define PIN_LEDR 8
+#define PIN_LEDG 9
+// #define PIN_LEDB 12 // No Blue LED
+#define PIN_CONNECTION_LED PIN_LEDG
+#elif HW_VERSION == HW_VERSION_V1_1_1
+#define PIN_LEDR 12
+#define PIN_LEDG 9
+#define PIN_LEDB 8
+#define PIN_CONNECTION_LED PIN_LEDG
+#endif
 
-#define PIN_CONNECTION_LED PIN_LED2
+#define PIN_BOOT 0
 
 // I2C for temperature sensor
 #define PIN_I2C_SDA 10
@@ -37,7 +63,11 @@
 #define TEMP2_I2C 0b1001000
 
 // Accelerometer
+#if (HW_VERSION_ID == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
 #define PIN_ACCEL_INTERRUPT 38
+#elif (HW_VERSION == HW_VERSION_V1_1_1)
+#define PIN_ACCEL_INTERRUPT 21
+#endif
 #define PIN_SPI_SDI 39
 #define PIN_SPI_SDO 40
 #define PIN_SPI_SCLK 41
@@ -47,8 +77,26 @@
 #define IMU_GYRO_RANGE 2000 // Options are 250, 500, 1000, 2000 dps (any other value defaults to 2000 dps).
 
 // Power management
-// #define PIN_BATTERY_VOLTAGE 12 // As per design.
+#if HW_VERSION == HW_VERSION_V1_0_4
+#define PIN_BATTERY_VOLTAGE 12 // As per design.
+#elif HW_VERSION == HW_VERSION_V1_0_5
 #define PIN_BATTERY_VOLTAGE 15 // Bodge wire as original is shorted to ground.
+#elif HW_VERSION == HW_VERSION_V1_1_1
+#define PIN_BATTERY_VOLTAGE 13 // Bodge wire as original is shorted to ground.
+#endif
+
+// Extra GPIO pins
+#if (HW_VERSION == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
+// Spare GPIO pins are // TODO:
+#define SPARE_GPIO_6 15
+#elif (HW_VERSION == HW_VERSION_V1_1_1)
+#define SPARE_GPIO_1 48
+#define SPARE_GPIO_2 33
+#define SPARE_GPIO_3 18
+#define SPARE_GPIO_4 17
+#define SPARE_GPIO_5 16
+#define SPARE_GPIO_6 15
+#endif
 
 // Communications
 #define PIN_UART_TX0
@@ -63,7 +111,9 @@
  */
 // Logging (with mutexes)
 #define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
-#define SERIAL_GIVE() delay(200); xSemaphoreGive(serialMutex)
+#define SERIAL_GIVE() \
+    delay(200);       \
+    xSemaphoreGive(serialMutex)
 // #define SERIAL_TAKE()
 // #define SERIAL_GIVE()
 #define LOGV(tag, format, ...)            \
@@ -93,7 +143,7 @@
 
 /**
  * @brief Enumerator to represent each side of the power meter.
- * 
+ *
  */
 enum EnumSide
 {
@@ -104,7 +154,7 @@ enum EnumSide
 
 /**
  * @brief Enumerator to represent the selected connection method.
- * 
+ *
  */
 enum EnumConnection
 {
@@ -121,11 +171,11 @@ enum EnumConnection
 #define WIFI_RECONNECT_ATTEMPT_TIME 60000 // If not connected in 1 minute, disconnect and attempt again.
 
 // Constant constants.
-#define GRAVITY 9.81 // Accelerometer operates in g, calculations are done in SI units.
-#define KALMAN_X0 {0, 0} // Initial state.
+#define GRAVITY 9.81                   // Accelerometer operates in g, calculations are done in SI units.
+#define KALMAN_X0 {0, 0}               // Initial state.
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 
-#define SUPPLY_VOLTAGE 3300 // Power supply in mV, used to calculate the battery voltage.
+#define SUPPLY_VOLTAGE 3300            // Power supply in mV, used to calculate the battery voltage.
 #define OFFSET_COMPENSATION_SAMPLES 10 // How many samples to average to calculate the offset.
-#include "constants.h"
+
 #include "Arduino.h"

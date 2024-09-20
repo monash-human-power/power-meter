@@ -34,13 +34,17 @@ MQTTConnection connectionMQTT;
 BLEConnection connectionBLE;
 Connection *connectionBasePtr;
 
+// #define HW_MAJOR_VERSION_STR #HW_MAJOR_VERSION
+// #define HW_MINOR_VERSION_STR #HW_MINOR_VERSION
+// #define HW_PATCH_VERSION_STR #HW_PATCH_VERSION
+
 void setup()
 {
     // Initialise mutexes
     serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
     Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
     Serial.setTimeout(30000);
-    LOGI("Setup", "MHP Power meter v" VERSION ". Compiled " __DATE__ ", " __TIME__);
+    LOGI("Setup", "MHP Power meter " SW_VERSION ", " HW_VERSION_STR ". Compiled " __DATE__ ", " __TIME__);
 
     // Load config
     config.load();

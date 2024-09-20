@@ -266,7 +266,8 @@ State *MQTTConnection::StateActive::enter()
 {\
  \"name\": \"" DEVICE_NAME "\",\
  \"compiled\": \"" __DATE__ ", " __TIME__ "\",\
- \"version\": \"" VERSION "\",\
+ \"sw_version\": \"" SW_VERSION "\",\
+ \"hw_version\": \"" HW_VERSION_STR "\",\
  \"connect-time\": %lu,\
  \"calibration\": %s,\
  \"mac\": \"%02x:%02x:%02x:%02x:%02x:%02x\"\

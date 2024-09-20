@@ -27,7 +27,7 @@ This script is based off the [ICM42670P Arduino library `Polling_SPI`](https://g
 ICM42670 IMU(SPI,PIN_SPI_AC_CS);
 void setup() {
   pinMode(PIN_LED1, OUTPUT);
-  pinMode(PIN_LED2, OUTPUT);
+  pinMode(PIN_LED1, OUTPUT);
   setLEDState(true);
   Serial.begin(115200);
   SPI.begin(PIN_SPI_SCLK, PIN_SPI_SDO, PIN_SPI_SDI, PIN_SPI_AC_CS);
