@@ -8,13 +8,12 @@
  */
 #pragma once
 #include "connections.h"
+#include "power_meter.h"
+extern PowerMeter powerMeter;
 extern SemaphoreHandle_t serialMutex;
 
 void Connection::begin(const int housekeepingLength, const int lowSpeedLength, const int highSpeedLength, const int imuLength)
 {
-    // Initialise the LEDs
-    pinMode(PIN_CONNECTION_LED, OUTPUT);
-
     // Housekeeping queue
     // Check if the queue has already been created.
     if (!m_housekeepingQueue)
@@ -171,6 +170,7 @@ State *Connection::StateDisabled::enter()
 {
     // Make sure we aren't accepting data.
     m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
+    powerMeter.leds.setConnState(CONN_STATE_DISABLED);
     // Wait for a notification that also has the enable bits set.
     while (!isNotificationWaiting(portMAX_DELAY, CONN_NOTIFY_ENABLE)) {
         LOGD("DisabledState", "Notification received, but not to enable");

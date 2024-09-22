@@ -60,7 +60,7 @@ float TempSensor::readTempRegister()
     {
         // Incorrect number of bytes received.
         LOGE("Temp", "Error reading temperature from %d", m_i2cAddress);
-        temperature = NAN;
+        temperature = INVALID_TEMPERATURE;
     }
 
     // Store the temperature as the most recent.

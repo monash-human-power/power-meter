@@ -17,7 +17,7 @@
 #include "src/config.h"
 
 SemaphoreHandle_t serialMutex;
-TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle;
+TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle;
 portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 Preferences prefs;
 
@@ -34,12 +34,10 @@ MQTTConnection connectionMQTT;
 BLEConnection connectionBLE;
 Connection *connectionBasePtr;
 
-// #define HW_MAJOR_VERSION_STR #HW_MAJOR_VERSION
-// #define HW_MINOR_VERSION_STR #HW_MINOR_VERSION
-// #define HW_PATCH_VERSION_STR #HW_PATCH_VERSION
-
 void setup()
 {
+    pinMode(PIN_LEDR, OUTPUT);
+    digitalWrite(PIN_LEDR, HIGH);
     // Initialise mutexes
     serialMutex = xSemaphoreCreateMutex(); // Needs to be created before logging anything.
     Serial.begin(SERIAL_BAUD); // Already running from the bootloader.
@@ -49,6 +47,17 @@ void setup()
     // Load config
     config.load();
     config.print();
+
+    // LEDs (important to get the task started early).
+    xTaskCreatePinnedToCore(
+        taskLED,
+        "LED",
+        2048,
+        NULL,
+        1,
+        &ledTaskHandle,
+        1);
+    delay(50);
 
     // Start the hardware.
     powerMeter.begin();
@@ -107,6 +116,8 @@ void setup()
     // Create tasks to read data from ADCs
     powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
     powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
+
+    digitalWrite(PIN_LEDR, LOW);
 }
 
 void loop()

@@ -8,6 +8,8 @@
  */
 #include "connection_ble.h"
 extern SemaphoreHandle_t serialMutex;
+#include "power_meter.h"
+extern PowerMeter powerMeter;
 
 void BLEConnection::begin()
 {
@@ -51,7 +53,7 @@ void BLEConnection::runActive()
     LowSpeedData lowSpeed;
     if (xQueueReceive(m_lowSpeedQueue, &lowSpeed, 0))
     {
-        digitalWrite(PIN_CONNECTION_LED, HIGH);
+        powerMeter.leds.setConnState(CONN_STATE_SENDING);
         // We have data to send.
         // Update the data array.
         // Power
@@ -79,7 +81,7 @@ void BLEConnection::runActive()
         // (7 & 8) may be fitted, so don't wish to cause confusion by using these locations. See section 3.196.1 of the
         // GATT specification supplement for more options.
         m_cpsLocation.writeValue(5);
-        digitalWrite(PIN_CONNECTION_LED, LOW);
+        powerMeter.leds.setConnState(CONN_STATE_ACTIVE);
     }
 }
 
@@ -96,6 +98,7 @@ uint16_t BLEConnection::m_scaleTime1024(uint32_t us)
 State *BLEConnection::StateBLEConnect::enter()
 {
     m_connection.setAllowData(false);
+    powerMeter.leds.setConnState(CONN_STATE_CONNECTING_1);
     // Start connection process
     BLE.advertise();
     LOGI("BLE", "Waiting for central to connect");
@@ -115,6 +118,7 @@ State *BLEConnection::StateBLEConnect::enter()
 State *BLEConnection::StateActive::enter()
 {
     m_connection.setAllowData(true);
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE);
     while (m_connection.m_central.connected() && !m_connection.isDisableWaiting(1))
     {
         // Check each queue and send data if present. Queue sets could be useful here.
@@ -127,6 +131,7 @@ State *BLEConnection::StateActive::enter()
 
 State *BLEConnection::StateShutdown::enter()
 {
+    powerMeter.leds.setConnState(CONN_STATE_SHUTTING_DOWN);
     m_connection.setAllowData(false);
     m_connection.m_central.disconnect();
     LOGI("BLE", "Shutting BLE down.");

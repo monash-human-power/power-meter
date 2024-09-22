@@ -15,7 +15,7 @@ extern PowerMeter powerMeter;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 
-extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle;
+extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle;
 extern portMUX_TYPE spinlock;
 
 void Side::begin()
@@ -226,6 +226,127 @@ void irqAmp()
 template void irqAmp<SIDE_LEFT, PIN_AMP2_DOUT>();
 template void irqAmp<SIDE_RIGHT, PIN_AMP1_DOUT>();
 
+void LEDs::begin()
+{
+    pinMode(PIN_LEDR, OUTPUT);
+    pinMode(PIN_LEDG, OUTPUT);
+#ifdef HAS_BLUE_LED
+    pinMode(PIN_LEDB, OUTPUT);
+#endif
+}
+
+void LEDs::setConnState(EnumConnState state)
+{
+    m_connState = state;
+    if (m_taskExists)
+    {
+        xTaskNotifyGive(ledTaskHandle);
+    }
+}
+
+#define NOTIFY_DELAY(TIME)                             \
+    if (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(TIME))) \
+    {                                                  \
+        powerDown();                                   \
+    }
+
+#define NOTIFY_DELAY_RETURN(TIME)                      \
+    if (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(TIME))) \
+    {                                                  \
+        powerDown();                                   \
+        return;                                        \
+    }
+
+void LEDs::run()
+{
+    m_taskExists = true;
+    while (true)
+    {
+        switch (m_connState)
+        {
+        case CONN_STATE_ACTIVE:
+        case CONN_STATE_DISABLED:
+            NOTIFY_DELAY(1000);
+            break;
+        case CONN_STATE_SHUTTING_DOWN:
+            digitalWrite(PIN_LEDR, HIGH);
+            NOTIFY_DELAY(1000);
+            break;
+        case CONN_STATE_RECEIVING:
+#ifdef HAS_BLUE_LED
+            digitalWrite(PIN_LEDB, HIGH);
+            NOTIFY_DELAY(4000);
+            break;
+#endif
+        case CONN_STATE_SENDING:
+            digitalWrite(PIN_LEDG, HIGH);
+            NOTIFY_DELAY(4000);
+            break;
+        case CONN_STATE_CONNECTING_1:
+            cycleConnConnecting1();
+            break;
+        case CONN_STATE_CONNECTING_2:
+            cycleConnConnecting2();
+            break;
+        }
+    }
+}
+
+void LEDs::powerDown()
+{
+    // Normal LEDs
+    digitalWrite(PIN_LEDR, LOW);
+    digitalWrite(PIN_LEDG, LOW);
+#ifdef HAS_BLUE_LED
+    digitalWrite(PIN_LEDB, LOW);
+#endif
+
+    // I2C
+    powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
+    powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(false);
+}
+
+void LEDs::cycleConnConnecting1()
+{
+    powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
+    powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);
+    NOTIFY_DELAY_RETURN(100);
+    powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
+    powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(false);
+    NOTIFY_DELAY_RETURN(400);
+#ifdef HAS_BLUE_LED
+    digitalWrite(PIN_LEDB, HIGH);
+#else
+    digitalWrite(PIN_LEDG, HIGH);
+#endif
+    NOTIFY_DELAY_RETURN(50);
+#ifdef HAS_BLUE_LED
+    digitalWrite(PIN_LEDB, LOW);
+#else
+    digitalWrite(PIN_LEDG, LOW);
+#endif
+    NOTIFY_DELAY_RETURN(950);
+}
+
+void LEDs::cycleConnConnecting2()
+{
+    powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
+    powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);
+    NOTIFY_DELAY_RETURN(100);
+    powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
+    powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(false);
+    NOTIFY_DELAY_RETURN(100);
+    digitalWrite(PIN_LEDG, HIGH);
+    NOTIFY_DELAY_RETURN(50);
+    digitalWrite(PIN_LEDG, LOW);
+    NOTIFY_DELAY_RETURN(450);
+}
+
+void taskLED(void *pvParameters)
+{
+    powerMeter.leds.run();
+}
+
 void PowerMeter::begin()
 {
     LOGD("Power", "Starting hardware");
@@ -236,6 +357,9 @@ void PowerMeter::begin()
     sides[SIDE_LEFT].begin();
     sides[SIDE_RIGHT].begin();
 
+    // Start the LEDs now the temperature sensors and their attached LEDs are started.
+    leds.begin();
+
     // Initialise the IMU
     imuManager.begin();
 }
@@ -245,6 +369,7 @@ void PowerMeter::powerDown()
     LOGI("Power", "Power down");
     digitalWrite(PIN_AMP_PWDN, LOW);
     digitalWrite(PIN_POWER_SAVE, LOW);
+    leds.powerDown();
 }
 
 void PowerMeter::powerUp()
@@ -259,8 +384,8 @@ void PowerMeter::powerUp()
     pinMode(PIN_AMP2_DOUT, INPUT);
     pinMode(PIN_ACCEL_INTERRUPT, INPUT);
 
-    pinMode(PIN_LEDR, OUTPUT);
-    pinMode(PIN_LEDG, OUTPUT);
+    // pinMode(PIN_LEDR, OUTPUT);
+    // pinMode(PIN_LEDG, OUTPUT);
 
     // Reset the strain gauge ADCs as per the manual (only needed first time, but should be ok later?).
     digitalWrite(PIN_POWER_SAVE, HIGH); // Turn on the strain gauges.

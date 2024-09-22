@@ -44,9 +44,11 @@ void MQTTConnection::begin()
 //     LOGI(topic, "%ldus to publish.", end - start)
 
 #define MQTT_LOG_PUBLISH(topic, payload)    \
-    digitalWrite(PIN_CONNECTION_LED, HIGH); \
+    powerMeter.leds.setConnState(CONN_STATE_SENDING); \
     mqtt.publish(topic, payload);           \
-    digitalWrite(PIN_CONNECTION_LED, LOW)
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
+
+// #define MQTT_LOG_PUBLISH(topic, payload) mqtt.publish(topic, payload)
 
 // #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
 //     LOGV(topic, "Binary data of length %d", length); \
@@ -56,9 +58,11 @@ void MQTTConnection::begin()
 //     LOGI(topic, "%ldus to publish.", end - start)
 
 #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
-    digitalWrite(PIN_CONNECTION_LED, HIGH);          \
+    powerMeter.leds.setConnState(CONN_STATE_SENDING); \
     mqtt.publish(topic, payload, length);            \
-    digitalWrite(PIN_CONNECTION_LED, LOW)
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
+
+// #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) mqtt.publish(topic, payload, length)
 
 void MQTTConnection::runActive()
 {
@@ -158,6 +162,7 @@ void MQTTConnection::m_handleIMUQueue()
 State *MQTTConnection::StateWiFiConnect::enter()
 {
     m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
+    powerMeter.leds.setConnState(CONN_STATE_CONNECTING_1);
     // Wait until connected to WiFi.
     do
     {
@@ -188,6 +193,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
 {
     // Initial setup
     m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
+    powerMeter.leds.setConnState(CONN_STATE_CONNECTING_2);
     LOGV("Networking", "Connecting to MQTT broker '" MQTT_BROKER "' on port " xstringify(MQTT_PORT) ".");
     mqtt.setServer(MQTT_BROKER, MQTT_PORT);
     mqtt.setCallback(mqttCallback);
@@ -232,6 +238,7 @@ State *MQTTConnection::StateMQTTConnect::enter()
 State *MQTTConnection::StateActive::enter()
 {
     // Setup to send data
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE);
     sendAboutMQTTMessage();
     m_connection.setAllowData(true); // We can start sending data.
 
@@ -296,6 +303,7 @@ void MQTTConnection::StateActive::sendAboutMQTTMessage()
 State *MQTTConnection::StateShutdown::enter()
 {
     m_connection.setAllowData(false); // Stop accepting new data.
+    powerMeter.leds.setConnState(CONN_STATE_SHUTTING_DOWN);
     mqtt.disconnect();
     WiFi.disconnect(true, false); // Turn the radio hardware off, keep saved data.
     // TODO: Is disabling OTA updates needed?
@@ -312,6 +320,7 @@ inline void mqttUpdateConf(char *payload, unsigned int length)
 
 void mqttCallback(const char *topic, byte *payload, unsigned int length)
 {
+    powerMeter.leds.setConnState(CONN_STATE_RECEIVING);
     LOGI("MQTT", "Received a message with topic '%s'.", topic);
     if (STRINGS_MATCH(topic, MQTT_TOPIC_CONFIG))
     {
@@ -321,4 +330,5 @@ void mqttCallback(const char *topic, byte *payload, unsigned int length)
     {
         powerMeter.offsetCompensate();
     }
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE);
 }

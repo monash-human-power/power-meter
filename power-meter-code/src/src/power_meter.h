@@ -165,6 +165,69 @@ template <EnumSide sideEnum, uint8_t pinDout>
 void irqAmp();
 
 /**
+ * @brief Class that manages LEDs.
+ *
+ */
+class LEDs
+{
+public:
+    /**
+     * @brief Sets the pins to be outputs correctly.
+     * 
+     */
+    void begin();
+
+    /**
+     * @brief Sets the current connection state to indicate.
+     * 
+     * @param state the new state to indicate.
+     */
+    void setConnState(EnumConnState state);
+
+    /**
+     * @brief Indicates a rotation has just occurred.
+     * 
+     */
+    void setRotationEvent();
+
+    /**
+     * @brief Runs the task to manage the LEDs.
+     * 
+     */
+    void run();
+
+    /**
+     * @brief Turns off the LEDs.
+     * 
+     */
+    void powerDown();
+
+private:
+    /**
+     * @brief One round of flashing for connecting.
+     * 
+     */
+    void cycleConnConnecting1(); // TODO: Refactor name to m_
+
+    /**
+     * @brief One round of flashing for connecting.
+     * 
+     */
+    void cycleConnConnecting2(); // TODO: Refactor name to m_
+
+    EnumConnState m_connState;
+
+    bool m_taskExists = false;
+};
+
+/**
+ * @brief Task that controls the LEDs.
+ * 
+ * @param pvParameters 
+ */
+void taskLED(void *pvParameters);
+
+/**
  * @brief Class for interfacing with all strain gauges.
  *
  */
@@ -221,6 +284,12 @@ public:
      *
      */
     Side sides[2];
+
+    /**
+     * @brief LEDs on the device.
+     * 
+     */
+    LEDs leds;
 };
 
 /**

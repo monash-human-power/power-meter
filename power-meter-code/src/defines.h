@@ -14,18 +14,21 @@
 /**
  * Hardware versions
  */
-#define HW_VERSION_ENCODE (MAJOR, MINOR, PATCH) MAJOR ## 000 ## MINOR ## 000 ## PATCH
-#define HW_VERSION_ID # HW_VERSION_ENCODE(HW_MAJOR_VERSION, HW_MINOR_VERSION, HW_PATCH_VERSION)
-#define HW_VERSION_V1_0_4 # HW_VERSION_ENCODE(1, 0, 4)
-#define HW_VERSION_V1_0_5 # HW_VERSION_ENCODE(1, 0, 5)
-#define HW_VERSION_V1_1_1 # HW_VERSION_ENCODE(1, 1, 1)
-#define HW_VERSION_STR "v" stringify(HW_MAJOR_VERSION) "." stringify(HW_MINOR_VERSION) "." stringify(HW_PATCH_VERSION)
 // Check the versions are valid.
-#if !defined(HW_MAJOR_VERSION) || !defined(HW_MINOR_VERSION) || !defined(HW_PATCH_VERSION)
+#if !defined(HW_VERSION)
 #error "No hardware version specified (set this in constants.h)."
 #endif
-#if (HW_VERSION_ID != HW_VERSION_V1_0_4) && (HW_VERSION != HW_VERSION_V1_0_5) && (HW_VERSION != HW_VERSION_V1_1_1)
+#if (HW_VERSION != HW_VERSION_V1_0_4) && (HW_VERSION != HW_VERSION_V1_0_5) && (HW_VERSION != HW_VERSION_V1_1_1)
 #error "Unsupported hardware version specified (set this in constants.h)"
+#endif
+
+// Define a nicely formatted version string according to the version.
+#if HW_VERSION == HW_VERSION_V1_0_4
+#define HW_VERSION_STR "v1.0.4"
+#elif HW_VERSION == HW_VERSION_V1_0_5
+#define HW_VERSION_STR "v1.0.5"
+#elif HW_VERSION == HW_VERSION_V1_1_1
+#define HW_VERSION_STR "v1.1.1"
 #endif
 
 /**
@@ -41,7 +44,7 @@
 #define AMP_BIT_DEPTH 24
 
 // Buttons and LEDs
-#if (HW_VERSION_ID == HW_VERSION_V1_0_4) || (HW_VERSION_ID == HW_VERSION_V1_0_5)
+#if (HW_VERSION == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
 #define PIN_LEDR 8
 #define PIN_LEDG 9
 // #define PIN_LEDB 12 // No Blue LED
@@ -51,6 +54,7 @@
 #define PIN_LEDG 9
 #define PIN_LEDB 8
 #define PIN_CONNECTION_LED PIN_LEDG
+#define HAS_BLUE_LED
 #endif
 
 #define PIN_BOOT 0
@@ -63,7 +67,7 @@
 #define TEMP2_I2C 0b1001000
 
 // Accelerometer
-#if (HW_VERSION_ID == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
+#if (HW_VERSION == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
 #define PIN_ACCEL_INTERRUPT 38
 #elif (HW_VERSION == HW_VERSION_V1_1_1)
 #define PIN_ACCEL_INTERRUPT 21
@@ -163,6 +167,21 @@ enum EnumConnection
 };
 
 /**
+ * @brief Enumerator for connection state
+ * 
+ */
+ enum EnumConnState
+ {
+    CONN_STATE_DISABLED,
+    CONN_STATE_CONNECTING_1,
+    CONN_STATE_CONNECTING_2,
+    CONN_STATE_ACTIVE,
+    CONN_STATE_SHUTTING_DOWN,
+    CONN_STATE_SENDING,
+    CONN_STATE_RECEIVING
+ };
+
+/**
  * WiFi settings.
  */
 #define MQTT_TOPIC_SEPARATOR '/'
@@ -177,5 +196,5 @@ enum EnumConnection
 
 #define SUPPLY_VOLTAGE 3300            // Power supply in mV, used to calculate the battery voltage.
 #define OFFSET_COMPENSATION_SAMPLES 10 // How many samples to average to calculate the offset.
-
+#define INVALID_TEMPERATURE -1000      // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
 #include "Arduino.h"
