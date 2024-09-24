@@ -58,7 +58,7 @@ def right_raw_to_kg(raw:np.ndarray) -> np.ndarray:
     weight = m*(raw - raw1) + weight1
     return weight
 
-def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw=True) -> None:
+def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw=True, use_start_compensate:bool=False, show_raw_limits:bool=False) -> None:
     """Plots strain over time.
 
     Args:
@@ -71,11 +71,25 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
     left_df["Time"] = left_df["Device Timestamp [us]"]*1e-6
     right_df["Time"] = right_df["Device Timestamp [us]"]*1e-6
 
+    if use_start_compensate:
+        # Use the first reading for offset compensation if requested.
+        if len(left_df) > 0:
+            left_df["Raw [uint24]"] -= left_df["Raw [uint24]"][0]
+        
+        if len(right_df) > 0:
+            right_df["Raw [uint24]"] -= right_df["Raw [uint24]"][0]
+
     if show_raw:
         # Create a figure with a raw subplot.
         fig = plt.figure()
         gs = fig.add_gridspec(2, height_ratios=[0.5, 1])
         ax_raw, ax_weight = gs.subplots(sharex=True)
+
+        # Plot the raw limits if desired
+        if show_raw_limits:
+            ax_raw.axhline(y=0, color="r", linestyle="dotted")
+            ax_raw.axhline(y=(2**24)-1, color="r", linestyle="dotted")
+            ax_raw.axhline(y=(2**23)-1, color="r", linestyle="dotted")
 
         # Plot the raw values
         ax_raw.plot(left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side")
@@ -141,8 +155,20 @@ if __name__ == "__main__":
         help="Hides the raw valued subplot",
         action="store_false"
     )
+    parser.add_argument(
+        "-c",
+        "--compensate",
+        help="If provided, uses the first reading for each side to offset compensate the raw values.",
+        action="store_true"
+    )
+    parser.add_argument(
+        "-l",
+        "--raw-limits",
+        help="If provided, shows 0, (2^24)-1 and (2^23)-1 on the raw plot.",
+        action="store_true"
+    )
 
     args = parser.parse_args()
     left_strain_df = pd.read_csv(f"{args.input}/left_strain.csv")
     right_strain_df = pd.read_csv(f"{args.input}/right_strain.csv")
-    plot_strain(left_strain_df, right_strain_df, args.title, args.no_raw)
+    plot_strain(left_strain_df, right_strain_df, args.title, args.no_raw, args.compensate, args.raw_limits)
