@@ -27,12 +27,19 @@ from datetime import datetime
 import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from multiprocessing import Process, Queue
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from matplotlib.lines import Line2D
+from multiprocessing import Process, Queue, Semaphore
 import math
 from enum import Enum
 import time
 import json
 import traceback
+from typing import TypeVar, Tuple
+from dataclasses import dataclass
+
+T = TypeVar("U")
 
 # Sides
 class Side(Enum):
@@ -225,13 +232,18 @@ class CSVSide:
             None
         """
         # Select which file to write to
+        raw_sum = 0
         for i in data:
             timestep = i.timestamp - self.last_timestamp
             self.last_timestamp = i.timestamp
-            print(f"{self.side.name}: ({timestep:>10d}) {i}")
+            # print(f"{self.side.name}: ({timestep:>10d}) {i}")
+            raw_sum += i.raw
             self.file.write(
                 f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
             )
+        
+        # Print out the average
+        print(f"{self.side.name:<10s}: {raw_sum//len(data):>10d}")
 
     def close(self) -> None:
         self.file.close()
@@ -277,7 +289,7 @@ class CSVHandler(DataHandler):
         for i in converted:
             timestep = i.timestamp - self.last_imu_timestamp
             self.last_imu_timestamp = i.timestamp
-            print(f"({timestep:>10d}) {i}")
+            # print(f"({timestep:>10d}) {i}")
             self.imu_file.write(
                 f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.accel_z},{i.gyro_x},{i.gyro_y},{i.gyro_z}\n"
             )
@@ -300,8 +312,7 @@ class CSVHandler(DataHandler):
         else:
             self.right.add_fast(unix_time, converted)
     
-    def add_slow(self, unix_time: float, data: str) -> None:
-        data = json.loads(data)
+    def add_slow(self, unix_time: float, data: json) -> None:
         self.slow.write(f"{unix_time},{data['timestamp']},{data['cadence']},{data['rotations']},{data['power']},{data['balance']}\n")
 
     def close(self):
@@ -311,89 +322,238 @@ class CSVHandler(DataHandler):
         self.housekeeping_file.close()
         self.slow.close()
 
+class LiveChart(ABC):
+    def __init__(self, fig:Figure, ax:Axes, max_history:int=None, title:str="") -> None:
+        """Initialises the figure and sets it up to call update.
 
-class GraphHandler(DataHandler):
-    """Class that shows data on matplotlib."""
-
-    def __init__(self, max_history=None):
+        Args:
+            max_history (int, optional): The maximum history to show. If None, shows all history. Defaults to None.
+            ymax (int, optional): The maximum y value. Defaults to None.
+            title (str, optional): Title to use. Defaults to "".
+        """
         self.max_history = max_history
-        fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+        fig.suptitle(title)
+        ax.set_title("")
+        fig.tight_layout()
+        self.fig, self.ax = fig, ax
+        # Start the process to show the graph.
+        self.queue = Queue()
+        self.title_queue = Queue()
+
+    @abstractmethod
+    def update(self, data:T) -> Tuple[Line2D]:
+        """Updates the graph.
+
+        Args:
+            data (T): The data to add (or list of data points).
+        """
+        pass
+
+    def add_data(self, data:T) -> None:
+        """Adds data to be passed to the update method eventually."""
+        self.queue.put(data)
+    
+    def setup_animation(self) -> None:
+        self.ani = animation.FuncAnimation(
+            fig=self.fig, func=self.update_graph, interval=80, cache_frame_data=False
+        )
+
+    def update_graph(self, frame:int) -> Tuple[Line2D]:
+        """Gets the latest data from the queue and calls update
+        """
+        # Update the title as needed
+        if not self.title_queue.empty():
+            self.ax.set_title(self.title_queue.get())
+
+        # Update the lines
+        if not self.queue.empty():
+            data = self.queue.get()
+            return self.update(data)
+        else:
+            return None
+    
+    def limit_length(self, input:list) -> list:
+        """Limits the length of a list to the given max history.
+
+        Args:
+            input (list): The input data.
+
+        Returns:
+            list: The latest with old data removed.
+        """
+        if self.max_history and len(input) > self.max_history:
+            return input[len(input) - self.max_history :]
+        else:
+            return input
+    
+    def update_title(self, new_title:str) -> None:
+        """Adds the new title to the queue."""
+        self.title_queue.put(new_title)
+
+class PolarLiveChart(LiveChart):
+    def __init__(self, max_history:int=None, title:str="", ymax:int=None) -> None:
+        fig, ax = fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+        ax.set_ylim(0, ymax)
+        super().__init__(fig, ax, max_history, title)
+
+class IMULiveChart(PolarLiveChart):
+    """Live chart for the IMU."""
+    def __init__(self, max_history:int=None):
         self.theta = []
         self.cadence = []
-        self.line = ax.plot(self.theta, self.cadence)[0]
-        self.latest = ax.axvline(0, color="r")
-        ax.set_ylim(0, 160)
-        ax.set_title(f"Cadence [rpm] vs pedal angle [$^\circ$]")
-
-        def format_radians_label(float_in):
-            """Converts a float value in radians into a string representation of that float.
-            From https://stackoverflow.com/a/63667851
-            """
-            if float_in > math.pi:
-                float_in = -(2 * math.pi - float_in)
-            string_out = str(float_in / (math.pi)) + "π"
-
-            return string_out
-
-        def convert_polar_xticks_to_radians(ax):
-            """Converts x-tick labels from degrees to radians
-            From https://stackoverflow.com/a/63667851
-            """
-
-            # Get the x-tick positions (returns in radians)
-            label_positions = ax.get_xticks()
-
-            # Convert to a list since we want to change the type of the elements
-            labels = list(label_positions)
-
-            # Format each label (edit this function however you'd like)
-            labels = [format_radians_label(label) for label in labels]
-
-            ax.set_xticklabels(labels)
-
-        def animate():
-            """Animate and block in a function to allow for multiple processing."""
-            ani = animation.FuncAnimation(
-                fig=fig, func=self.update_graph, interval=1, cache_frame_data=False
-            )
-            plt.show()
-
-        convert_polar_xticks_to_radians(ax)
-        self.queue = Queue()
-        self.animate_process = Process(target=animate)
-        self.animate_process.start()  # TODO: Handle keyboard interrupts.
-
-    def update_graph(self, frame):
-        print(f"Frame {frame}")
-        # Get the new data
-        converted = self.queue.get()
+        super().__init__(max_history, "Cadence [rpm] vs pedal angle [$^\circ$]", 160)
+        self.line = self.ax.plot([], [])[0]
+        self.latest = self.ax.axvline(0, color="r")
+    
+    def update(self, converted: T) -> Tuple[Line2D]:
         for conv in converted:
             self.theta.append(conv.position)
             self.cadence.append(conv.cadence())
 
         # Remove old data
-        if self.max_history and len(self.cadence) > self.max_history:
-            self.cadence = self.cadence[len(self.cadence) - self.max_history :]
-            self.theta = self.theta[len(self.theta) - self.max_history :]
+        self.cadence = self.limit_length(self.cadence)
+        self.theta = self.limit_length(self.theta)
 
         # Update the data
         self.line.set_xdata(self.theta)
         self.line.set_ydata(self.cadence)
         self.latest.set_xdata([self.theta[-1]])
-        # self.latest.set_ydata([self.cadence[-1]])
-        print(f"{self.theta[-1]=}\t{self.cadence[-1]=}")
+
         return self.line, self.latest
+
+    def update_cadence_subtitle(self, cadence: float) -> None:
+        self.update_title(f"Currently ${cadence:>.1f}$ rpm average")
+
+@dataclass
+class SideDataPair:
+    side: Side
+    data: List[StrainData]
+
+class TorqueLiveChart(PolarLiveChart):
+    """Live chart for the torque."""
+    def __init__(self, max_history:int=None):
+        # Lists to hold data
+        self.thetas = {
+            Side.LEFT: [],
+            Side.RIGHT: []
+        }
+        self.torques = {
+            Side.LEFT: [],
+            Side.RIGHT: []
+        }
+
+        # Initialise the graph.
+        super().__init__(max_history, "Torque [Nm] vs pedal angle [$^\circ$]", 150)
+        self.lines = {
+            Side.LEFT: self.ax.plot([], [])[0],
+            Side.RIGHT: self.ax.plot([], [])[0]
+        }
+        self.latest = self.ax.axvline(0, color="r")
+    
+    def update(self, converted: T) -> Tuple[Line2D]:
+        # Extract the data
+        side: Side = converted.side
+        data: List[StrainData] = converted.data
+
+        # Append to list.
+        theta_list = self.thetas[side]
+        torque_list = self.torques[side]
+        for conv in data:
+            theta_list.append(conv.position)
+            torque_list.append(conv.torque)
+
+        # Remove old data
+        self.thetas[side] = self.limit_length(self.thetas[side])
+        self.torques[side] = self.limit_length(self.torques[side])
+
+        # Update the data
+        self.lines[side].set_xdata(self.thetas[side])
+        self.lines[side].set_ydata(self.torques[side])
+        self.latest.set_xdata([self.thetas[side][-1]])
+
+        return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest
+    
+class PowerLiveChart(PolarLiveChart):
+    """Live chart for the power."""
+    def __init__(self, max_history:int=None):
+        # Lists to hold data
+        self.thetas = {
+            Side.LEFT: [],
+            Side.RIGHT: []
+        }
+        self.powers = {
+            Side.LEFT: [],
+            Side.RIGHT: []
+        }
+
+        # Initialise the graph.
+        super().__init__(max_history, "Instantaneous power [W] vs pedal angle [$^\circ$]", 150)
+        self.lines = {
+            Side.LEFT: self.ax.plot([], [], label="Left")[0],
+            Side.RIGHT: self.ax.plot([], [], label="Right")[0]
+        }
+        self.latest = self.ax.axvline(0, color="r")
+        self.ax.legend()
+    
+    def update(self, converted: T) -> Tuple[Line2D]:
+        # Extract the data
+        side: Side = converted.side
+        data: List[StrainData] = converted.data
+
+        # Append to list.
+        theta_list = self.thetas[side]
+        power_list = self.powers[side]
+        for conv in data:
+            theta_list.append(conv.position)
+            power_list.append(conv.power)
+
+        # Remove old data
+        self.thetas[side] = self.limit_length(self.thetas[side])
+        self.powers[side] = self.limit_length(self.powers[side])
+
+        # Update the data
+        self.lines[side].set_xdata(self.thetas[side])
+        self.lines[side].set_ydata(self.powers[side])
+        self.latest.set_xdata([self.thetas[side][-1]])
+
+        return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest
+
+    def update_power_subtitle(self, power: float, balance:float) -> None:
+        self.update_title(f"${power:.0f}$ W, ${balance:.0f}$ % balance over the last rotation")
+
+class GraphHandler(DataHandler):
+    """Class that shows data on matplotlib."""
+    def __init__(self, max_history=None):
+        self.imu_graph = IMULiveChart(max_history)
+        self.torque_graph = TorqueLiveChart(max_history)
+        self.power_graph = PowerLiveChart(max_history)
+        self.animate_process = Process(target=self.animate, daemon=True)
+        self.animate_process.start()
 
     def add_imu(self, unix_time:float, data: bytes) -> None:
         converted = self._process_imu(data)
-        self.queue.put(converted)
+        self.imu_graph.add_data(converted)
 
     def add_about(self, unix_time:float, data: str) -> None:
         return super().add_about(data)
 
+    def add_fast(self, unix_time: float, data: str, side: Side) -> None:
+        converted = self._process_strain(data)
+        self.torque_graph.add_data(SideDataPair(side, converted))
+        self.power_graph.add_data(SideDataPair(side, converted))
+
     def close(self) -> None:
         self.animate_process.kill()
-
+    
+    def add_slow(self, unix_time: float, data: str) -> None:
+        self.imu_graph.update_cadence_subtitle(data["cadence"])
+        self.power_graph.update_power_subtitle(data["power"], data["balance"])
+    
+    def animate(self) -> None:
+        self.imu_graph.setup_animation()
+        self.torque_graph.setup_animation()
+        self.power_graph.setup_animation()
+        plt.show()
 
 class MultiHandler(DataHandler):
     def __init__(self, handlers: List[DataHandler]) -> None:
@@ -485,7 +645,8 @@ def on_message(client: mqtt.Client, userdata: None, msg: mqtt.MQTTMessage) -> No
     elif msg.topic == MQTT_TOPIC_RIGHT:
         handler.add_fast(t, msg.payload, Side.RIGHT)
     elif msg.topic == MQTT_TOPIC_LOW_SPEED:
-        handler.add_slow(t, msg.payload)
+        data = json.loads(msg.payload)
+        handler.add_slow(t, data)
 
 
 if __name__ == "__main__":

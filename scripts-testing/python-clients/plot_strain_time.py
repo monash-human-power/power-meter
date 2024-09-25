@@ -47,16 +47,10 @@ def right_raw_to_kg(raw:np.ndarray) -> np.ndarray:
     Returns:
         np.ndarray: Outputs scaled to kg
     """
-    # TODO: Actually measure / calibrate
-    print("WARNING: Right side has not been calibrated")
-    # Samples from testing.
-    raw1, weight1 = 16620474, 0
-    raw2, weight2 = 16730324, 38.23
-
     # Linear-relationship.
-    m = (weight2 - weight1) / (raw2 - raw1)
-    weight = m*(raw - raw1) + weight1
-    return weight
+    m = 5868.07419695
+    c = 6277726.2937114
+    return (raw - c) / m
 
 def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw=True, use_start_compensate:bool=False, show_raw_limits:bool=False) -> None:
     """Plots strain over time.
