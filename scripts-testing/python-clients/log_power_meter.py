@@ -443,7 +443,7 @@ class TorqueLiveChart(PolarLiveChart):
         }
 
         # Initialise the graph.
-        super().__init__(max_history, "Torque [Nm] vs pedal angle [$^\circ$]", 150)
+        super().__init__(max_history, "Torque [Nm] vs pedal angle [$^\circ$]", 50)
         self.lines = {
             Side.LEFT: self.ax.plot([], [])[0],
             Side.RIGHT: self.ax.plot([], [])[0]

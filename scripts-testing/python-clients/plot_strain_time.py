@@ -20,25 +20,7 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 import argparse
 
-def left_raw_to_kg(raw:np.ndarray) -> np.ndarray:
-    """Converts raw values to kg.
-
-    Args:
-        raw (np.ndarray): The raw inputs
-
-    Returns:
-        np.ndarray: Outputs scaled to kg
-    """
-    # Samples from testing.
-    raw1, weight1 = 16620474, 0
-    raw2, weight2 = 16730324, 38.23
-
-    # Linear-relationship.
-    m = (weight2 - weight1) / (raw2 - raw1)
-    weight = m*(raw - raw1) + weight1
-    return weight
-
-def right_raw_to_kg(raw:np.ndarray) -> np.ndarray:
+def left_raw_to_nm(raw:np.ndarray) -> np.ndarray:
     """Converts raw values to kg.
 
     Args:
@@ -48,9 +30,27 @@ def right_raw_to_kg(raw:np.ndarray) -> np.ndarray:
         np.ndarray: Outputs scaled to kg
     """
     # Linear-relationship.
-    m = 5868.07419695
-    c = 6277726.2937114
-    return (raw - c) / m
+    m = -3532.9388551007
+    c = 9958806.90678679
+    coef = 10 * 0.13 / m
+    print(f"Left coefficient: {coef}")
+    return (raw - c) * coef
+
+def right_raw_to_nm(raw:np.ndarray) -> np.ndarray:
+    """Converts raw values to kg.
+
+    Args:
+        raw (np.ndarray): The raw inputs
+
+    Returns:
+        np.ndarray: Outputs scaled to kg
+    """
+    # Linear-relationship.
+    m = 5786.5965078533
+    c = 6275241.9683
+    coef = 10 * 0.13 / m
+    print(f"Right coefficient: {coef}")
+    return (raw - c) * coef
 
 def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw=True, use_start_compensate:bool=False, show_raw_limits:bool=False) -> None:
     """Plots strain over time.
@@ -98,11 +98,11 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
         ax_weight = gs.subplots(sharex=True)
 
     # Plot the corrected weights
-    left_weight = left_raw_to_kg(left_df["Raw [uint24]"].values)
-    right_weight = right_raw_to_kg(right_df["Raw [uint24]"].values)
+    left_weight = left_raw_to_nm(left_df["Raw [uint24]"].values)
+    right_weight = right_raw_to_nm(right_df["Raw [uint24]"].values)
     ax_weight.plot(left_df["Time"].values, left_weight, label="Left side")
     ax_weight.plot(right_df["Time"].values, right_weight, label="Right side")
-    ax_weight.set_ylabel("Weight [kg]")
+    ax_weight.set_ylabel("Torque [Nm]")
     ax_weight.grid()
 
     # Check whether to show the legend if we have data for both sides
