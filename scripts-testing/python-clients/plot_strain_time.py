@@ -89,8 +89,8 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
             ax_raw.axhline(y=(2**23)-1, color="r", linestyle="dotted")
 
         # Plot the raw values
-        ax_raw.plot(left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side")
         ax_raw.plot(right_df["Time"].values, right_df["Raw [uint24]"].values, label="Right side")
+        ax_raw.plot(left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side")
         ax_raw.set_ylabel("Raw values")
         ax_raw.set_title("Raw readings")
         ax_raw.grid()
@@ -107,22 +107,22 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
     else:
         left_weight = left_df["Torque [Nm]"].values
         right_weight = right_df["Torque [Nm]"].values
-    ax_weight.plot(left_df["Time"].values, left_weight, label="Left side")
     ax_weight.plot(right_df["Time"].values, right_weight, label="Right side")
+    ax_weight.plot(left_df["Time"].values, left_weight, label="Left side")
     ax_weight.set_ylabel("Torque [Nm]")
     ax_weight.grid()
 
     # Check whether to show the legend if we have data for both sides
     if len(left_df) != 0 and len(right_df) != 0:
         # Data for both sides
-        ax_weight.set_title("Calibrated weights for both sides")
+        ax_weight.set_title("Calibrated torque for both sides")
         ax_weight.legend()
     elif len(left_df) != 0:
         # Left data only
-        ax_weight.set_title("Calibrated weights on the left side")
+        ax_weight.set_title("Calibrated torque on the left side")
     else:
         # Right data only
-        ax_weight.set_title("Calibrated weights on the right side")
+        ax_weight.set_title("Calibrated torque on the right side")
 
     ax_weight.set_xlabel("Time [s]")
 

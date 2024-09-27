@@ -51,6 +51,7 @@ from dataclasses import dataclass
 
 T = TypeVar("U")
 
+
 # Sides
 class Side(Enum):
     LEFT = "left"
@@ -148,7 +149,7 @@ class DataHandler(ABC):
         """
         pass
 
-    def add_housekeeping(self, unix_time:float, data: str) -> None:
+    def add_housekeeping(self, unix_time: float, data: str) -> None:
         """Accepts housekeeping data and handles it.
 
         Args:
@@ -156,7 +157,7 @@ class DataHandler(ABC):
         """
         pass
 
-    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
+    def add_fast(self, unix_time: float, data: str, side: Side) -> None:
         """Accepts a message from a side and handles it.
 
         Args:
@@ -165,7 +166,7 @@ class DataHandler(ABC):
         """
         pass
 
-    def add_slow(self, unix_time:float, data: str) -> None:
+    def add_slow(self, unix_time: float, data: str) -> None:
         """Adds slow speed data (power, balance, cadence...)
 
         Args:
@@ -225,14 +226,14 @@ class CSVSide:
         # Open the file and write a heading.
         self.file = open(f"{output_dir}/{side.value}_strain.csv", "w")
         self.file.write(
-            "Unix Timestamp [us],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
+            "Unix Timestamp [s],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
         )
 
         # Initialise time step calculation
         self.last_timestamp = 0
         self.side = side
 
-    def add_fast(self, unix_time:float, data: List[StrainData]) -> None:
+    def add_fast(self, unix_time: float, data: List[StrainData]) -> None:
         """Adds high speed data to the side.
 
         Args:
@@ -251,7 +252,7 @@ class CSVSide:
             self.file.write(
                 f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
             )
-        
+
         # Print out the average
         print(f"{self.side.name:<10s}: {raw_sum//len(data):>10d}")
 
@@ -269,18 +270,20 @@ class CSVHandler(DataHandler):
             os.makedirs(output)
 
         # Create the about file
-        json_str_header = "Unix Timestamp [us],Message\n"
+        json_str_header = "Unix Timestamp [s],Message\n"
         self.about_file = open(f"{output}/about.csv", "w", buffering=1)
         self.about_file.write(json_str_header)
 
         # Create the housekeeping file
         self.housekeeping_file = open(f"{output}/housekeeping.csv", "w", buffering=1)
-        self.housekeeping_file.write("Unix Timestamp [us],Left Temperature [C],Right Temperature [C],IMU Temperature [C],Battery [mV],Left Offset [raw],Right Offset [raw]\n")
+        self.housekeeping_file.write(
+            "Unix Timestamp [s],Left Temperature [C],Right Temperature [C],IMU Temperature [C],Battery [mV],Left Offset [raw],Right Offset [raw]\n"
+        )
 
         # Create the IMU file
-        self.imu_file = open(f"{output}/imu.csv", "w")
+        self.imu_file = open(f"{output}/imu.csv", "w", buffering=1)
         self.imu_file.write(
-            "Unix Timestamp [us],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Acceleration Z [m/s^2],Gyro A [rad/s],Gyro B [rad/s],Gyro Z [rad/s]\n"
+            "Unix Timestamp [s],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Acceleration X [m/s^2],Acceleration Y [m/s^2],Acceleration Z [m/s^2],Gyro A [rad/s],Gyro B [rad/s],Gyro Z [rad/s]\n"
         )
         self.last_imu_timestamp = 0
 
@@ -289,12 +292,12 @@ class CSVHandler(DataHandler):
         self.right = CSVSide(Side.RIGHT, output)
 
         # Create the slow file
-        self.slow = open(f"{output}/slow.csv", "w")
+        self.slow = open(f"{output}/slow.csv", "w", buffering=1)
         self.slow.write(
-            "Unix Timestamp [us],Device Timestamp [us],Cadence [rpm],Rotations [#],Power [W],Balance [%]\n"
+            "Unix Timestamp [s],Device Timestamp [us],Cadence [rpm],Rotations [#],Power [W],Balance [%]\n"
         )
 
-    def add_imu(self, unix_time:float, data: bytes) -> None:
+    def add_imu(self, unix_time: float, data: bytes) -> None:
         converted = self._process_imu(data)
         for i in converted:
             timestep = i.timestamp - self.last_imu_timestamp
@@ -304,16 +307,18 @@ class CSVHandler(DataHandler):
                 f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.accel_x},{i.accel_y},{i.accel_z},{i.gyro_x},{i.gyro_y},{i.gyro_z}\n"
             )
 
-    def add_about(self, unix_time:float, data: str) -> None:
+    def add_about(self, unix_time: float, data: str) -> None:
         print(f"About: {data}")
         self.about_file.write(f"{unix_time},'{data}'\n")
 
-    def add_housekeeping(self, unix_time:float, data: str) -> None:
+    def add_housekeeping(self, unix_time: float, data: str) -> None:
         print(f"Housekeeping: {data}")
         data = json.loads(data)
-        self.housekeeping_file.write(f"{unix_time},{data['temps']['left']},{data['temps']['right']},{data['temps']['imu']},{data['battery']},{data['left-offset']},{data['right-offset']}\n")
+        self.housekeeping_file.write(
+            f"{unix_time},{data['temps']['left']},{data['temps']['right']},{data['temps']['imu']},{data['battery']},{data['left-offset']},{data['right-offset']}\n"
+        )
 
-    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
+    def add_fast(self, unix_time: float, data: str, side: Side) -> None:
         # Process the data.
         converted = self._process_strain(data)
 
@@ -321,9 +326,11 @@ class CSVHandler(DataHandler):
             self.left.add_fast(unix_time, converted)
         else:
             self.right.add_fast(unix_time, converted)
-    
+
     def add_slow(self, unix_time: float, data: json) -> None:
-        self.slow.write(f"{unix_time},{data['timestamp']},{data['cadence']},{data['rotations']},{data['power']},{data['balance']}\n")
+        self.slow.write(
+            f"{unix_time},{data['timestamp']},{data['cadence']},{data['rotations']},{data['power']},{data['balance']}\n"
+        )
 
     def close(self):
         print("Closing CSV Handler")
@@ -332,8 +339,11 @@ class CSVHandler(DataHandler):
         self.housekeeping_file.close()
         self.slow.close()
 
+
 class LiveChart(ABC):
-    def __init__(self, fig:Figure, ax:Axes, max_history:int=None, title:str="") -> None:
+    def __init__(
+        self, fig: Figure, ax: Axes, max_history: int = None, title: str = ""
+    ) -> None:
         """Initialises the figure and sets it up to call update.
 
         Args:
@@ -351,7 +361,7 @@ class LiveChart(ABC):
         self.title_queue = Queue()
 
     @abstractmethod
-    def update(self, data:T) -> Tuple[Line2D]:
+    def update(self, data: T) -> Tuple[Line2D]:
         """Updates the graph.
 
         Args:
@@ -359,18 +369,17 @@ class LiveChart(ABC):
         """
         pass
 
-    def add_data(self, data:T) -> None:
+    def add_data(self, data: T) -> None:
         """Adds data to be passed to the update method eventually."""
         self.queue.put(data)
-    
+
     def setup_animation(self) -> None:
         self.ani = animation.FuncAnimation(
             fig=self.fig, func=self.update_graph, interval=80, cache_frame_data=False
         )
 
-    def update_graph(self, frame:int) -> Tuple[Line2D]:
-        """Gets the latest data from the queue and calls update
-        """
+    def update_graph(self, frame: int) -> Tuple[Line2D]:
+        """Gets the latest data from the queue and calls update"""
         # Update the title as needed
         if not self.title_queue.empty():
             self.ax.set_title(self.title_queue.get())
@@ -381,8 +390,8 @@ class LiveChart(ABC):
             return self.update(data)
         else:
             return None
-    
-    def limit_length(self, input:list) -> list:
+
+    def limit_length(self, input: list) -> list:
         """Limits the length of a list to the given max history.
 
         Args:
@@ -395,26 +404,31 @@ class LiveChart(ABC):
             return input[len(input) - self.max_history :]
         else:
             return input
-    
-    def update_title(self, new_title:str) -> None:
+
+    def update_title(self, new_title: str) -> None:
         """Adds the new title to the queue."""
         self.title_queue.put(new_title)
 
+
 class PolarLiveChart(LiveChart):
-    def __init__(self, max_history:int=None, title:str="", ymax:int=None) -> None:
+    def __init__(
+        self, max_history: int = None, title: str = "", ymax: int = None
+    ) -> None:
         fig, ax = fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
         ax.set_ylim(0, ymax)
         super().__init__(fig, ax, max_history, title)
 
+
 class IMULiveChart(PolarLiveChart):
     """Live chart for the IMU."""
-    def __init__(self, max_history:int=None):
+
+    def __init__(self, max_history: int = None):
         self.theta = []
         self.cadence = []
         super().__init__(max_history, "Cadence [rpm] vs pedal angle [$^\circ$]", 160)
         self.line = self.ax.plot([], [])[0]
         self.latest = self.ax.axvline(0, color="r")
-    
+
     def update(self, converted: T) -> Tuple[Line2D]:
         for conv in converted:
             self.theta.append(conv.position)
@@ -434,32 +448,29 @@ class IMULiveChart(PolarLiveChart):
     def update_cadence_subtitle(self, cadence: float) -> None:
         self.update_title(f"Currently ${cadence:>.1f}$ rpm average")
 
+
 @dataclass
 class SideDataPair:
     side: Side
     data: List[StrainData]
 
+
 class TorqueLiveChart(PolarLiveChart):
     """Live chart for the torque."""
-    def __init__(self, max_history:int=None):
+
+    def __init__(self, max_history: int = None):
         # Lists to hold data
-        self.thetas = {
-            Side.LEFT: [],
-            Side.RIGHT: []
-        }
-        self.torques = {
-            Side.LEFT: [],
-            Side.RIGHT: []
-        }
+        self.thetas = {Side.LEFT: [], Side.RIGHT: []}
+        self.torques = {Side.LEFT: [], Side.RIGHT: []}
 
         # Initialise the graph.
         super().__init__(max_history, "Torque [Nm] vs pedal angle [$^\circ$]", 50)
         self.lines = {
             Side.LEFT: self.ax.plot([], [])[0],
-            Side.RIGHT: self.ax.plot([], [])[0]
+            Side.RIGHT: self.ax.plot([], [])[0],
         }
         self.latest = self.ax.axvline(0, color="r")
-    
+
     def update(self, converted: T) -> Tuple[Line2D]:
         # Extract the data
         side: Side = converted.side
@@ -482,29 +493,27 @@ class TorqueLiveChart(PolarLiveChart):
         self.latest.set_xdata([self.thetas[side][-1]])
 
         return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest
-    
+
+
 class PowerLiveChart(PolarLiveChart):
     """Live chart for the power."""
-    def __init__(self, max_history:int=None):
+
+    def __init__(self, max_history: int = None):
         # Lists to hold data
-        self.thetas = {
-            Side.LEFT: [],
-            Side.RIGHT: []
-        }
-        self.powers = {
-            Side.LEFT: [],
-            Side.RIGHT: []
-        }
+        self.thetas = {Side.LEFT: [], Side.RIGHT: []}
+        self.powers = {Side.LEFT: [], Side.RIGHT: []}
 
         # Initialise the graph.
-        super().__init__(max_history, "Instantaneous power [W] vs pedal angle [$^\circ$]", 1000)
+        super().__init__(
+            max_history, "Instantaneous power [W] vs pedal angle [$^\circ$]", 1000
+        )
         self.lines = {
             Side.LEFT: self.ax.plot([], [], label="Left")[0],
-            Side.RIGHT: self.ax.plot([], [], label="Right")[0]
+            Side.RIGHT: self.ax.plot([], [], label="Right")[0],
         }
         self.latest = self.ax.axvline(0, color="r")
         self.ax.legend()
-    
+
     def update(self, converted: T) -> Tuple[Line2D]:
         # Extract the data
         side: Side = converted.side
@@ -528,11 +537,15 @@ class PowerLiveChart(PolarLiveChart):
 
         return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest
 
-    def update_power_subtitle(self, power: float, balance:float) -> None:
-        self.update_title(f"${power:.0f}$ W, ${balance:.0f}$ % balance over the last rotation")
+    def update_power_subtitle(self, power: float, balance: float) -> None:
+        self.update_title(
+            f"${power:.0f}$ W, ${balance:.0f}$ % balance over the last rotation"
+        )
+
 
 class GraphHandler(DataHandler):
     """Class that shows data on matplotlib."""
+
     def __init__(self, max_history=None):
         self.imu_graph = IMULiveChart(max_history)
         self.torque_graph = TorqueLiveChart(max_history)
@@ -540,11 +553,11 @@ class GraphHandler(DataHandler):
         self.animate_process = Process(target=self.animate, daemon=True)
         self.animate_process.start()
 
-    def add_imu(self, unix_time:float, data: bytes) -> None:
+    def add_imu(self, unix_time: float, data: bytes) -> None:
         converted = self._process_imu(data)
         self.imu_graph.add_data(converted)
 
-    def add_about(self, unix_time:float, data: str) -> None:
+    def add_about(self, unix_time: float, data: str) -> None:
         return super().add_about(data)
 
     def add_fast(self, unix_time: float, data: str, side: Side) -> None:
@@ -554,17 +567,18 @@ class GraphHandler(DataHandler):
 
     def close(self) -> None:
         self.animate_process.kill()
-    
+
     def add_slow(self, unix_time: float, data: str) -> None:
         print(data)
         self.imu_graph.update_cadence_subtitle(data["cadence"])
         self.power_graph.update_power_subtitle(data["power"], data["balance"])
-    
+
     def animate(self) -> None:
         self.imu_graph.setup_animation()
         self.torque_graph.setup_animation()
         self.power_graph.setup_animation()
         plt.show()
+
 
 class MultiHandler(DataHandler):
     def __init__(self, handlers: List[DataHandler]) -> None:
@@ -575,11 +589,11 @@ class MultiHandler(DataHandler):
         """
         self.handlers = handlers
 
-    def add_imu(self, unix_time:float, data: bytes) -> None:
+    def add_imu(self, unix_time: float, data: bytes) -> None:
         for h in self.handlers:
             h.add_imu(unix_time, data)
 
-    def add_about(self, unix_time:float, data: str) -> None:
+    def add_about(self, unix_time: float, data: str) -> None:
         for h in self.handlers:
             h.add_about(unix_time, data)
 
@@ -587,10 +601,10 @@ class MultiHandler(DataHandler):
         for h in self.handlers:
             h.add_housekeeping(unix_time, data)
 
-    def add_fast(self, unix_time:float, data: str, side: Side) -> None:
+    def add_fast(self, unix_time: float, data: str, side: Side) -> None:
         for h in self.handlers:
             h.add_fast(unix_time, data, side)
-    
+
     def add_slow(self, unix_time: float, data: str) -> None:
         for h in self.handlers:
             h.add_slow(unix_time, data)
