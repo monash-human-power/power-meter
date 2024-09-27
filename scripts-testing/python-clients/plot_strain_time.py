@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """plot_strain_time.py
-usage: plot_strain_time.py [-h] -i INPUT [-t TITLE] [--no-raw]
+usage: plot_strain_time.py [-h] -i INPUT [-t TITLE] [--no-raw] [-c] [-l] [--local-calibration]
 
 Plots Strain gauge-related timeseries data.
 
@@ -11,6 +11,9 @@ options:
   -t TITLE, --title TITLE
                         Title to put on the figure (default: Strain Timeseries data)
   --no-raw              Hides the raw valued subplot (default: True)
+  -c, --compensate      If provided, uses the first reading for each side to offset compensate the raw values. (default: False)
+  -l, --raw-limits      If provided, shows 0, (2^24)-1 and (2^23)-1 on the raw plot. (default: False)
+  --local-calibration   If provided, calculates the torques using the raw values. If not provided, uses the torque provided by the power meter. (default: False)
 
 Written by Jotham Gates and Oscar Varney for MHP, 2024
 """

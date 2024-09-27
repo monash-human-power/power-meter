@@ -189,7 +189,7 @@ void Side::m_updateAveragePower(uint32_t timestamp)
 
         // Calculate the average power over the rotation, aligned to the sample rate. This variable will remain
         // set until the next rotation.
-        averagePower = m_energy / (timestamp - m_segStartTime);
+        averagePower = m_energy / (timestamp - m_segStartTime) * 1e6;
         m_segStartTime = timestamp;
 
         // Reset accumulator.

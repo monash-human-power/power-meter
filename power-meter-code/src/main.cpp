@@ -57,7 +57,7 @@ void setup()
         1,
         &ledTaskHandle,
         1);
-    delay(50);
+    delay(100); // Avoid race conditions and maybe help temp sensors start correctly?
 
     // Start the hardware.
     powerMeter.begin();

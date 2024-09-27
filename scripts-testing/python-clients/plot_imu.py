@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""plot_imy.py
-usage: plot_imu.py [-h] -i INPUT
+"""plot_imu.py
+usage: plot_imu.py [-h] -i INPUT [-t TITLE]
 
 Plots IMU-related timeseries data. Alternative methods of calculating orientation are used to provide something to compare the inbuilt Kalman filter to.
 
@@ -8,6 +8,8 @@ options:
   -h, --help            show this help message and exit
   -i INPUT, --input INPUT
                         The folder containing the CSV files. (default: None)
+  -t TITLE, --title TITLE
+                        Title to put on the figure (default: IMU Timeseries data)
 
 Written by Jotham Gates and Oscar Varney for MHP, 2024
 """

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """log_power_meter.py
-usage: log_power_meter.py [--help] [-h HOST] [-m {graph,csv,both}] [-r MAX_RECORDS] [-o OUTPUT]
+usage: log_power_meter.py [--help] [-h HOST] [-m {graph,csv,both}] [-r MAX_RECORDS] [-o OUTPUT] [--no-about] [--no-housekeeping] [--no-imu] [--no-left] [--no-right] [--no-power]
 
 Subscribes to MQTT data from the power meter, decodes it and saves the data to a file and or draws it on a live graph.
 
@@ -12,9 +12,19 @@ options:
   -r MAX_RECORDS, --max-records MAX_RECORDS
                         The maximum number of records to show at a time on the graph. Set as 0 to show everything (may slow down over time) (default: 250)
   -o OUTPUT, --output OUTPUT
-                        The folder to create and write CSV files into. (default: DATETIME_PowerMeter)
+                        The folder to create and write CSV files into. (default: 20240927_194404_PowerMeter)
 
-Written by Jotham Gates and Oscar Varney for MHP, 2024
+Topics to include:
+  All topics are included by default, set these to False to not subscribe to a particular topic.
+
+  --no-about            If present, does not subscribe to about messages. (default: False)
+  --no-housekeeping     If present, does not subscribe to housekeeping messages. (default: False)
+  --no-imu              If present, does not subscribe to messages containing high speed IMU data. (default: False)
+  --no-left             If present, does not subscribe to messages containing high speed data from the left ADC. (default: False)
+  --no-right            If present, does not subscribe to messages containing high speed data from the right ADC. (default: False)
+  --no-power            If present, does not subscribe to messages containing slow power data. (default: False)
+
+Written by Jotham Gates and Oscar Varney for MHP, 2024. For more information, please see here: https://github.com/monash-human-power/power-meter
 """
 
 from __future__ import annotations
@@ -487,7 +497,7 @@ class PowerLiveChart(PolarLiveChart):
         }
 
         # Initialise the graph.
-        super().__init__(max_history, "Instantaneous power [W] vs pedal angle [$^\circ$]", 150)
+        super().__init__(max_history, "Instantaneous power [W] vs pedal angle [$^\circ$]", 1000)
         self.lines = {
             Side.LEFT: self.ax.plot([], [], label="Left")[0],
             Side.RIGHT: self.ax.plot([], [], label="Right")[0]
@@ -546,6 +556,7 @@ class GraphHandler(DataHandler):
         self.animate_process.kill()
     
     def add_slow(self, unix_time: float, data: str) -> None:
+        print(data)
         self.imu_graph.update_cadence_subtitle(data["cadence"])
         self.power_graph.update_power_subtitle(data["power"], data["balance"])
     
@@ -579,6 +590,10 @@ class MultiHandler(DataHandler):
     def add_fast(self, unix_time:float, data: str, side: Side) -> None:
         for h in self.handlers:
             h.add_fast(unix_time, data, side)
+    
+    def add_slow(self, unix_time: float, data: str) -> None:
+        for h in self.handlers:
+            h.add_slow(unix_time, data)
 
     def close(self) -> None:
         for h in self.handlers:
