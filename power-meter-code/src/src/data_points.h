@@ -44,6 +44,12 @@ public:
      * @return float The average temperature in degrees C.
      */
     float averageTemp();
+
+    /**
+     * @brief Offsets for each side.
+     * 
+     */
+    uint32_t offsets[2];
 };
 
 /**

@@ -195,6 +195,6 @@ enum EnumConnection
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 
 #define SUPPLY_VOLTAGE 3300            // Power supply in mV, used to calculate the battery voltage.
-#define OFFSET_COMPENSATION_SAMPLES 10 // How many samples to average to calculate the offset.
+#define OFFSET_COMPENSATION_SAMPLES 200 // How many samples to average to calculate the offset.
 #define INVALID_TEMPERATURE -1000      // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
 #include "Arduino.h"

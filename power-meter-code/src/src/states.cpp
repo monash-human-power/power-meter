@@ -35,6 +35,8 @@ State *StateActive::enter()
         housekeeping.temperatures[SIDE_RIGHT] = powerMeter.sides[SIDE_RIGHT].tempSensor.readTemp();
         housekeeping.temperatures[SIDE_IMU_TEMP] = powerMeter.imuManager.getLastTemperature();
         housekeeping.battery = powerMeter.batteryVoltage();
+        housekeeping.offsets[SIDE_LEFT] = config.strain[SIDE_LEFT].offset;
+        housekeeping.offsets[SIDE_RIGHT] = config.strain[SIDE_RIGHT].offset;
         connectionBasePtr->addHousekeeping(housekeeping);
 
         debugMemory();

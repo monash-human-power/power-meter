@@ -43,9 +43,9 @@ void MQTTConnection::begin()
 //     uint32_t end = micros();             \
 //     LOGI(topic, "%ldus to publish.", end - start)
 
-#define MQTT_LOG_PUBLISH(topic, payload)    \
+#define MQTT_LOG_PUBLISH(topic, payload)              \
     powerMeter.leds.setConnState(CONN_STATE_SENDING); \
-    mqtt.publish(topic, payload);           \
+    mqtt.publish(topic, payload);                     \
     powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
 
 // #define MQTT_LOG_PUBLISH(topic, payload) mqtt.publish(topic, payload)
@@ -57,13 +57,15 @@ void MQTTConnection::begin()
 //     uint32_t end = micros();                         \
 //     LOGI(topic, "%ldus to publish.", end - start)
 
-#define MQTT_LOG_PUBLISH_BUF(topic, payload, length) \
+#define MQTT_LOG_PUBLISH_BUF(topic, payload, length)  \
     powerMeter.leds.setConnState(CONN_STATE_SENDING); \
-    mqtt.publish(topic, payload, length);            \
+    mqtt.publish(topic, payload, length);             \
     powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
 
 // #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) mqtt.publish(topic, payload, length)
 
+#define MQTT_HOUSEKEEPING_STR "{\"temps\":{\"left\":%.2f,\"right\":%.2f, \"imu\":%.2f},\"battery\":%.2f,\"left-offset\":%lu,\"right-offset\":%lu}"
+#define MQTT_HOUSEKEEPING_STR_LEN (sizeof(MQTT_HOUSEKEEPING_STR) + 4 * 10 + 2 * 11)
 void MQTTConnection::runActive()
 {
     // Check the housekeeping queue
@@ -71,14 +73,16 @@ void MQTTConnection::runActive()
     if (xQueueReceive(m_housekeepingQueue, &housekeeping, 0))
     {
         // Housekeeping data can be sent. Generate a json string.
-        char payload[80];
+        char payload[MQTT_HOUSEKEEPING_STR_LEN];
         sprintf(
             payload,
-            "{\"temps\":{\"left\":%.2f,\"right\":%.2f, \"imu\":%.2f},\"battery\":%.2f}",
+            MQTT_HOUSEKEEPING_STR,
             housekeeping.temperatures[SIDE_LEFT],
             housekeeping.temperatures[SIDE_RIGHT],
             housekeeping.temperatures[SIDE_IMU_TEMP],
-            housekeeping.battery);
+            housekeeping.battery,
+            housekeeping.offsets[SIDE_LEFT],
+            housekeeping.offsets[SIDE_RIGHT]);
 
         // Publish
         MQTT_LOG_PUBLISH(MQTT_TOPIC_HOUSEKEEPING, payload);

@@ -260,12 +260,12 @@ class CSVHandler(DataHandler):
 
         # Create the about file
         json_str_header = "Unix Timestamp [us],Message\n"
-        self.about_file = open(f"{output}/about.csv", "w")
+        self.about_file = open(f"{output}/about.csv", "w", buffering=1)
         self.about_file.write(json_str_header)
 
         # Create the housekeeping file
-        self.housekeeping_file = open(f"{output}/housekeeping.csv", "w")
-        self.housekeeping_file.write("Unix Timestamp [us],Left Temperature [C],Right Temperature [C],IMU Temperature [C],Battery [mV]\n")
+        self.housekeeping_file = open(f"{output}/housekeeping.csv", "w", buffering=1)
+        self.housekeeping_file.write("Unix Timestamp [us],Left Temperature [C],Right Temperature [C],IMU Temperature [C],Battery [mV],Left Offset [raw],Right Offset [raw]\n")
 
         # Create the IMU file
         self.imu_file = open(f"{output}/imu.csv", "w")
@@ -301,7 +301,7 @@ class CSVHandler(DataHandler):
     def add_housekeeping(self, unix_time:float, data: str) -> None:
         print(f"Housekeeping: {data}")
         data = json.loads(data)
-        self.housekeeping_file.write(f"{unix_time},{data['temps']['left']},{data['temps']['right']},{data['temps']['imu']},{data['battery']}\n")
+        self.housekeeping_file.write(f"{unix_time},{data['temps']['left']},{data['temps']['right']},{data['temps']['imu']},{data['battery']},{data['left-offset']},{data['right-offset']}\n")
 
     def add_fast(self, unix_time:float, data: str, side: Side) -> None:
         # Process the data.

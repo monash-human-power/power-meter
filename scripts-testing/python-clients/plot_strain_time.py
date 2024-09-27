@@ -52,7 +52,7 @@ def right_raw_to_nm(raw:np.ndarray) -> np.ndarray:
     print(f"Right coefficient: {coef}")
     return (raw - c) * coef
 
-def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw=True, use_start_compensate:bool=False, show_raw_limits:bool=False) -> None:
+def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw:bool, use_start_compensate:bool, show_raw_limits:bool, local_calibration:bool) -> None:
     """Plots strain over time.
 
     Args:
@@ -98,8 +98,12 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
         ax_weight = gs.subplots(sharex=True)
 
     # Plot the corrected weights
-    left_weight = left_raw_to_nm(left_df["Raw [uint24]"].values)
-    right_weight = right_raw_to_nm(right_df["Raw [uint24]"].values)
+    if local_calibration:
+        left_weight = left_raw_to_nm(left_df["Raw [uint24]"].values)
+        right_weight = right_raw_to_nm(right_df["Raw [uint24]"].values)
+    else:
+        left_weight = left_df["Torque [Nm]"].values
+        right_weight = right_df["Torque [Nm]"].values
     ax_weight.plot(left_df["Time"].values, left_weight, label="Left side")
     ax_weight.plot(right_df["Time"].values, right_weight, label="Right side")
     ax_weight.set_ylabel("Torque [Nm]")
@@ -161,8 +165,13 @@ if __name__ == "__main__":
         help="If provided, shows 0, (2^24)-1 and (2^23)-1 on the raw plot.",
         action="store_true"
     )
+    parser.add_argument(
+        "--local-calibration",
+        help="If provided, calculates the torques using the raw values. If not provided, uses the torque provided by the power meter.",
+        action="store_true"
+    )
 
     args = parser.parse_args()
     left_strain_df = pd.read_csv(f"{args.input}/left_strain.csv")
     right_strain_df = pd.read_csv(f"{args.input}/right_strain.csv")
-    plot_strain(left_strain_df, right_strain_df, args.title, args.no_raw, args.compensate, args.raw_limits)
+    plot_strain(left_strain_df, right_strain_df, args.title, args.no_raw, args.compensate, args.raw_limits, args.local_calibration)
