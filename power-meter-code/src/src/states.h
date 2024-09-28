@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-28
  */
 #pragma once
 #include "../defines.h"
@@ -56,6 +56,14 @@ public:
 
 private:
     State &m_sleepState;
+
+    /**
+     * @brief Checks if the power meter is deemed to be inactive according to the IMU / rotation counter (no forwards rotations for x min).
+     * 
+     * @return true Power meter is active (don't enter sleep mode).
+     * @return false Inactive, sleep mode recommended.
+     */
+    bool m_isActive();
 };
 
 /**

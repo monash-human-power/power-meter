@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-10
+ * @date 2024-09-28
  */
 #pragma once
 #include "../defines.h"
@@ -124,7 +124,8 @@ public:
     char wifiSSID[CONF_WIFI_SSID_MAX_LENGTH] = DEFAULT_WIFI_SSID;
     char wifiPSK[CONF_WIFI_PSK_MAX_LENGTH] = DEFAULT_WIFI_PASSWORD;
     char mqttBroker[CONF_MQTT_BROKER_MAX_LENGTH] = DEFAULT_MQTT_BROKER;
-    // TODO: MQTT and WiFi settings, device name, MQTT prefix.
+    uint16_t sleepTime = DEFAULT_SLEEP_TIME;
+    // TODO: device name, MQTT prefix.
 
 private:
     /**

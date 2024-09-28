@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-28
  */
 
 #include "power_meter.h"
@@ -257,37 +257,56 @@ void LEDs::setConnState(EnumConnState state)
         return;                                        \
     }
 
+void LEDs::setImpendingSleep()
+{
+    m_sleepPending = true;
+    if (m_taskExists)
+    {
+        xTaskNotifyGive(ledTaskHandle);
+    }
+}
+
 void LEDs::run()
 {
     m_taskExists = true;
     while (true)
     {
-        switch (m_connState)
+        if (m_sleepPending)
         {
-        case CONN_STATE_ACTIVE:
-        case CONN_STATE_DISABLED:
-            NOTIFY_DELAY(1000);
-            break;
-        case CONN_STATE_SHUTTING_DOWN:
             digitalWrite(PIN_LEDR, HIGH);
-            NOTIFY_DELAY(1000);
-            break;
-        case CONN_STATE_RECEIVING:
-#ifdef HAS_BLUE_LED
-            digitalWrite(PIN_LEDB, HIGH);
-            NOTIFY_DELAY(4000);
-            break;
-#endif
-        case CONN_STATE_SENDING:
-            digitalWrite(PIN_LEDG, HIGH);
-            NOTIFY_DELAY(4000);
-            break;
-        case CONN_STATE_CONNECTING_1:
-            cycleConnConnecting1();
-            break;
-        case CONN_STATE_CONNECTING_2:
-            cycleConnConnecting2();
-            break;
+            NOTIFY_DELAY(50);
+            digitalWrite(PIN_LEDR, LOW);
+            NOTIFY_DELAY(200);
+        }
+        else
+        {
+            switch (m_connState)
+            {
+            case CONN_STATE_ACTIVE:
+            case CONN_STATE_DISABLED:
+                NOTIFY_DELAY(1000);
+                break;
+            case CONN_STATE_SHUTTING_DOWN:
+                digitalWrite(PIN_LEDR, HIGH);
+                NOTIFY_DELAY(1000);
+                break;
+            case CONN_STATE_RECEIVING:
+    #ifdef HAS_BLUE_LED
+                digitalWrite(PIN_LEDB, HIGH);
+                NOTIFY_DELAY(4000);
+                break;
+    #endif
+            case CONN_STATE_SENDING:
+                digitalWrite(PIN_LEDG, HIGH);
+                NOTIFY_DELAY(4000);
+                break;
+            case CONN_STATE_CONNECTING_1:
+                m_cycleConnConnecting1();
+                break;
+            case CONN_STATE_CONNECTING_2:
+                m_cycleConnConnecting2();
+                break;
+            }
         }
     }
 }
@@ -306,7 +325,7 @@ void LEDs::powerDown()
     powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(false);
 }
 
-void LEDs::cycleConnConnecting1()
+void LEDs::m_cycleConnConnecting1()
 {
     powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
     powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);
@@ -328,7 +347,7 @@ void LEDs::cycleConnConnecting1()
     NOTIFY_DELAY_RETURN(950);
 }
 
-void LEDs::cycleConnConnecting2()
+void LEDs::m_cycleConnConnecting2()
 {
     powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
     powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);

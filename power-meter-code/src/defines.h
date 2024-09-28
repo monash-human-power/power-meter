@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-10
+ * @date 2024-09-28
  */
 #pragma once
 #define SW_VERSION "s0.1.0"
@@ -70,6 +70,7 @@
 #if (HW_VERSION == HW_VERSION_V1_0_4) || (HW_VERSION == HW_VERSION_V1_0_5)
 #define PIN_ACCEL_INTERRUPT 38
 #elif (HW_VERSION == HW_VERSION_V1_1_1)
+#define ACCEL_RTC_CAPABLE
 #define PIN_ACCEL_INTERRUPT 21
 #endif
 #define PIN_SPI_SDI 39
@@ -168,10 +169,10 @@ enum EnumConnection
 
 /**
  * @brief Enumerator for connection state
- * 
+ *
  */
- enum EnumConnState
- {
+enum EnumConnState
+{
     CONN_STATE_DISABLED,
     CONN_STATE_CONNECTING_1,
     CONN_STATE_CONNECTING_2,
@@ -179,7 +180,7 @@ enum EnumConnection
     CONN_STATE_SHUTTING_DOWN,
     CONN_STATE_SENDING,
     CONN_STATE_RECEIVING
- };
+};
 
 /**
  * WiFi settings.
@@ -194,9 +195,9 @@ enum EnumConnection
 #define KALMAN_X0 {0, 0}               // Initial state.
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 
-#define SUPPLY_VOLTAGE 3300            // Power supply in mV, used to calculate the battery voltage.
+#define SUPPLY_VOLTAGE 3300             // Power supply in mV, used to calculate the battery voltage.
 #define OFFSET_COMPENSATION_SAMPLES 200 // How many samples to average to calculate the offset.
-#define INVALID_TEMPERATURE -1000      // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
+#define INVALID_TEMPERATURE -1000       // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
 
 // Settings for ArduinoJSON
 #define ARDUINOJSON_NEGATIVE_EXPONENTIATION_THRESHOLD 1e-2

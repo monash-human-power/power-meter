@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-28
  */
 
 #include "imu.h"
@@ -18,12 +18,18 @@ extern portMUX_TYPE spinlock;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 
+#include <esp_sleep.h>
+#include <driver/rtc_io.h>
+
 volatile uint32_t imuTime;
 
 void IMUManager::begin()
 {
     LOGD("IMU", "Starting IMU");
     // Initialise the IMU
+#ifdef ACCEL_RTC_CAPABLE
+    rtc_gpio_deinit((gpio_num_t)PIN_ACCEL_INTERRUPT);
+#endif
     // Manually initialise the SPI bus beforehand so that the pins can be specified. The call to `SPI.begin()` in the
     // IMU library should have no effect / returned early.
     SPI.begin(PIN_SPI_SCLK, PIN_SPI_SDI, PIN_SPI_SDO, PIN_SPI_AC_CS);

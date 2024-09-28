@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-28
  */
 #pragma once
 
@@ -191,6 +191,12 @@ public:
     void setRotationEvent();
 
     /**
+     * @brief Indicates the power meter will soon sleep.
+     * 
+     */
+    void setImpendingSleep();
+
+    /**
      * @brief Runs the task to manage the LEDs.
      * 
      */
@@ -207,17 +213,18 @@ private:
      * @brief One round of flashing for connecting.
      * 
      */
-    void cycleConnConnecting1(); // TODO: Refactor name to m_
+    void m_cycleConnConnecting1();
 
     /**
      * @brief One round of flashing for connecting.
      * 
      */
-    void cycleConnConnecting2(); // TODO: Refactor name to m_
+    void m_cycleConnConnecting2();
 
     EnumConnState m_connState;
 
     bool m_taskExists = false;
+    bool m_sleepPending = false;
 };
 
 /**

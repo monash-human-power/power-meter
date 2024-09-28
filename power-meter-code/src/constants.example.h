@@ -33,6 +33,12 @@
 #define DEFAULT_STRAIN_TEST_TEMP 24.25
 
 /**
+ * @brief How long between rotations to wait before entering sleep mode.
+ * 
+ */
+#define DEFAULT_SLEEP_TIME 600 // 10 minutes of no rotations to sleep.
+
+/**
  * @brief Relative physical offset of the IMU from the axle centre (in m).
  * 
  */

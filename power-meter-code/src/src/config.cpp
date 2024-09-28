@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-10
+ * @date 2024-09-28
  */
 #include "config.h"
 extern SemaphoreHandle_t serialMutex;
@@ -94,7 +94,7 @@ bool Config::readJSON(char *text, uint32_t length)
     DeserializationError error = deserializeJson(json, text, length);
     if (error)
     {
-        LOGW("Config", "Could not deserialise the json document. Discarding");
+        LOGW(CONF_KEY, "Could not deserialise the json document. Discarding");
         return false;
     }
 
@@ -107,7 +107,7 @@ bool Config::readJSON(char *text, uint32_t length)
         connectionMethod = (EnumConnection)connection;
         break;
     default:
-        LOGW("Config", "Unrecognised connection type. Ignoring.");
+        LOGW(CONF_KEY, "Unrecognised connection type. Ignoring.");
     }
 
     // Kalman filters
@@ -117,6 +117,16 @@ bool Config::readJSON(char *text, uint32_t length)
 
     // How often to send IMU data
     imuHowOften = json["imuHowOften"];
+    // How long to wait before going to sleep. Set to 0 to disable sleep.
+    uint16_t proposedSleepTime = json["sleep-time"];
+    if (proposedSleepTime == 0 || proposedSleepTime > 20)
+    {
+        sleepTime = proposedSleepTime;
+    }
+    else
+    {
+        LOGW(CONF_KEY, "For safety reasons, this sleep time (%ds) is too short to set.", proposedSleepTime);
+    }
 
     // Read the strain gauge input data.
     strain[SIDE_LEFT].readJSON(json["left-strain"]);
@@ -174,7 +184,9 @@ void Config::writeJSON(JsonVariant doc, bool showWiFi)
     m_writeMatrix(kalmanR, rMeasCovariance);
 
     // How often to record IMU data.
-    doc["imuHowOften"] = 1;
+    doc["imuHowOften"] = imuHowOften;
+    // How long to wait before going to sleep. Set to 0 to disable sleep.
+    doc["sleep-time"] = sleepTime;
 
     // Read configs for each side.
     JsonObject leftStrain = doc["left-strain"].to<JsonObject>();
@@ -228,7 +240,10 @@ void Config::removeKey()
 
 inline void Config::m_safeReadString(char *dest, const char *source, size_t maxLength)
 {
-    strncpy(dest, source, maxLength);
+    if (source)
+    {
+        strncpy(dest, source, maxLength);
+    }
     dest[maxLength - 1] = '\0';
 }
 

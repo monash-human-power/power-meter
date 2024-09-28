@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-09-28
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -27,7 +27,7 @@ State *StateActive::enter()
     powerMeter.powerUp();
 
     // Main housekeeping loop
-    while (true)
+    while (m_isActive())
     {
         // Populate and send the housekeeping data. Update the temperatures at the same time.
         HousekeepingData housekeeping;
@@ -118,14 +118,35 @@ State *StateActive::enter()
     return &m_sleepState;
 }
 
+bool StateActive::m_isActive()
+{
+    // Calculate how long it has been since the last rotation.
+    LowSpeedData data;
+    powerMeter.imuManager.setLowSpeedData(data);
+    uint32_t duration = (micros() - data.timestamp) / 1000000L;
+
+    // Work out if it has been too long.
+    return config.sleepTime == 0 || duration < config.sleepTime;
+}
+
 State *StateSleep::enter()
 {
+    LOGD("Sleep", "Shutting down the hardware");
     connectionBasePtr->disable();
+    powerMeter.leds.setImpendingSleep();
+    powerMeter.imuManager.enableMotion();
+    delay(2000);
     powerMeter.powerDown();
-    LOGD("Sleep", "Simulating sleeping");
-    delay(10000);
-    LOGD("Sleep", "Waking up");
-    return &m_activeState;
+    LOGD("Sleep", "Going to sleep");
+#ifdef ACCEL_RTC_CAPABLE
+    esp_sleep_enable_ext0_wakeup((gpio_num_t)PIN_ACCEL_INTERRUPT, HIGH);
+#else
+    LOGE("Sleep", "This hardware version can't accept accelerometer interrupts in sleep mode!");
+    esp_sleep_enable_timer_wakeup(20000000); // 20s to simulate
+#endif
+
+    // Start deep sleep. The MCU will restart on wake.
+    esp_deep_sleep_start();
 }
 
 void reboot(bool dfu)
