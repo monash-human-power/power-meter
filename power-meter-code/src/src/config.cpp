@@ -13,17 +13,15 @@ extern Preferences prefs;
 // Uses this to limit the maximum number of packets to queue.
 #include "connection_mqtt.h"
 
-void StrainConf::writeJSON(char *text, uint32_t length)
+void StrainConf::writeJSON(JsonObject json)
 {
-    if (length < CONF_SG_JSON_TEXT_LENGTH)
-    {
-        LOGE("Config", "Buffer to print to JSON needs to be at least %d long.", CONF_SG_JSON_TEXT_LENGTH);
-        return;
-    }
-    sprintf(text, CONF_SG_JSON_TEXT, offset, coefficient, tempTest, tempCoefficient);
+    json["offset"] = offset;
+    json["coef"] = coefficient;
+    json["temp-test"] = tempTest;
+    json["temp-coef"] = tempCoefficient;
 }
 
-void StrainConf::readJSON(JsonDocument doc)
+void StrainConf::readJSON(JsonObject doc)
 {
     offset = doc["offset"];
     coefficient = doc["coef"];
@@ -69,7 +67,7 @@ void Config::save()
 void Config::print()
 {
     char text[CONF_JSON_TEXT_LENGTH];
-    writeJSON(text, CONF_JSON_TEXT_LENGTH);
+    writeJSON(text, CONF_JSON_TEXT_LENGTH, true);
     LOGI(CONF_KEY, "Current config: %s", text);
 }
 
@@ -92,7 +90,7 @@ void Config::serialRead()
 bool Config::readJSON(char *text, uint32_t length)
 {
     // Intellisense seems to be broken for ArduinoJSON at the moment. Ignore the red squiggles for now
-    StaticJsonDocument<150> json;
+    JsonDocument json;
     DeserializationError error = deserializeJson(json, text, length);
     if (error)
     {
@@ -100,19 +98,22 @@ bool Config::readJSON(char *text, uint32_t length)
         return false;
     }
 
-    // Handle each known method
-    LOGW("Config", "Deliberately not overwriting the connection type until a way to change back is implemented.");
-    // Q matrix
-    qEnvCovariance(0, 0) = json["q(0,0)"];
-    qEnvCovariance(0, 1) = json["q(0,1)"];
-    qEnvCovariance(1, 0) = json["q(1,0)"];
-    qEnvCovariance(1, 1) = json["q(1,1)"];
+    // Handle each known connection method
+    uint8_t connection = json["connection"];
+    switch (connection)
+    {
+    case CONNECTION_MQTT:
+    case CONNECTION_BLE:
+        connectionMethod = (EnumConnection)connection;
+        break;
+    default:
+        LOGW("Config", "Unrecognised connection type. Ignoring.");
+    }
 
-    // R matrix
-    rMeasCovariance(0, 0) = json["r(0,0)"];
-    rMeasCovariance(0, 1) = json["r(0,1)"];
-    rMeasCovariance(1, 0) = json["r(1,0)"];
-    rMeasCovariance(1, 1) = json["r(1,1)"];
+    // Kalman filters
+    JsonObject kalman = json["kalman"];
+    qEnvCovariance = m_readMatrix(kalman["Q"]);
+    rMeasCovariance = m_readMatrix(kalman["R"]);
 
     // How often to send IMU data
     imuHowOften = json["imuHowOften"];
@@ -122,7 +123,7 @@ bool Config::readJSON(char *text, uint32_t length)
     strain[SIDE_RIGHT].readJSON(json["right-strain"]);
 
     // MQTT
-    JsonDocument mqttDoc = json["mqtt"];
+    JsonVariant mqttDoc = json["mqtt"];
 
     // Get the length, checking that we have sufficient buffer to accomodate it.
     uint16_t proposedSize = mqttDoc["length"];
@@ -134,33 +135,75 @@ bool Config::readJSON(char *text, uint32_t length)
     {
         LOGW(CONF_KEY, "MQTT size of %u is greater than buffer of " stringify(MQTT_FAST_BUFFER) ". Ignoring this field.", proposedSize);
     }
+    // Get the broker.
+    m_safeReadString(mqttBroker, mqttDoc["broker"], CONF_MQTT_BROKER_MAX_LENGTH);
+
+    // Get the WiFi SSID and password
+    JsonVariant wifiDoc = json["wifi"];
+    // Guard against someone sending redacted credentials back to this device.
+    if (wifiDoc["redacted"] == false)
+    {
+        m_safeReadString(wifiSSID, wifiDoc["ssid"], CONF_WIFI_SSID_MAX_LENGTH);
+        m_safeReadString(wifiPSK, wifiDoc["psk"], CONF_WIFI_PSK_MAX_LENGTH);
+    }
+    else
+    {
+        LOGW(CONF_KEY, "WiFi settings were redacted, will not update.");
+    }
     return true;
 }
 
-void Config::writeJSON(char *text, uint32_t length)
+void Config::writeJSON(char *text, uint32_t length, bool showWiFi)
 {
-    // Check that text is long enough to work with.
-    if (length < CONF_JSON_TEXT_LENGTH)
+    JsonDocument doc;
+    writeJSON(doc, showWiFi);
+    serializeJson(doc, text, length);
+}
+
+void Config::writeJSON(JsonVariant doc, bool showWiFi)
+{
+    // Useful: https://arduinojson.org/v7/assistant
+    doc["connection"] = connectionMethod;
+
+    // Kalman filter
+    JsonObject kalman = doc["kalman"].to<JsonObject>();
+    JsonArray kalmanQ = kalman["Q"].to<JsonArray>();
+    m_writeMatrix(kalmanQ, qEnvCovariance);
+
+    JsonArray kalmanR = kalman["R"].to<JsonArray>();
+    m_writeMatrix(kalmanR, rMeasCovariance);
+
+    // How often to record IMU data.
+    doc["imuHowOften"] = 1;
+
+    // Read configs for each side.
+    JsonObject leftStrain = doc["left-strain"].to<JsonObject>();
+    strain[SIDE_LEFT].writeJSON(leftStrain);
+
+    JsonObject rightStrain = doc["right-strain"].to<JsonObject>();
+    strain[SIDE_RIGHT].writeJSON(rightStrain);
+
+    // Read MQTT conf
+    JsonObject mqtt = doc["mqtt"].to<JsonObject>();
+    mqtt["length"] = mqttPacketSize;
+    mqtt["broker"] = mqttBroker;
+
+    // WiFi conf (if allowed to divulge such secrets).
+    JsonObject wifi = doc["wifi"].to<JsonObject>();
+    if (showWiFi)
     {
-        LOGE("Config", "Buffer to print to JSON needs to be at least %d long.", CONF_JSON_TEXT_LENGTH);
-        return;
+        // Send the details.
+        wifi["ssid"] = wifiSSID;
+        wifi["psk"] = wifiPSK;
+        wifi["redacted"] = false;
     }
-
-    // Get the JSON text for each side.
-    char leftText[CONF_SG_JSON_TEXT_LENGTH];
-    char rightText[CONF_SG_JSON_TEXT_LENGTH];
-    strain[SIDE_LEFT].writeJSON(leftText, CONF_SG_JSON_TEXT_LENGTH);
-    strain[SIDE_RIGHT].writeJSON(rightText, CONF_SG_JSON_TEXT_LENGTH);
-
-    // Write to the original text.
-    sprintf(
-        text, CONF_JSON_TEXT,
-        connectionMethod,
-        qEnvCovariance(0, 0), qEnvCovariance(0, 1), qEnvCovariance(1, 0), qEnvCovariance(1, 1),
-        rMeasCovariance(0, 0), rMeasCovariance(0, 1), rMeasCovariance(1, 0), rMeasCovariance(1, 1),
-        imuHowOften,
-        leftText, rightText,
-        mqttPacketSize); // TODO
+    else
+    {
+        // Don't send WiFi details.
+        wifi["ssid"] = "";
+        wifi["psk"] = "";
+        wifi["redacted"] = true;
+    }
 }
 
 void Config::toggleConnection()
@@ -181,4 +224,36 @@ void Config::removeKey()
 {
     LOGI(CONF_KEY, "Removing key from storage.");
     prefs.remove(CONF_KEY);
+}
+
+inline void Config::m_safeReadString(char *dest, const char *source, size_t maxLength)
+{
+    strncpy(dest, source, maxLength);
+    dest[maxLength - 1] = '\0';
+}
+
+void Config::m_writeMatrix(JsonArray jsonArray, Matrix<2, 2, float> matrix)
+{
+    // Top row
+    JsonArray topRow = jsonArray.add<JsonArray>();
+    topRow.add(matrix(0, 0));
+    topRow.add(matrix(0, 1));
+
+    JsonArray bottomRow = jsonArray.add<JsonArray>();
+    bottomRow.add(matrix(1, 0));
+    bottomRow.add(matrix(1, 1));
+}
+
+Matrix<2, 2, float> Config::m_readMatrix(JsonArray jsonArray)
+{
+    Matrix<2, 2, float> matrix;
+    JsonArray topRow = jsonArray[0];
+    matrix(0, 0) = topRow[0];
+    matrix(0, 1) = topRow[1];
+
+    JsonArray bottomRow = jsonArray[1];
+    matrix(1, 0) = bottomRow[0];
+    matrix(1, 1) = bottomRow[1];
+
+    return matrix;
 }

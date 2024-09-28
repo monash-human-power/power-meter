@@ -172,8 +172,8 @@ State *MQTTConnection::StateWiFiConnect::enter()
     {
         // Reset and request connection.
         WiFi.disconnect(); // Just to be safe.
-        LOGV("Networking", "Connecting to '" WIFI_SSID "'.");
-        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        LOGV("Networking", "Connecting to '%s'.", config.wifiSSID);
+        WiFi.begin(config.wifiSSID, config.wifiPSK);
 
         // Wait until WiFi is connected.
         for (uint32_t iterCount = 0; WiFi.status() != WL_CONNECTED && iterCount < WIFI_RECONNECT_ATTEMPT_TIME; iterCount++)
@@ -198,8 +198,8 @@ State *MQTTConnection::StateMQTTConnect::enter()
     // Initial setup
     m_connection.setAllowData(false); // Make sure we aren't accepting data until we are ready.
     powerMeter.leds.setConnState(CONN_STATE_CONNECTING_2);
-    LOGV("Networking", "Connecting to MQTT broker '" MQTT_BROKER "' on port " xstringify(MQTT_PORT) ".");
-    mqtt.setServer(MQTT_BROKER, MQTT_PORT);
+    LOGV("Networking", "Connecting to MQTT broker '%s' on port " xstringify(MQTT_PORT) ".", config.mqttBroker);
+    mqtt.setServer(config.mqttBroker, MQTT_PORT);
     mqtt.setCallback(mqttCallback);
     int iterations = 0;
 

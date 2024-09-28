@@ -197,4 +197,8 @@ enum EnumConnection
 #define SUPPLY_VOLTAGE 3300            // Power supply in mV, used to calculate the battery voltage.
 #define OFFSET_COMPENSATION_SAMPLES 200 // How many samples to average to calculate the offset.
 #define INVALID_TEMPERATURE -1000      // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
+
+// Settings for ArduinoJSON
+#define ARDUINOJSON_NEGATIVE_EXPONENTIATION_THRESHOLD 1e-2
+#define ARDUINOJSON_POSITIVE_EXPONENTIATION_THRESHOLD 1e4
 #include "Arduino.h"
