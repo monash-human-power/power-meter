@@ -138,7 +138,7 @@ def plot_graph(importers:List[Importer], title:str) -> None:
     plot_axes(ax_cadence, "Cadence [rpm]", importers)
     ax_cadence.set_title("Cadence")
     ax_cadence.set_ylabel("Cadence [$rpm$]")
-    ax_cadence.legend(loc="upper center")
+    ax_cadence.legend() #loc="upper center")
 
     # Plot the power axes
     plot_axes(ax_power, "Power [W]", importers)

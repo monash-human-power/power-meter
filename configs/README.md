@@ -1,10 +1,13 @@
 # Config files
 These JSON files contain calibration data and settings for the power meters.
+
+## Uploading over MQTT
 These can be uploaded over MQTT using:
 ```
 mosquitto_pub -t "/power/conf" -h "10.42.0.140" -f FirstPrototype_130.json
 ```
 
+## Uploading over serial
 They can also be uploaded over the serial port:
 1. Connect a USB cable and open a serial terminal.
 2. Press `g` to print out the current config stored on the device. Make changes as necessary.

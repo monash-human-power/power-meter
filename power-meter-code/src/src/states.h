@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-28
+ * @date 2024-10-01
  */
 #pragma once
 #include "../defines.h"
@@ -51,11 +51,14 @@ protected:
 class StateActive : public State
 {
 public:
-    StateActive(State &sleepState) : State("Active"), m_sleepState(sleepState) {}
+    StateActive(State &sleepState, State &flatState) : State("Active"), m_sleepState(sleepState), m_flatState(flatState) {}
     virtual State *enter();
 
 private:
     State &m_sleepState;
+    State &m_flatState;
+
+    uint32_t m_flatSuccessiveReadings = MINIMUM_BATTERY_SUCCESSIVE;
 
     /**
      * @brief Checks if the power meter is deemed to be inactive according to the IMU / rotation counter (no forwards rotations for x min).
@@ -78,6 +81,17 @@ public:
 
 private:
     State &m_activeState;
+};
+
+/**
+ * @brief Shuts the unit down permenantly until it is reset by changing the battery (or pressing reset).
+ * 
+ */
+class StateFlatBattery : public State
+{
+    public:
+    StateFlatBattery() : State("Flat battery") {}
+    virtual State *enter();
 };
 
 /**

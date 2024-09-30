@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-10-01
  */
 #include <Arduino.h>
 #include "defines.h"
@@ -23,7 +23,8 @@ Preferences prefs;
 
 // Main states for the state machine.
 extern StateSleep sleepState;
-StateActive activeState(sleepState);
+StateFlatBattery flatState;
+StateActive activeState(sleepState, flatState);
 StateSleep sleepState(activeState);
 
 PowerMeter powerMeter;
@@ -48,6 +49,7 @@ void setup()
     config.load();
     config.print();
 
+    delay(50); // Help the temp sensors start?
     // LEDs (important to get the task started early).
     xTaskCreatePinnedToCore(
         taskLED,
@@ -57,10 +59,11 @@ void setup()
         1,
         &ledTaskHandle,
         1);
-    delay(100); // Avoid race conditions and maybe help temp sensors start correctly?
+    delay(50); // Avoid race conditions and maybe help temp sensors start correctly?
 
     // Start the hardware.
     powerMeter.begin();
+    
     pinMode(PIN_BOOT, INPUT);
 
     // Initialise the selected connection.

@@ -8,7 +8,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-28
+ * @date 2024-10-01
  */
 #include "states.h"
 extern SemaphoreHandle_t serialMutex;
@@ -38,6 +38,23 @@ State *StateActive::enter()
         housekeeping.offsets[SIDE_LEFT] = config.strain[SIDE_LEFT].offset;
         housekeeping.offsets[SIDE_RIGHT] = config.strain[SIDE_RIGHT].offset;
         connectionBasePtr->addHousekeeping(housekeeping);
+
+        // Shut down if the battery is flat a certain number of times in a row.
+        if (housekeeping.battery < MINIMUM_BATTERY)
+        {
+            // Flat this time.
+            m_flatSuccessiveReadings--;
+            if (!m_flatSuccessiveReadings)
+            {
+                // Flat several times in a row. Time to shut down.
+                return &m_flatState;
+            }
+        }
+        else
+        {
+            // Reset counter.
+            m_flatSuccessiveReadings = MINIMUM_BATTERY_SUCCESSIVE;
+        }
 
         debugMemory();
 
@@ -146,6 +163,19 @@ State *StateSleep::enter()
 #endif
 
     // Start deep sleep. The MCU will restart on wake.
+    esp_deep_sleep_start();
+}
+
+State *StateFlatBattery::enter()
+{
+    LOGD("Flat", "Shutting down the hardware");
+    connectionBasePtr->disable();
+    powerMeter.leds.setImpendingSleep();
+    powerMeter.imuManager.enableMotion(); // TODO: Shutdown entirely.
+    delay(2000);
+    powerMeter.powerDown();
+    LOGD("Flat", "Going to sleep permenantly");
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
     esp_deep_sleep_start();
 }
 
