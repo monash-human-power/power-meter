@@ -15,7 +15,7 @@ inline float HousekeepingData::averageTemp()
 
 float LowSpeedData::cadence()
 {
-    if (lastRotationDuration != 0)
+    if (rotationEvent && lastRotationDuration != 0)
     {
         return 60e6/lastRotationDuration;
     }

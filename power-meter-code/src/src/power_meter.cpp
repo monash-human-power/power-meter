@@ -483,6 +483,7 @@ void taskLowSpeed(void *pvParameters)
             float right = powerMeter.sides[SIDE_RIGHT].averagePower;
             lowSpeed.power = left + right;
             lowSpeed.balance = 100 * right / lowSpeed.power;
+            lowSpeed.rotationEvent = true; // Genuine power and cadence reading.
         }
         else
         {

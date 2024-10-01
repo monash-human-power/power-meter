@@ -105,6 +105,12 @@ public:
      *
      */
     float balance;
+
+    /**
+     * @brief Whether this object was created as a result of a rotaton occurring or on a different schedule.
+     * 
+     */
+    bool rotationEvent = false;
 };
 
 class BaseData
