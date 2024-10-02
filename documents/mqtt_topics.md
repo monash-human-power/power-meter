@@ -1,29 +1,28 @@
-# MQTT Topics
+# MQTT Topics <!-- omit in toc -->
 When running in WiFi and MQTT mode, the power meter publishes data to several topics. All topics are prefixed by `/power/` to distinguish data sent to and from the power meter with other traffic on the broker.
 
-- [MQTT Topics](#mqtt-topics)
-  - [Published topics](#published-topics)
-    - [About this device (`/power/about`)](#about-this-device-powerabout)
-      - [Example](#example)
-      - [Key value pairs](#key-value-pairs)
-    - [Housekeeping data (`/power/housekeeping`)](#housekeeping-data-powerhousekeeping)
-      - [Example](#example-1)
-      - [Key value pairs](#key-value-pairs-1)
-    - [Slow speed data (`/power/power`)](#slow-speed-data-powerpower)
-      - [Example](#example-2)
-      - [Key value pairs](#key-value-pairs-2)
-    - [High speed IMU data (`/power/imu`)](#high-speed-imu-data-powerimu)
-      - [Record format](#record-format)
-    - [High speed strain gauge data (`/power/fast/left`, `/power/fast/right`)](#high-speed-strain-gauge-data-powerfastleft-powerfastright)
-      - [Record format](#record-format-1)
-  - [Subscribed topics](#subscribed-topics)
-    - [Set a new configurration (`/power/conf`)](#set-a-new-configurration-powerconf)
-    - [Calculate and apply new offsets on the strain gauge ADCs (`/power/offset`)](#calculate-and-apply-new-offsets-on-the-strain-gauge-adcs-poweroffset)
-      - [Example usage](#example-usage)
-    - [Save configs (`/power/save`)](#save-configs-powersave)
-    - [Reboot (`/power/reboot`)](#reboot-powerreboot)
-    - [Enter sleep mode (`/power/sleep`)](#enter-sleep-mode-powersleep)
-  - [Additional notes](#additional-notes)
+- [Published topics](#published-topics)
+  - [About this device (`/power/about`)](#about-this-device-powerabout)
+    - [Example](#example)
+    - [Key value pairs](#key-value-pairs)
+  - [Housekeeping data (`/power/housekeeping`)](#housekeeping-data-powerhousekeeping)
+    - [Example](#example-1)
+    - [Key value pairs](#key-value-pairs-1)
+  - [Slow speed data (`/power/power`)](#slow-speed-data-powerpower)
+    - [Example](#example-2)
+    - [Key value pairs](#key-value-pairs-2)
+  - [High speed IMU data (`/power/imu`)](#high-speed-imu-data-powerimu)
+    - [Record format](#record-format)
+  - [High speed strain gauge data (`/power/fast/left`, `/power/fast/right`)](#high-speed-strain-gauge-data-powerfastleft-powerfastright)
+    - [Record format](#record-format-1)
+- [Subscribed topics](#subscribed-topics)
+  - [Set a new configurration (`/power/conf`)](#set-a-new-configurration-powerconf)
+  - [Calculate and apply new offsets on the strain gauge ADCs (`/power/offset`)](#calculate-and-apply-new-offsets-on-the-strain-gauge-adcs-poweroffset)
+    - [Example usage](#example-usage)
+  - [Save configs (`/power/save`)](#save-configs-powersave)
+  - [Reboot (`/power/reboot`)](#reboot-powerreboot)
+  - [Enter sleep mode (`/power/sleep`)](#enter-sleep-mode-powersleep)
+- [Additional notes](#additional-notes)
 
 
 ## Published topics
@@ -178,7 +177,7 @@ Each message is comprised of many individual records. The oldest records are arr
 
 ## Subscribed topics
 ### Set a new configurration (`/power/conf`)
-See [here](../configs/README.md) for more information and alternative ways to set configs.
+See [here](../configs/README.md) for more information on the message format and alternative ways to set configs.
 
 ### Calculate and apply new offsets on the strain gauge ADCs (`/power/offset`)
 Messages sent to this topic will cause the device to take many samples from the ADC, average them and use them as the offset from now on. These offsets are not stored in flash memory and will be restored to the defaults or those loaded into flash memory upon reboot.
@@ -189,16 +188,16 @@ mosquitto_pub -t "/power/offset" -m ""
 ```
 
 ### Save configs (`/power/save`)
-Not implemented yet.
+*Not implemented yet.*
 
 ### Reboot (`/power/reboot`)
 This would be useful to load new configs / start from a defined base.
-Not implemented yet.
+*Not implemented yet.*
 
 ### Enter sleep mode (`/power/sleep`)
 This would be useful to shut the system down and save power manually. It would also be useful to cleanly disconnect from the current connection so that the router / device managing the connection doesn't throw a wobbly if power is removed and reapplied with no warning.
 
-Not implemented yet.
+*Not implemented yet.*
 
 ## Additional notes
 - Integers are sent using little endian.
