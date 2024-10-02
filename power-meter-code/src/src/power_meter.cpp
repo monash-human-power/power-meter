@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-10-01
+ * @date 2024-10-02
  */
 
 #include "power_meter.h"
@@ -482,7 +482,7 @@ void taskLowSpeed(void *pvParameters)
             float left = powerMeter.sides[SIDE_LEFT].averagePower;
             float right = powerMeter.sides[SIDE_RIGHT].averagePower;
             lowSpeed.power = left + right;
-            lowSpeed.balance = 100 * right / lowSpeed.power;
+            lowSpeed.balance = 100 * left / lowSpeed.power;
             lowSpeed.rotationEvent = true; // Genuine power and cadence reading.
         }
         else

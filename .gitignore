@@ -4,8 +4,7 @@ docs
 power-meter-code/src/constants.h
 .ipynb_checkpoints
 log.txt
-imu.csv
-about.txt
+*.fit
 
 ### KICAD ###
 power-meter-pcb/out

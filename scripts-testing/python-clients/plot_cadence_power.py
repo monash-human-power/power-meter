@@ -31,9 +31,12 @@ import numpy as np
 from typing import Tuple, List, Union
 from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import argparse
 from abc import ABC, abstractmethod
 import datetime
+from fit_tool.fit_file import FitFile
+from fit_tool.profile.messages.record_message import RecordMessage
 
 class Importer(ABC):
     """Base class for importing power and cadence data."""
@@ -50,8 +53,12 @@ class Importer(ABC):
 
     def _load(self, df:pd.DataFrame) -> None:
         """Imports the data and applies the specified offset."""
+        # Save and apply the time offset
         self.df = df
         self.df["Unix Timestamp [s]"] += self.offset
+
+        self.df["Left Power [W]"] = self.df["Balance [%]"] / 100 * self.df["Power [W]"]
+        self.df["Right Power [W]"] = (100 - self.df["Balance [%]"]) / 100 * self.df["Power [W]"]
 
     def get_data(self) -> pd.DataFrame:
         """Returns the cadence over time.
@@ -100,11 +107,47 @@ class ATrainingTrackerCSVImporter(Importer):
             return timestamp
         return column.apply(str_to_unix)
 
-class TCXImporter(Importer):
-    """Imports TCX files"""
+class FITImporter(Importer):
+    """Imports FIT files"""
     def __init__(self, file:str, offset:float, name:str="TCX file"):
-        raise NotImplementedError("Need to implement")
-        super().__init__(name)
+        super().__init__(name, offset=offset)
+        self.file = file
+    
+    def load(self) -> None:
+        fit_file = FitFile.from_file(self.file)
+        records = fit_file.records
+        timestamps = []
+        power = []
+        distance = []
+        speed = []
+        cadence = []
+        balance = []
+        for record in records:
+            message = record.message
+            if isinstance(message, RecordMessage):
+                timestamps.append(message.timestamp)
+                distance.append(message.distance)
+                power.append(message.power)
+                speed.append(message.speed)
+                cadence.append(message.cadence)
+                balance.append(message.left_right_balance)
+
+        return self._load(pd.DataFrame({
+            "Unix Timestamp [s]": np.array(timestamps) / 1000,
+            "Cadence [rpm]": cadence,
+            "Power [W]": power,
+            "Balance [%]": balance
+        }))
+
+def offset_all(importers:List[Importer], offset:float) -> None:
+    """Offsets all times on all importers by a given amount.
+
+    Args:
+        importers (List[Importer]): The importers to offset.
+        offset (float): The amount to offset by.
+    """
+    for i in importers:
+        i.df["Unix Timestamp [s]"] += offset
 
 def plot_axes(axes:Axes, field:str, importers:List[Importer]) -> None:
     """Plots the data for all importers over an axes.
@@ -118,7 +161,7 @@ def plot_axes(axes:Axes, field:str, importers:List[Importer]) -> None:
         data = i.get_data()
         axes.plot(data["Unix Timestamp [s]"].values, data[field].values, label=i.name)
 
-def plot_graph(importers:List[Importer], title:str) -> None:
+def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
     """Plots strain over time.
 
     Args:
@@ -145,12 +188,32 @@ def plot_graph(importers:List[Importer], title:str) -> None:
     ax_power.set_title("Power")
     ax_power.set_ylabel("Power [$W$]")
 
-    # Plot the power balance
-    plot_axes(ax_balance, "Balance [%]", importers)
-    ax_balance.set_title("Power balance between left and right sides")
-    ax_balance.set_ylabel("Balance [%]")
+    if show_balance:
+        # Plot the power balance
+        plot_axes(ax_balance, "Balance [%]", importers)
+        ax_balance.set_title("Power balance between left and right sides")
+        ax_balance.set_ylabel("Balance [%]")
+    else:
+        # Plot the power for each side.
+        colour_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+        for index, i in enumerate(importers):
+            data = i.get_data()
+            ax_balance.plot(data["Unix Timestamp [s]"].values, data["Left Power [W]"].values, "-", color=colour_cycle[index], label=f"{i.name} (left)")
+            ax_balance.plot(data["Unix Timestamp [s]"].values, data["Right Power [W]"].values, ":", color=colour_cycle[index], label=f"{i.name} (right)")
+
+        # Legend is needed (custom so we can just put the left and right sides without colours)
+        left_line = Line2D([0], [0], linestyle="-", color="black")
+        right_line = Line2D([0], [0], linestyle=":", color="black")
+        legend_lines = [left_line, right_line]
+        ax_balance.legend(legend_lines, ["Left side", "Right side"])
+
+        # Other formatting.
+        ax_balance.set_ylabel("Power [W]")
+        ax_balance.set_title("Power measured on each side")
+
     ax_balance.set_xlabel("Time [s]")
 
+    # Overall formatting.
     plt.suptitle(title)
     plt.tight_layout()
     plt.show()
@@ -218,7 +281,7 @@ def a_training_tracker_importer_pair(argument:str) -> ATrainingTrackerCSVImporte
     file, display, offset = importer_name_pair(argument)
     return ATrainingTrackerCSVImporter(file, offset, display)
 
-def tcx_importer_pair(argument:str) -> TCXImporter:
+def tcx_importer_pair(argument:str) -> FITImporter:
     """Parser that returns the importer.
 
     Args:
@@ -228,7 +291,7 @@ def tcx_importer_pair(argument:str) -> TCXImporter:
         TCXImporter: Importer matching the requests.
     """
     file, display, offset = importer_name_pair(argument)
-    return TCXImporter(file, offset, display)
+    return FITImporter(file, offset, display)
 
 def none_empty_list(inpt: Union[List[Importer], None]) -> List[Importer]:
     if inpt is None:
@@ -250,6 +313,19 @@ if __name__ == "__main__":
         type=str,
         default="Comparison between power meters",
     )
+    parser.add_argument(
+        "-b",
+        "--balance",
+        help="Plot the left-right power balance instead of calculating individual left-right power for each side.",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-g",
+        "--global-offset",
+        help="Global time offset in seconds.",
+        type=float,
+        default=0
+    )
     importer_group = parser.add_argument_group(
         "Importers",
         "Importers allow data in different formats to be processed."
@@ -269,14 +345,15 @@ if __name__ == "__main__":
         nargs="+"
     )
     importer_group.add_argument(
-        "-t",
-        "--tcx-files",
-        help="TCX file to import. Data is formatted as a series of sets of FOLDERNAME[,DISPLAY_NAME,[OFFSET]].  If the display name is not provided, the folder name will be used and the offset set to 0. The offset (in seconds) defaults to 0 if not specified.",
+        "-f",
+        "--fit-files",
+        help="FIT file to import. Data is formatted as a series of sets of FOLDERNAME[,DISPLAY_NAME,[OFFSET]].  If the display name is not provided, the folder name will be used and the offset set to 0. The offset (in seconds) defaults to 0 if not specified.",
         type=tcx_importer_pair,
         nargs="+"
     )
     args = parser.parse_args()
-    importers: List[Importer] = none_empty_list(args.custom) + none_empty_list(args.a_training_tracker) + none_empty_list(args.tcx_files)
+    importers: List[Importer] = none_empty_list(args.custom) + none_empty_list(args.a_training_tracker) + none_empty_list(args.fit_files)
     load_all(importers)
-    plot_graph(importers, args.title)
+    offset_all(importers, args.global_offset - importers[0].df["Unix Timestamp [s]"][0])
+    plot_graph(importers, args.title, args.balance)
     

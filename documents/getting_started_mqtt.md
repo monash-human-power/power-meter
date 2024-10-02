@@ -16,11 +16,20 @@
 1. Open a terminal and change the working directory to the [repository root](../).
 2. **Optional:** Create a python virtual environment to keep the packages installed in this project separate from the rest of the system.
     ```bash
+    # Linux
     pip3 -m venv .venv
+
+    # Windows
+    pip -m venv venv
     ```
 3. Activate the virtual environment if using it.
     ```bash
+    # Linux
     source .venv/bin/activate
+
+    # Windows
+    # See 
+    venv\Scripts\Activate.ps1
     ```
     You will notive that each line in the terminal now starts with `(.venv)`.
 4. Install the required packages:
