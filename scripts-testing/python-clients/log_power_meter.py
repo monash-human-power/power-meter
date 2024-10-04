@@ -470,6 +470,10 @@ class TorqueLiveChart(PolarLiveChart):
             Side.RIGHT: self.ax.plot([], [])[0],
         }
         self.latest = self.ax.axvline(0, color="r")
+        # self.points = {
+        #     Side.LEFT: self.ax.plot([], [], marker=".", markersize=10)[0],
+        #     Side.RIGHT: self.ax.plot([], [], marker=".", markersize=10)[0]
+        # }
 
     def update(self, converted: T) -> Tuple[Line2D]:
         # Extract the data
@@ -490,9 +494,12 @@ class TorqueLiveChart(PolarLiveChart):
         # Update the data
         self.lines[side].set_xdata(self.thetas[side])
         self.lines[side].set_ydata(self.torques[side])
+        # self.points[side].set_xdata([self.thetas[side][-1]])
+        # self.points[side].set_ydata([self.torques[side][-1]])
         self.latest.set_xdata([self.thetas[side][-1]])
 
         return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest
+        # return self.lines[Side.LEFT], self.lines[Side.RIGHT], self.latest, self.points[Side.LEFT], self.points[Side.RIGHT]
 
 
 class PowerLiveChart(PolarLiveChart):

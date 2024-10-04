@@ -45,6 +45,8 @@ import datetime
 from fit_tool.fit_file import FitFile
 from fit_tool.profile.messages.record_message import RecordMessage
 
+from common import add_time_args
+
 class Importer(ABC):
     """Base class for importing power and cadence data."""
     def __init__(self, name:str, offset:float): # , df:pd.DataFrame, offset:float):
@@ -352,29 +354,7 @@ if __name__ == "__main__":
         help="Plot the left-right power balance instead of calculating individual left-right power for each side.",
         action="store_true",
     )
-    time_group = parser.add_argument_group(
-        "Time",
-        "Parameters relating to time offsets and limiting the time periods plotted."
-    )
-    time_group.add_argument(
-        "-g",
-        "--global-offset",
-        help="Global time offset in seconds. This is mainly for making the x axis look nicer. The start and stop times also depend on this.",
-        type=float,
-        default=0
-    )
-    time_group.add_argument(
-        "--start",
-        help="The minimum time to show (after all offsets are applied).",
-        type=float,
-        default = None
-    )
-    time_group.add_argument(
-        "--stop",
-        help="The maximum time to show (after all offsets are applied).",
-        type=float,
-        default = None
-    )
+    add_time_args(parser)
     importer_group = parser.add_argument_group(
         "Importers",
         "Importers allow data in different formats to be processed."

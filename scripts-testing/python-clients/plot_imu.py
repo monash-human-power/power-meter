@@ -19,6 +19,7 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 import argparse
 
+from common import add_time_args, apply_time_args, apply_device_time_corrections
 
 def accel_to_angle(accel_x: np.ndarray, accel_y: np.ndarray) -> np.ndarray:
     """Converts X and Y acceleration to angles.
@@ -210,7 +211,7 @@ def plot_imu(df: pd.DataFrame, name: str = ""):
         name (str): Name of the dataset to print in the figure title.
     """
     # Extract the data from the device.
-    times = df["Device Timestamp [us]"].values / 1e6
+    times = df["Time"]
     accel_x = df["Acceleration X [m/s^2]"].values
     accel_y = df["Acceleration Y [m/s^2]"].values
     gyro_z = df["Gyro Z [rad/s]"].values
@@ -282,7 +283,13 @@ if __name__ == "__main__":
         type=str,
         default="IMU Timeseries data",
     )
-
+    add_time_args(parser, add_device_compensate=True)
     args = parser.parse_args()
+
     imu_df = pd.read_csv(f"{args.input}/imu.csv")
-    plot_imu(imu_df, args.title)
+    if len(imu_df):
+        imu_df = apply_time_args(imu_df, args)
+        apply_device_time_corrections(imu_df, args)
+        plot_imu(imu_df, args.title)
+    else:
+        print("The IMU file is empty. Please use another dataset.")

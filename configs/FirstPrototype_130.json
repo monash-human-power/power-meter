@@ -37,7 +37,7 @@
         "temp-coef": 0
     },
     "mqtt": {
-        "length": 20,
+        "length": 60,
         "broker": "koyuga.local"
     },
     "wifi": {

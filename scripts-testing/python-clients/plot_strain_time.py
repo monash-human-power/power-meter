@@ -23,7 +23,10 @@ from typing import Tuple
 import matplotlib.pyplot as plt
 import argparse
 
-def left_raw_to_nm(raw:np.ndarray) -> np.ndarray:
+from common import add_time_args, apply_time_args, apply_device_time_corrections
+
+
+def left_raw_to_nm(raw: np.ndarray) -> np.ndarray:
     """Converts raw values to kg.
 
     Args:
@@ -39,7 +42,8 @@ def left_raw_to_nm(raw:np.ndarray) -> np.ndarray:
     print(f"Left coefficient: {coef}")
     return (raw - c) * coef
 
-def right_raw_to_nm(raw:np.ndarray) -> np.ndarray:
+
+def right_raw_to_nm(raw: np.ndarray) -> np.ndarray:
     """Converts raw values to kg.
 
     Args:
@@ -55,7 +59,16 @@ def right_raw_to_nm(raw:np.ndarray) -> np.ndarray:
     print(f"Right coefficient: {coef}")
     return (raw - c) * coef
 
-def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw:bool, use_start_compensate:bool, show_raw_limits:bool, local_calibration:bool) -> None:
+
+def plot_strain(
+    left_df: pd.DataFrame,
+    right_df: pd.DataFrame,
+    title: str,
+    show_raw: bool,
+    use_start_compensate: bool,
+    show_raw_limits: bool,
+    local_calibration: bool,
+) -> None:
     """Plots strain over time.
 
     Args:
@@ -64,15 +77,11 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
         title (str): The title to use.
     """
 
-    # Convert the times to nicer units.
-    left_df["Time"] = left_df["Device Timestamp [us]"]*1e-6
-    right_df["Time"] = right_df["Device Timestamp [us]"]*1e-6
-
     if use_start_compensate:
         # Use the first reading for offset compensation if requested.
         if len(left_df) > 0:
             left_df["Raw [uint24]"] -= left_df["Raw [uint24]"][0]
-        
+
         if len(right_df) > 0:
             right_df["Raw [uint24]"] -= right_df["Raw [uint24]"][0]
 
@@ -85,12 +94,16 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
         # Plot the raw limits if desired
         if show_raw_limits:
             ax_raw.axhline(y=0, color="r", linestyle="dotted")
-            ax_raw.axhline(y=(2**24)-1, color="r", linestyle="dotted")
-            ax_raw.axhline(y=(2**23)-1, color="r", linestyle="dotted")
+            ax_raw.axhline(y=(2**24) - 1, color="r", linestyle="dotted")
+            ax_raw.axhline(y=(2**23) - 1, color="r", linestyle="dotted")
 
         # Plot the raw values
-        ax_raw.plot(right_df["Time"].values, right_df["Raw [uint24]"].values, label="Right side")
-        ax_raw.plot(left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side")
+        ax_raw.plot(
+            right_df["Time"].values, right_df["Raw [uint24]"].values, label="Right side"
+        )
+        ax_raw.plot(
+            left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side"
+        )
         ax_raw.set_ylabel("Raw values")
         ax_raw.set_title("Raw readings")
         ax_raw.grid()
@@ -129,6 +142,7 @@ def plot_strain(left_df:pd.DataFrame, right_df:pd.DataFrame, title:str, show_raw
     plt.suptitle(title)
     plt.show()
 
+
 if __name__ == "__main__":
     # Extract command line arguments
     parser = argparse.ArgumentParser(
@@ -152,29 +166,46 @@ if __name__ == "__main__":
         default="Strain Timeseries data",
     )
     parser.add_argument(
-        "--no-raw",
-        help="Hides the raw valued subplot",
-        action="store_false"
+        "--no-raw", help="Hides the raw valued subplot", action="store_false"
     )
     parser.add_argument(
         "-c",
         "--compensate",
         help="If provided, uses the first reading for each side to offset compensate the raw values.",
-        action="store_true"
+        action="store_true",
     )
     parser.add_argument(
         "-l",
         "--raw-limits",
         help="If provided, shows 0, (2^24)-1 and (2^23)-1 on the raw plot.",
-        action="store_true"
+        action="store_true",
     )
     parser.add_argument(
         "--local-calibration",
         help="If provided, calculates the torques using the raw values. If not provided, uses the torque provided by the power meter.",
-        action="store_true"
+        action="store_true",
     )
-
+    add_time_args(parser, add_device_compensate=True)
     args = parser.parse_args()
+
+    # Load and process the data frames
     left_strain_df = pd.read_csv(f"{args.input}/left_strain.csv")
+    if len(left_strain_df):
+        left_strain_df = apply_time_args(left_strain_df, args)
+        apply_device_time_corrections(left_strain_df, args)
+
     right_strain_df = pd.read_csv(f"{args.input}/right_strain.csv")
-    plot_strain(left_strain_df, right_strain_df, args.title, args.no_raw, args.compensate, args.raw_limits, args.local_calibration)
+    if len(right_strain_df):
+        right_strain_df = apply_time_args(right_strain_df, args)
+        apply_device_time_corrections(right_strain_df, args)
+
+    # Plot
+    plot_strain(
+        left_strain_df,
+        right_strain_df,
+        args.title,
+        args.no_raw,
+        args.compensate,
+        args.raw_limits,
+        args.local_calibration,
+    )

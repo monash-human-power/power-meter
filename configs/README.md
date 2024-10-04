@@ -120,7 +120,7 @@ The config is published as part of a message on the [`/power/about`](../document
 ### Uploading over MQTT
 These can be uploaded over MQTT using:
 ```
-mosquitto_pub -t "/power/conf" -h "10.42.0.140" -f FirstPrototype_130.json
+mosquitto_pub -t "/power/conf" -f FirstPrototype_130.json
 ```
 
 ### Uploading over serial
