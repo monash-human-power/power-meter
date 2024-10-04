@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """plot_strain_time.py
-usage: plot_strain_time.py [-h] -i INPUT [-t TITLE] [--no-raw] [-c] [-l] [--local-calibration]
+usage: plot_strain_time.py [-h] -i INPUT [-t TITLE] [--no-raw] [-c] [-l] [--local-calibration] [-g GLOBAL_OFFSET] [--start START] [--stop STOP] [-d]
 
 Plots Strain gauge-related timeseries data.
 
@@ -14,6 +14,15 @@ options:
   -c, --compensate      If provided, uses the first reading for each side to offset compensate the raw values. (default: False)
   -l, --raw-limits      If provided, shows 0, (2^24)-1 and (2^23)-1 on the raw plot. (default: False)
   --local-calibration   If provided, calculates the torques using the raw values. If not provided, uses the torque provided by the power meter. (default: False)
+
+Time:
+  Parameters relating to time offsets and limiting the time periods plotted.
+
+  -g GLOBAL_OFFSET, --global-offset GLOBAL_OFFSET
+                        Global time offset in seconds. This is mainly for making the x axis look nicer. The start and stop times also depend on this. (default: 0)
+  --start START         The minimum time to show (after all offsets are applied). (default: None)
+  --stop STOP           The maximum time to show (after all offsets are applied). (default: None)
+  -d, --device-time     Does not correct for the device time potentially being reset. (default: True)
 
 Written by Jotham Gates and Oscar Varney for MHP, 2024
 """
@@ -76,6 +85,8 @@ def plot_strain(
         right_df (pd.DataFrame): Right data
         title (str): The title to use.
     """
+    # Strategically place the dodgy (right) side at the back and adjust the colours to match the other graphs
+    colour_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
 
     if use_start_compensate:
         # Use the first reading for offset compensation if requested.
@@ -99,14 +110,15 @@ def plot_strain(
 
         # Plot the raw values
         ax_raw.plot(
-            right_df["Time"].values, right_df["Raw [uint24]"].values, label="Right side"
+            left_df["Time"].values, left_df["Raw [uint24]"].values, color=colour_cycle[0], label="Left side"
         )
         ax_raw.plot(
-            left_df["Time"].values, left_df["Raw [uint24]"].values, label="Left side"
+            right_df["Time"].values, right_df["Raw [uint24]"].values, color=colour_cycle[1], label="Right side"
         )
         ax_raw.set_ylabel("Raw values")
         ax_raw.set_title("Raw readings")
         ax_raw.grid()
+        ax_raw.legend()
     else:
         # Create a figure without a raw subplot.
         fig = plt.figure()
@@ -120,8 +132,8 @@ def plot_strain(
     else:
         left_weight = left_df["Torque [Nm]"].values
         right_weight = right_df["Torque [Nm]"].values
-    ax_weight.plot(right_df["Time"].values, right_weight, label="Right side")
-    ax_weight.plot(left_df["Time"].values, left_weight, label="Left side")
+    ax_weight.plot(right_df["Time"].values, right_weight, color=colour_cycle[1], label="Right side")
+    ax_weight.plot(left_df["Time"].values, left_weight, color=colour_cycle[0], label="Left side")
     ax_weight.set_ylabel("Torque [Nm]")
     ax_weight.grid()
 
@@ -129,7 +141,8 @@ def plot_strain(
     if len(left_df) != 0 and len(right_df) != 0:
         # Data for both sides
         ax_weight.set_title("Calibrated torque for both sides")
-        ax_weight.legend()
+        if not show_raw:
+            ax_weight.legend()
     elif len(left_df) != 0:
         # Left data only
         ax_weight.set_title("Calibrated torque on the left side")

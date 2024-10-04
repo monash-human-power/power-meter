@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+"""plot_temperature.py
+usage: plot_temperature.py [-h] -i INPUT [-t TITLE] [-g GLOBAL_OFFSET] [--start START] [--stop STOP]
+
+Plots the temperature over time.
+
+options:
+  -h, --help            show this help message and exit
+  -i INPUT, --input INPUT
+                        The folder containing the CSV files. (default: None)
+  -t TITLE, --title TITLE
+                        Title to put on the figure (default: Temperature timeseries data)
+
+Time:
+  Parameters relating to time offsets and limiting the time periods plotted.
+
+  -g GLOBAL_OFFSET, --global-offset GLOBAL_OFFSET
+                        Global time offset in seconds. This is mainly for making the x axis look nicer. The start and stop times also depend on this. (default: 0)
+  --start START         The minimum time to show (after all offsets are applied). (default: None)
+  --stop STOP           The maximum time to show (after all offsets are applied). (default: None)
+
+Written by Jotham Gates and Oscar Varney for MHP, 2024
+"""
 import pandas as pd
 import numpy as np
 from typing import Tuple, Union
@@ -63,7 +85,7 @@ def plot_housekeeping(housekeeping_df: pd.DataFrame, title: str) -> None:
 if __name__ == "__main__":
     # Extract command line arguments
     parser = argparse.ArgumentParser(
-        description="Plots Strain gauge-related timeseries data.",
+        description="Plots the temperature over time.",
         conflict_handler="resolve",  # Cope with -h being used for host like mosquitto clients
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog="Written by Jotham Gates and Oscar Varney for MHP, 2024",

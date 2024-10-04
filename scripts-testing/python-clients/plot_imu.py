@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """plot_imu.py
-usage: plot_imu.py [-h] -i INPUT [-t TITLE]
+usage: plot_imu.py [-h] -i INPUT [-t TITLE] [-g GLOBAL_OFFSET] [--start START] [--stop STOP] [-d]
 
 Plots IMU-related timeseries data. Alternative methods of calculating orientation are used to provide something to compare the inbuilt Kalman filter to.
 
@@ -10,6 +10,15 @@ options:
                         The folder containing the CSV files. (default: None)
   -t TITLE, --title TITLE
                         Title to put on the figure (default: IMU Timeseries data)
+
+Time:
+  Parameters relating to time offsets and limiting the time periods plotted.
+
+  -g GLOBAL_OFFSET, --global-offset GLOBAL_OFFSET
+                        Global time offset in seconds. This is mainly for making the x axis look nicer. The start and stop times also depend on this. (default: 0)
+  --start START         The minimum time to show (after all offsets are applied). (default: None)
+  --stop STOP           The maximum time to show (after all offsets are applied). (default: None)
+  -d, --device-time     Does not correct for the device time potentially being reset. (default: True)
 
 Written by Jotham Gates and Oscar Varney for MHP, 2024
 """
