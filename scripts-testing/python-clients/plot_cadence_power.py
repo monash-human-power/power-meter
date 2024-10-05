@@ -53,18 +53,30 @@ class Importer(ABC):
         self.df = None
         self.name = name
         self.offset = offset
+        self.scale = 1
 
     @abstractmethod
     def load(self) -> None:
         """Imports the data and applies the specified offset.
         Call self._load to apply the offset and save the frame."""
         pass
+    
+    
+    def set_scale(self, scale:float) -> None:
+        """Sets a scaling factor.
+
+        Args:
+            scale (float): The scalar to scale power by.
+        """
+        self.scale = scale
 
     def _load(self, df:pd.DataFrame) -> None:
         """Imports the data and applies the specified offset."""
         # Save and apply the time offset
         self.df = df
         self.df["Unix Timestamp [s]"] += self.offset
+
+        self.df["Power [W]"] *= self.scale
 
         self.df["Left Power [W]"] = self.df["Balance [%]"] / 100 * self.df["Power [W]"]
         self.df["Right Power [W]"] = (100 - self.df["Balance [%]"]) / 100 * self.df["Power [W]"]
@@ -183,6 +195,8 @@ def plot_axes(axes:Axes, field:str, importers:List[Importer]) -> None:
     for i in importers:
         data = i.get_data()
         axes.plot(data["Unix Timestamp [s]"].values, data[field].values, label=i.name)
+    
+    axes.grid()
 
 def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
     """Plots strain over time.
@@ -214,7 +228,7 @@ def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
     if show_balance:
         # Plot the power balance
         plot_axes(ax_balance, "Balance [%]", importers)
-        ax_balance.set_title("Power balance between left and right sides")
+        ax_balance.set_title("Power balance between left and right sides (only capable power meters shown)")
         ax_balance.set_ylabel("Balance [%]")
     else:
         # Plot the power for each side.
@@ -232,13 +246,14 @@ def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
 
         # Other formatting.
         ax_balance.set_ylabel("Power [W]")
-        ax_balance.set_title("Power measured on each side")
+        ax_balance.set_title("Power measured on each side (only capable power meters shown)")
+        ax_balance.grid()
 
     ax_balance.set_xlabel("Time [s]")
 
     # Overall formatting.
     plt.suptitle(title)
-    plt.tight_layout()
+    # plt.tight_layout()
     plt.show()
 
 def load_all(importers: List[Importer]) -> None:
@@ -380,8 +395,19 @@ if __name__ == "__main__":
         type=tcx_importer_pair,
         nargs="+"
     )
+    importer_group.add_argument(
+        "--scale-a",
+        help="Scalar value to scale the data from a training tracker. This is useful if the power meter logged through this is set to the incorrect crank length.",
+        type=float,
+        default=1
+    )
     args = parser.parse_args()
-    importers: List[Importer] = none_empty_list(args.custom) + none_empty_list(args.a_training_tracker) + none_empty_list(args.fit_files)
+    # Scale the A training tracker power as needed.
+    a_training_tracker_importers = none_empty_list(args.a_training_tracker)
+    for a in a_training_tracker_importers:
+        a.set_scale(args.scale_a)
+
+    importers: List[Importer] = none_empty_list(args.custom) + a_training_tracker_importers + none_empty_list(args.fit_files)
     if not len(importers):
         # No input files.
         print("No input files specified! Please try again using the '-c', '-a' or '-f' options, or run again using '--help' to show more information.")

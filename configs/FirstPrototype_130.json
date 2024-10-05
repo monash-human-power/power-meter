@@ -26,18 +26,18 @@
     "sleep-time": 0,
     "left-strain": {
         "offset": 0,
-        "coef": -0.000367965609742472,
+        "coef": -0.00040763281162742694,
         "temp-test": 24.25,
         "temp-coef": 0
     },
     "right-strain": {
         "offset": 0,
-        "coef": 0.0002246571016720624,
+        "coef": 0.00023426676245480286,
         "temp-test": 24.25,
         "temp-coef": 0
     },
     "mqtt": {
-        "length": 60,
+        "length": 100,
         "broker": "koyuga.local"
     },
     "wifi": {
@@ -46,3 +46,4 @@
         "redacted": true
     }
 }
+

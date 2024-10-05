@@ -45,8 +45,10 @@ def left_raw_to_nm(raw: np.ndarray) -> np.ndarray:
         np.ndarray: Outputs scaled to kg
     """
     # Linear-relationship.
-    m = -3532.9388551007
-    c = 9958806.90678679
+    # m = -3532.9388551007 # Old
+    m = -3189.14464910197
+    # c = 9958806.90678679 # Old
+    c = 0
     coef = 10 * 0.13 / m
     print(f"Left coefficient: {coef}")
     return (raw - c) * coef
@@ -62,8 +64,10 @@ def right_raw_to_nm(raw: np.ndarray) -> np.ndarray:
         np.ndarray: Outputs scaled to kg
     """
     # Linear-relationship.
-    m = 5786.5965078533
-    c = 6275241.9683
+    # m = 5786.5965078533 # Old
+    m = 5549.22937585228
+    # c = 6275241.9683 # Old
+    c = 0
     coef = 10 * 0.13 / m
     print(f"Right coefficient: {coef}")
     return (raw - c) * coef
@@ -109,12 +113,15 @@ def plot_strain(
             ax_raw.axhline(y=(2**23) - 1, color="r", linestyle="dotted")
 
         # Plot the raw values
-        ax_raw.plot(
-            left_df["Time"].values, left_df["Raw [uint24]"].values, color=colour_cycle[0], label="Left side"
-        )
-        ax_raw.plot(
-            right_df["Time"].values, right_df["Raw [uint24]"].values, color=colour_cycle[1], label="Right side"
-        )
+        if len(left_df):
+            ax_raw.plot(
+                left_df["Time"].values, left_df["Raw [uint24]"].values, color=colour_cycle[0], label="Left side"
+            )
+        
+        if len(right_df):
+            ax_raw.plot(
+                right_df["Time"].values, right_df["Raw [uint24]"].values, color=colour_cycle[1], label="Right side"
+            )
         ax_raw.set_ylabel("Raw values")
         ax_raw.set_title("Raw readings")
         ax_raw.grid()
@@ -132,8 +139,12 @@ def plot_strain(
     else:
         left_weight = left_df["Torque [Nm]"].values
         right_weight = right_df["Torque [Nm]"].values
-    ax_weight.plot(right_df["Time"].values, right_weight, color=colour_cycle[1], label="Right side")
-    ax_weight.plot(left_df["Time"].values, left_weight, color=colour_cycle[0], label="Left side")
+    
+    if len(right_df):
+        ax_weight.plot(right_df["Time"].values, right_weight, color=colour_cycle[1], label="Right side")
+    
+    if len(left_df):
+        ax_weight.plot(left_df["Time"].values, left_weight, color=colour_cycle[0], label="Left side")
     ax_weight.set_ylabel("Torque [Nm]")
     ax_weight.grid()
 
