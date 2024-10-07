@@ -487,3 +487,11 @@ class PowerLiveChart(PolarLiveChart):
         self.update_title(
             f"${power:.0f}$ W, ${balance:.0f}$ % balance over the last rotation"
         )
+
+def none_empty_list(inpt: Union[List[T], None]) -> List[T]:
+    """Returns the input if it is not None. Otherwise an empty list is returned.
+    """
+    if inpt is None:
+        return []
+    else:
+        return inpt

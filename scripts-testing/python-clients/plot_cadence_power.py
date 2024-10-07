@@ -45,7 +45,7 @@ import datetime
 from fit_tool.fit_file import FitFile
 from fit_tool.profile.messages.record_message import RecordMessage
 
-from common import add_time_args
+from common import add_time_args, none_empty_list
 
 class Importer(ABC):
     """Base class for importing power and cadence data."""
@@ -342,12 +342,6 @@ def tcx_importer_pair(argument:str) -> FITImporter:
     """
     file, display, offset = importer_name_pair(argument)
     return FITImporter(file, offset, display)
-
-def none_empty_list(inpt: Union[List[Importer], None]) -> List[Importer]:
-    if inpt is None:
-        return []
-    else:
-        return inpt
 
 if __name__ == "__main__":
     # Extract command line arguments
