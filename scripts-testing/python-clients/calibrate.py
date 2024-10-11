@@ -121,7 +121,7 @@ def plot_calibration(left_sheets:List[pd.DataFrame], left_sheet_names:List[str],
     
     ax_right.set_xlabel("Torque applied [Nm]")
     ax_right.set_xlim(right=weight_to_torque(max_weight))
-    plt.suptitle("Reported ADC values vs applied torque")
+    plt.suptitle("Reported ADC measuremets vs applied torque during calibration")
     plt.tight_layout()
     # plt.show()
 
