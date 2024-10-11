@@ -119,8 +119,6 @@ void setup()
     // Create tasks to read data from ADCs
     powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
     powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
-
-    digitalWrite(PIN_LEDR, LOW);
 }
 
 void loop()

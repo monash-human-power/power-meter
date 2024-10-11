@@ -4,7 +4,7 @@
 import argparse
 import pandas as pd
 import numpy as np
-from typing import Union, List
+from typing import Tuple, Union, List
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.figure import Figure
@@ -15,6 +15,7 @@ from sklearn.linear_model import LinearRegression
 from common import none_empty_list, Side
 
 GRAVITY = 9.81
+CRANK_LENGTH = 0.13
 
 def remove_nan(sheets:List[pd.DataFrame]) -> None:
     """Removes rows with invalid weights and readings.
@@ -40,40 +41,88 @@ def load_sheets(file:str, sheet_args:Union[List[str], None]) -> List[pd.DataFram
     remove_nan(sheets)
     return sheets
 
+def weight_to_torque(weight:np.ndarray) -> np.ndarray:
+    """Converts the given weight to a torque.
+
+    Args:
+        weight (np.ndarray): The mass applied in kg (assuming G = 9.81ms^-2)
+
+    Returns:
+        np.ndarray: Torque in Nm
+    """
+    force = weight * GRAVITY
+    torque = force * CRANK_LENGTH
+    return torque
+
 def linear_regress_side(sheet:pd.DataFrame) -> LinearRegression:
-    forces = (sheet["Weight"].values * GRAVITY).reshape(-1, 1)
+    forces = (weight_to_torque(sheet["Weight"].values)).reshape(-1, 1)
     return LinearRegression().fit(forces, sheet["Raw"].values.reshape(-1, 1))
 
 def score_linear_regress(sheet:pd.DataFrame, reg:LinearRegression) -> float:
-    forces = (sheet["Weight"].values * GRAVITY).reshape(-1, 1)
+    forces = (weight_to_torque(sheet["Weight"].values)).reshape(-1, 1)
     return reg.score(forces, sheet["Raw"].values.reshape(-1, 1))
 
-def plot_side_calibration(ax:Axes, sheets:List[pd.DataFrame], sheet_names:List[str], side:Side, max_weight:float):
+def separate_scientific(num:float) -> Tuple[float, int]:
+    # https://stackoverflow.com/a/13490731
+    exp = int(np.log10(abs(num)))
+    return num / (10**exp), exp
+
+def format_scientific(num:float) -> str:
+    # return '{0}^{{{1:+03}}}'.format(*separate_scientific(-1.234e9))
+    mantissa, exp = separate_scientific(num)
+    return f"{mantissa:.2f} \\times 10^{{{exp}}}"
+
+def plot_side_calibration(row:List[Axes], sheets:List[pd.DataFrame], sheet_names:List[str], side:Side, max_weight:float):
+    # ax, lax = row
+    ax = row
     for i, sheet in enumerate(sheets):
+        # Perform linear regression
+        reg = linear_regress_side(sheet)
+        # reg_label = f"$f(x) = {reg.coef_[0][0]:.0f} x + {format_scientific(reg.intercept_[0])} , R^2={score_linear_regress(sheet, reg):.3f}$"
+        reg_label = None
         # Plot the raw data
-        ax.scatter(sheet["Weight"].values * GRAVITY, sheet["Raw"].values, label=sheet_names[i])
+        # Date
+        #label = f"{get_average_temp(sheet):.1f}°C measured ({sheet_names[i][6:8]}/{sheet_names[i][4:6]}/{sheet_names[i][0:4]})"
+        # Temperature only
+        label = f"${get_average_temp(sheet):.1f}^\circ C$, $R^2={score_linear_regress(sheet, reg):.3f}$"
+
+        ax.scatter(weight_to_torque(sheet["Weight"].values), sheet["Raw"].values, label=label)
 
         # Perform linear regression and display the results
-        reg = linear_regress_side(sheet)
-        x = np.array([0, max_weight*GRAVITY])
+        x = np.array([0, weight_to_torque(max_weight)])
         y = reg.predict(x.reshape(-1, 1))
-        ax.plot(x, y, ":", label=f"$f(x) = {reg.coef_[0][0]} x + {reg.intercept_[0]} , R^2={score_linear_regress(sheet, reg)}$")
+        ax.plot(x, y, ":", label=reg_label)
     
     ax.set_ylabel("Reading from ADC")
     ax.set_title(f"{side.value.title()} side")
+
+    # Set the legend on the right with its own axis
     ax.legend()
+    # h, l = ax.get_legend_handles_labels()
+    # lax.legend(h, l, borderaxespad=0, frameon=False)
+    # lax.axis("off")
 
 def plot_calibration(left_sheets:List[pd.DataFrame], left_sheet_names:List[str], right_sheets:List[pd.DataFrame], right_sheet_names:List[str], max_weight:float) -> None:
     fig = plt.figure()
-    gs = fig.add_gridspec(2, height_ratios=[1, 1])
-    ax_left, ax_right = gs.subplots(sharex=False)
-    ax_left:Axes
-    ax_right:Axes
+    # gs = fig.add_gridspec(2, 2, height_ratios=[1, 1], width_ratios=[1, 1])
+    # row_left, row_right = gs.subplots(sharex=True)
+    # row_left:List[Axes]
+    # row_right:List[Axes]
+    # ax_right = row_right[0]
 
-    plot_side_calibration(ax_left, left_sheets, left_sheet_names, Side.LEFT, max_weight)
-    plot_side_calibration(ax_right, right_sheets, right_sheet_names, Side.RIGHT, max_weight)
-    ax_right.set_xlabel("Force applied [N]")
-    ax_right.set_xlim(right=max_weight*GRAVITY)
+    gs = fig.add_gridspec(2, 1)
+    row_left, row_right = gs.subplots(sharex=True)
+    row_left:List[Axes]
+    row_right:List[Axes]
+    ax_right = row_right
+
+    plot_side_calibration(row_left, left_sheets, left_sheet_names, Side.LEFT, max_weight)
+    plot_side_calibration(row_right, right_sheets, right_sheet_names, Side.RIGHT, max_weight)
+    
+    ax_right.set_xlabel("Torque applied [Nm]")
+    ax_right.set_xlim(right=weight_to_torque(max_weight))
+    plt.suptitle("Reported ADC values vs applied torque")
+    plt.tight_layout()
     # plt.show()
 
 def plot_raw_vs_temp_side(ax:Axes, sheets:List[pd.DataFrame], sheet_names:List[str], side:Side):
