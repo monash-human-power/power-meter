@@ -54,12 +54,15 @@ def weight_to_torque(weight:np.ndarray) -> np.ndarray:
     torque = force * CRANK_LENGTH
     return torque
 
+def convert_weight_units(weight:np.ndarray) -> np.ndarray:
+    return weight
+
 def linear_regress_side(sheet:pd.DataFrame) -> LinearRegression:
-    forces = (weight_to_torque(sheet["Weight"].values)).reshape(-1, 1)
+    forces = (convert_weight_units(sheet["Weight"].values)).reshape(-1, 1)
     return LinearRegression().fit(forces, sheet["Raw"].values.reshape(-1, 1))
 
 def score_linear_regress(sheet:pd.DataFrame, reg:LinearRegression) -> float:
-    forces = (weight_to_torque(sheet["Weight"].values)).reshape(-1, 1)
+    forces = (convert_weight_units(sheet["Weight"].values)).reshape(-1, 1)
     return reg.score(forces, sheet["Raw"].values.reshape(-1, 1))
 
 def separate_scientific(num:float) -> Tuple[float, int]:
@@ -86,10 +89,10 @@ def plot_side_calibration(row:List[Axes], sheets:List[pd.DataFrame], sheet_names
         # Temperature only
         label = f"${get_average_temp(sheet):.1f}^\circ C$, $R^2={score_linear_regress(sheet, reg):.3f}$"
 
-        ax.scatter(weight_to_torque(sheet["Weight"].values), sheet["Raw"].values, label=label)
+        ax.scatter(convert_weight_units(sheet["Weight"].values), sheet["Raw"].values, label=label)
 
         # Perform linear regression and display the results
-        x = np.array([0, weight_to_torque(max_weight)])
+        x = np.array([0, convert_weight_units(max_weight)])
         y = reg.predict(x.reshape(-1, 1))
         ax.plot(x, y, ":", label=reg_label)
     
@@ -103,7 +106,8 @@ def plot_side_calibration(row:List[Axes], sheets:List[pd.DataFrame], sheet_names
     # lax.axis("off")
 
 def plot_calibration(left_sheets:List[pd.DataFrame], left_sheet_names:List[str], right_sheets:List[pd.DataFrame], right_sheet_names:List[str], max_weight:float) -> None:
-    fig = plt.figure()
+    fig = plt.figure(figsize=[7.1111111,4])
+    # fig = plt.figure()
     # gs = fig.add_gridspec(2, 2, height_ratios=[1, 1], width_ratios=[1, 1])
     # row_left, row_right = gs.subplots(sharex=True)
     # row_left:List[Axes]
@@ -119,9 +123,10 @@ def plot_calibration(left_sheets:List[pd.DataFrame], left_sheet_names:List[str],
     plot_side_calibration(row_left, left_sheets, left_sheet_names, Side.LEFT, max_weight)
     plot_side_calibration(row_right, right_sheets, right_sheet_names, Side.RIGHT, max_weight)
     
-    ax_right.set_xlabel("Torque applied [Nm]")
-    ax_right.set_xlim(right=weight_to_torque(max_weight))
-    plt.suptitle("Reported ADC measuremets vs applied torque during calibration")
+    # ax_right.set_xlabel("Torque applied [Nm]")
+    ax_right.set_xlabel("Mass applied [kg]")
+    ax_right.set_xlim(right=convert_weight_units(max_weight))
+    plt.suptitle("ADC measurements vs applied mass during calibration")
     plt.tight_layout()
     # plt.show()
 

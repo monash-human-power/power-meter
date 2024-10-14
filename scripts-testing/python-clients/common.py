@@ -318,7 +318,7 @@ class PolarLiveChart(LiveChart):
             ymax (int): Maximum Y value.
             show_current_angle (bool, optional): Add a red line showing the current position. Defaults to True.
         """
-        fig, ax = plt.subplots(subplot_kw={"projection": "polar"})
+        fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=[3,3])
         ax.set_ylim(0, ymax)
         if show_current_angle:
             self.latest = ax.axvline(0, color="r")
@@ -446,7 +446,7 @@ class PowerLiveChart(PolarLiveChart):
         # Initialise the graph.
         super().__init__(
             max_history,
-            "Instantaneous power [W] vs pedal angle [$^\circ$]",
+            "Instantaneous power [W]\nvs pedal angle [$^\circ$]",
             800,
             show_current_angle,
         )

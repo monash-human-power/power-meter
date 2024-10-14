@@ -207,7 +207,7 @@ def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
         title (str): The title to use.
     """
     # Create a figure with a raw subplot.
-    fig = plt.figure()
+    fig = plt.figure(figsize=[7.11111, 4])
     gs = fig.add_gridspec(3, height_ratios=[1, 1, 1])
     ax_cadence, ax_power, ax_balance = gs.subplots(sharex=True)
     ax_cadence:Axes
@@ -218,7 +218,7 @@ def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
     plot_axes(ax_cadence, "Cadence [rpm]", importers)
     ax_cadence.set_title("Cadence")
     ax_cadence.set_ylabel("Cadence [$rpm$]")
-    ax_cadence.legend() #loc="upper center")
+    ax_cadence.legend(loc="upper left")
 
     # Plot the power axes
     plot_axes(ax_power, "Power [W]", importers)
@@ -253,7 +253,7 @@ def plot_graph(importers:List[Importer], title:str, show_balance:bool) -> None:
 
     # Overall formatting.
     plt.suptitle(title)
-    # plt.tight_layout()
+    plt.tight_layout()
     plt.show()
 
 def load_all(importers: List[Importer]) -> None:
