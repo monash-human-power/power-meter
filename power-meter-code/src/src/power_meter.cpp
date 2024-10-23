@@ -369,6 +369,7 @@ void taskLED(void *pvParameters)
     // digitalWrite(PIN_LEDR, HIGH);
     // digitalWrite(PIN_LEDB, HIGH);
     // powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);
+    // powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
     // while (true)
     // {
     //     delay(1000);

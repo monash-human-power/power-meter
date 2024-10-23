@@ -236,36 +236,36 @@ def plot_imu(df: pd.DataFrame, name: str = ""):
     cycle = plt.rcParams["axes.prop_cycle"].by_key()["color"]
     # plt.close()
     fig = plt.figure()
-    gs = fig.add_gridspec(3, height_ratios=[0.5, 0.5, 1])
+    gs = fig.add_gridspec(3, height_ratios=[1, 1, 1])
     ax_accel, ax_omega, ax_theta = gs.subplots(sharex=True)
 
     # Acceleration
     ax_accel.plot(times, accel_x, "r", label="X")
     ax_accel.plot(times, accel_y, "g", label="Y")
     ax_accel.legend()
-    ax_accel.set_ylabel("Acceleration [$m/s^2$]")
+    ax_accel.set_ylabel("$\\alpha$ [$m/s^2$]")
     ax_accel.set_title("Accelerometer readings, corrected for centripedal forces")
 
     # Velocity (omega)
-    ax_omega.plot(times, gyro_z, label="Gyro", color=cycle[0])
+    ax_omega.plot(times, gyro_z, label="Gyroscope", color=cycle[0])
     ax_omega.plot(times, kalman_velocity, label="Kalman", color=cycle[2])
     ax_omega.plot(times, device_velocity, label="Onboard Kalman", color=cycle[3])
-    ax_omega.set_ylabel("Velocity [$rad/s$]")
+    ax_omega.set_ylabel("$\\omega$ [$rad/s$]")
     ax_omega.set_title("Velocity")
     ax_omega.legend()
 
     # Position (theta)
     ax_theta.axhline(-np.pi, color="black")
     ax_theta.axhline(np.pi, color="black")
-    ax_theta.plot(times, gyro_position, label="Gyro", color=cycle[0])
+    ax_theta.plot(times, gyro_position, label="Gyroscope", color=cycle[0])
     ax_theta.plot(times, accel_position, label="Accelerometer", color=cycle[1])
     ax_theta.plot(times, kalman_position, label="Kalman", color=cycle[2])
     ax_theta.plot(times, device_position, label="Onboard Kalman", color=cycle[3])
     ax_theta.set_xlabel("Times [$s$]")
-    ax_theta.set_ylabel("Position [$rad$]")
+    ax_theta.set_ylabel("$\\theta$ [$rad$]")
     ax_theta.set_title("Position calculations using different methods")
     ax_theta.legend()
-
+    plt.tight_layout()
     plt.suptitle(name)
     plt.show()
 
