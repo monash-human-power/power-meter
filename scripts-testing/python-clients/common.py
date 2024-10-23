@@ -16,6 +16,7 @@ from multiprocessing import Queue
 from typing import TypeVar, Tuple
 from dataclasses import dataclass
 import struct
+import json
 
 T = TypeVar("U")
 
@@ -318,7 +319,7 @@ class PolarLiveChart(LiveChart):
             ymax (int): Maximum Y value.
             show_current_angle (bool, optional): Add a red line showing the current position. Defaults to True.
         """
-        fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=[3,3])
+        fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=[3, 3])
         ax.set_ylim(0, ymax)
         if show_current_angle:
             self.latest = ax.axvline(0, color="r")
@@ -488,10 +489,133 @@ class PowerLiveChart(PolarLiveChart):
             f"${power:.0f}$ W, ${balance:.0f}$ % balance over the last rotation"
         )
 
+
 def none_empty_list(inpt: Union[List[T], None]) -> List[T]:
-    """Returns the input if it is not None. Otherwise an empty list is returned.
-    """
+    """Returns the input if it is not None. Otherwise an empty list is returned."""
     if inpt is None:
         return []
     else:
         return inpt
+
+
+class Config(ABC):
+    @abstractmethod
+    def as_dict(self) -> dict:
+        """Converts the current config (or section) to a dictionary.
+
+        Returns:
+            dict: The dictionary representation.
+        """
+        pass
+
+
+class StrainConfig(Config):
+    def __init__(
+        self, data: dict = {"offset": 0, "coef": 0, "temp-test": 0, "temp-coef": 0}
+    ) -> None:
+        """Initialises the calibration."""
+        self.strain_offset = data["offset"]
+        self.strain_coef = data["coef"]
+        self.temp_coef = data["temp-coef"]
+        self.temp_offset = data["temp-test"]
+
+    def as_dict(self):
+        return {
+            "offset": self.strain_offset,
+            "coef": self.strain_coef,
+            "temp-test": self.temp_offset,
+            "temp-coef": self.temp_coef,
+        }
+    
+    def apply(self, raw_values:np.ndarray, temperatures:np.ndarray) -> np.ndarray:
+        """Applies the calibration to the raw data to calculate torque.
+
+        Args:
+            raw_values (np.ndarray): The raw values.
+            temperatures (np.ndarray): The temperature values.
+
+        Returns:
+            np.ndarray: The processed data.
+        """
+        return self.strain_coef*(raw_values - self.strain_offset) * (1-self.temp_coef) * (temperatures - self.temp_offset)
+
+
+class KalmanConfig(Config):
+    def __init__(
+        self, data: dict = {"Q": [[0, 0], [0, 0]], "R": [[0, 0], [0, 0]]}
+    ) -> None:
+        self.Q = data["Q"]
+        self.R = data["R"]
+
+    def as_dict(self):
+        return {"Q": self.Q, "R": self.R}
+
+
+class MQTTConfig(Config):
+    def __init__(self, data: dict = {"length": 0, "broker": ""}) -> None:
+        self.length = data["length"]
+        self.broker = data["broker"]
+
+    def as_dict(self):
+        return {"length": self.length, "broker": self.broker}
+
+
+class WiFiConfig(Config):
+    def __init__(self, data: dict = {"ssid": "", "psk": "", "redacted": True}) -> None:
+        self.ssid = data["ssid"]
+        self.psk = data["psk"]
+        self.redacted = data["redacted"]
+
+    def as_dict(self):
+        return {"ssid": self.ssid, "psk": self.psk, "redacted": self.redacted}
+
+
+class PowerMeterConfig(Config):
+    def __init__(self) -> None:
+        """Initialises the config."""
+        self.connection = 0
+        self.kalman = KalmanConfig()
+        self.imu_how_often = 0
+        self.sleep_time = 0
+        self.left_strain = StrainConfig()
+        self.right_strain = StrainConfig()
+        self.mqtt = MQTTConfig()
+        self.wifi = WiFiConfig()
+
+    def as_dict(self):
+        return {
+            "connection": self.connection,
+            "kalman": self.kalman.as_dict(),
+            "imuHowOften": self.imu_how_often,
+            "sleep-time": self.sleep_time,
+            "left-strain": self.left_strain.as_dict(),
+            "right-strain": self.right_strain.as_dict(),
+            "mqtt": self.mqtt.as_dict(),
+            "wifi": self.wifi.as_dict()
+        }
+
+    def load_dict(self, data: dict) -> None:
+        """Loads a JSON file as the config.
+
+        Args:
+            fname (str): The filename.
+        """
+        self.connection = data["connection"]
+        self.kalman = KalmanConfig(data["kalman"])
+        self.imu_how_often = data["imuHowOften"]
+        self.sleep_time = data["sleep-time"]
+        self.left_strain = StrainConfig(data["left-strain"])
+        self.right_strain = StrainConfig(data["right-strain"])
+        self.mqtt = MQTTConfig(data["mqtt"])
+        self.wifi = WiFiConfig(data["wifi"])
+
+    def load_file(self, filename:str) -> None:
+        with open(filename, "r") as file:
+            data = json.load(file)
+        
+        self.load_dict(data)
+    
+    def save_file(self, filename:str) -> None:
+        data = self.as_dict()
+        with open(filename, "w") as file:
+            json.dump(data, file)
