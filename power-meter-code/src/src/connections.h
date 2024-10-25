@@ -115,6 +115,12 @@ public:
      */
     void setAllowData(bool state);
 
+    /**
+     * @brief Indicates whether a message is currently being sent (in case the power supply rail does weird things and data needs to be discarded).
+     * 
+     */
+    bool isTransmitting = false;
+
 protected:
     /**
      * @brief Queues that all connection types are expected to accept.

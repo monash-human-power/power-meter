@@ -216,7 +216,7 @@ class IMUData:
 class StrainData:
     """Class for storing and processing data from a strain gauge"""
 
-    SIZE = 24
+    SIZE = 25
 
     def __init__(self, data: bytes) -> None:
         """Initialises the object.
@@ -231,10 +231,11 @@ class StrainData:
             self.raw,
             self.torque,
             self.power,
-        ) = struct.unpack("<LffLff", data)
+            self.transmitting
+        ) = struct.unpack("<LffLff?", data)
 
     def __str__(self) -> str:
-        return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad {self.raw:>11d}raw {self.torque:>8.2f}Nm {self.power:>8.2f}W"
+        return f"{self.timestamp:>10d}: {self.velocity:>8.2f}rad/s {self.position:>8.1f}rad {self.raw:>11d}raw {self.torque:>8.2f}Nm {self.power:>8.2f}W {'Currently' if self.transmitting else 'Not'} transmitting."
 
 
 class LiveChart(ABC):
@@ -320,6 +321,7 @@ class PolarLiveChart(LiveChart):
             show_current_angle (bool, optional): Add a red line showing the current position. Defaults to True.
         """
         fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=[3, 3])
+        # fig, ax = plt.subplots()
         ax.set_ylim(0, ymax)
         if show_current_angle:
             self.latest = ax.axvline(0, color="r")

@@ -96,6 +96,7 @@ Will be translated to:
 
 #### (3) Converting ADC values to torque
 The current formula is:
+
 $$
 \tau (x, t) = S_c \times (x - S_o) \times (1 - T_c \times (t - T_o))
 $$

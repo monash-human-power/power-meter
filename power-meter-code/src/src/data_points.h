@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-04
+ * @date 2024-10-25
  */
 #pragma once
 #include "../defines.h"
@@ -185,6 +185,12 @@ class HighSpeedData : public BaseData
 {
 public:
     /**
+     * @brief Flag for whether a transmission took place whilst reading this point (may need to be discarded if on the right side if so).
+     * 
+     */
+    bool isTransmitting;
+
+    /**
      * @brief The raw reading from the strain gauge.
      * This is a 24 bit number.
      *
@@ -214,5 +220,5 @@ public:
      */
     void toBytes(uint8_t *buffer);
 
-    static const int FAST_BYTES_SIZE = 4 + 4 + 4 + BASE_BYTES_SIZE;
+    static const int FAST_BYTES_SIZE = 4 + 4 + 4 + BASE_BYTES_SIZE + 1;
 };

@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-10
+ * @date 2024-10-25
  */
 #include "data_points.h"
 
@@ -17,7 +17,7 @@ float LowSpeedData::cadence()
 {
     if (rotationEvent && lastRotationDuration != 0)
     {
-        return 60e6/lastRotationDuration;
+        return 60e6 / lastRotationDuration;
     }
     else
     {
@@ -34,10 +34,9 @@ void BaseData::baseBytes(uint8_t *buffer)
 {
     // We can't just copy the entire struct due to the potential for byte packing.
     ADD_TO_BYTES(timestamp, buffer, 0); // Add the timestamp
-    ADD_TO_BYTES(velocity, buffer, 4); // Add the velocity
-    ADD_TO_BYTES(position, buffer, 8); // Add the position
+    ADD_TO_BYTES(velocity, buffer, 4);  // Add the velocity
+    ADD_TO_BYTES(position, buffer, 8);  // Add the position
 }
-
 
 void IMUData::toBytes(uint8_t *buffer)
 {
@@ -63,4 +62,5 @@ void HighSpeedData::toBytes(uint8_t *buffer)
     ADD_TO_BYTES(calcTorque, buffer, BASE_BYTES_SIZE + 4);
     float calcPower = power();
     ADD_TO_BYTES(calcPower, buffer, BASE_BYTES_SIZE + 8);
+    buffer[BASE_BYTES_SIZE + 12] = isTransmitting;
 }

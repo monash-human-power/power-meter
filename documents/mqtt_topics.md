@@ -166,14 +166,15 @@ This message contains multiple records of the 80Hz sampled strain gauge data for
 Each message is comprised of many individual records. The oldest records are arranged at the start of the message, whilst the most recent are at the back. Each message will be a multiple of the size of each record's length. The number of records per message is set in the [configurration](../configs/README.md).
 
 #### Record format
-| Byte offset in record |        Data type        | Size in bytes | Description                                                                                                                                                     |
-| :-------------------: | :---------------------: | :-----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-|           0           | unsigned 32 bit integer |       4       | The device time in microseconds when the sample was captured.                                                                                                   |
-|           4           |          float          |       4       | The angular velocity in radians per second of the power meter. This is an output from the on-board Kalman filter that has been predicted at the current time.   |
-|           8           |          float          |       4       | The position in radians of the power meter. This is an output from the on-board Kalman filter that has been predicted at the current time.                      |
-|          12           | unsigned 24 bit integer |       4       | The raw reading from the ADC. Whilst the output from the ADCs is a 24 bit number, the value is being sent as an unsigned 32 bit integer to simplify processing. |
-|          16           |          float          |       4       | The calculated torque in Nm.                                                                                                                                    |
-|          20           |          float          |       4       | The calculate power in W. This is the torque multiplied by the angular velocity.                                                                                |
+| Byte offset in record |        Data type        | Size in bytes | Description                                                                                                                                                          |
+| :-------------------: | :---------------------: | :-----------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|           0           | unsigned 32 bit integer |       4       | The device time in microseconds when the sample was captured.                                                                                                        |
+|           4           |          float          |       4       | The angular velocity in radians per second of the power meter. This is an output from the on-board Kalman filter that has been predicted at the current time.        |
+|           8           |          float          |       4       | The position in radians of the power meter. This is an output from the on-board Kalman filter that has been predicted at the current time.                           |
+|          12           | unsigned 24 bit integer |       4       | The raw reading from the ADC. Whilst the output from the ADCs is a 24 bit number, the value is being sent as an unsigned 32 bit integer to simplify processing.      |
+|          16           |          float          |       4       | The calculated torque in Nm.                                                                                                                                         |
+|          20           |          float          |       4       | The calculate power in W. This is the torque multiplied by the angular velocity.                                                                                     |
+|          24           |          bool           |       1       | Whether the device was transmitting when the sample was taken. This might be useful for noise filtering as the power supply on the microcontroller side is affected. |
 
 ## Subscribed topics
 ### Set a new configurration (`/power/conf`)

@@ -150,7 +150,7 @@ class CSVSide:
         # Open the file and write a heading.
         self.file = open(f"{output_dir}/{side.value}_strain.csv", "w")
         self.file.write(
-            "Unix Timestamp [s],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W]\n"
+            "Unix Timestamp [s],Device Timestamp [us],Timestep[us],Velocity [rad/s],Position [rad],Raw [uint24],Torque [Nm],Power [W],Transmitting [bool]\n"
         )
 
         # Initialise time step calculation
@@ -174,7 +174,7 @@ class CSVSide:
             # print(f"{self.side.name}: ({timestep:>10d}) {i}")
             raw_sum += i.raw
             self.file.write(
-                f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power}\n"
+                f"{unix_time},{i.timestamp},{timestep},{i.velocity},{i.position},{i.raw},{i.torque},{i.power},{i.transmitting}\n"
             )
 
         # Print out the average

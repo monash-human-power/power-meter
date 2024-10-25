@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-10
+ * @date 2024-10-25
  */
 #include "connection_mqtt.h"
 #include "config.h"
@@ -45,7 +45,16 @@ void MQTTConnection::begin()
 
 #define MQTT_LOG_PUBLISH(topic, payload)              \
     powerMeter.leds.setConnState(CONN_STATE_SENDING); \
+    isTransmitting = true;                            \
     mqtt.publish(topic, payload);                     \
+    isTransmitting = false;                           \
+    powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
+
+#define MQTT_LOG_PUBLISH_FROM_STATE(topic, payload)   \
+    powerMeter.leds.setConnState(CONN_STATE_SENDING); \
+    m_connection.isTransmitting = true;               \
+    mqtt.publish(topic, payload);                     \
+    m_connection.isTransmitting = false;              \
     powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
 
 // #define MQTT_LOG_PUBLISH(topic, payload) mqtt.publish(topic, payload)
@@ -59,7 +68,9 @@ void MQTTConnection::begin()
 
 #define MQTT_LOG_PUBLISH_BUF(topic, payload, length)  \
     powerMeter.leds.setConnState(CONN_STATE_SENDING); \
+    isTransmitting = true;                            \
     mqtt.publish(topic, payload, length);             \
+    isTransmitting = false;                           \
     powerMeter.leds.setConnState(CONN_STATE_ACTIVE)
 
 // #define MQTT_LOG_PUBLISH_BUF(topic, payload, length) mqtt.publish(topic, payload, length)
@@ -301,7 +312,7 @@ void MQTTConnection::StateActive::sendAboutMQTTMessage()
 
     // Successfully connected.
     // Publish
-    MQTT_LOG_PUBLISH(MQTT_TOPIC_ABOUT, payload);
+    MQTT_LOG_PUBLISH_FROM_STATE(MQTT_TOPIC_ABOUT, payload);
 }
 
 State *MQTTConnection::StateShutdown::enter()

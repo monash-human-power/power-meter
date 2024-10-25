@@ -4,7 +4,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-10-02
+ * @date 2024-10-25
  */
 
 #include "power_meter.h"
@@ -368,8 +368,19 @@ void taskLED(void *pvParameters)
     // Look pretty in photos
     // digitalWrite(PIN_LEDR, HIGH);
     // digitalWrite(PIN_LEDB, HIGH);
+    // digitalWrite(PIN_LEDG, HIGH);
     // powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(true);
     // powerMeter.sides[SIDE_LEFT].tempSensor.setLED(true);
+    // while (true)
+    // {
+    //     delay(1000);
+    // }
+
+    // digitalWrite(PIN_LEDR, LOW);
+    // digitalWrite(PIN_LEDB, LOW);
+    // digitalWrite(PIN_LEDG, LOW);
+    // powerMeter.sides[SIDE_RIGHT].tempSensor.setLED(false);
+    // powerMeter.sides[SIDE_LEFT].tempSensor.setLED(false);
     // while (true)
     // {
     //     delay(1000);
