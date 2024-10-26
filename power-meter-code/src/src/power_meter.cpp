@@ -47,6 +47,7 @@ void Side::readDataTask()
         // notification.
         uint32_t timestamp;
         bool success = xTaskNotifyWait(0, 0xffffffff, &timestamp, pdMS_TO_TICKS(100));
+        bool isTransmitting = connectionBasePtr->isTransmitting;
 
         uint32_t raw;
         if (success)
@@ -66,7 +67,7 @@ void Side::readDataTask()
             if (m_offsetSteps == 0)
             {
                 // No offset compensation. Proceed as normal.
-                processData(timestamp, state, raw);
+                processData(timestamp, state, raw, isTransmitting);
             }
             else
             {
@@ -93,7 +94,7 @@ void Side::readDataTask()
     }
 }
 
-inline void Side::processData(uint32_t timestamp, Matrix<2, 1, float> state, uint32_t raw)
+inline void Side::processData(uint32_t timestamp, Matrix<2, 1, float> state, uint32_t raw, bool isTransmitting)
 {
     // Create the object and copy main parameters
     HighSpeedData data;
@@ -104,6 +105,7 @@ inline void Side::processData(uint32_t timestamp, Matrix<2, 1, float> state, uin
 
     // Finish calculating and send raw to where it needs to go.
     data.torque = m_calculateTorque(raw, tempSensor.getLastTemp());
+    data.isTransmitting = isTransmitting;
     connectionBasePtr->addHighSpeed(data, m_side);
 
     // The rotation most likely occurred before this reading, so calculate average power for the previous rotation and

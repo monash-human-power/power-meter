@@ -98,7 +98,7 @@ Will be translated to:
 The current formula is:
 
 $$
-\tau (x, t) = S_c \times (x - S_o) \times (1 - T_c \times (t - T_o))
+\tau (x, t) = S_c \times (x - S_o) \times (1 - T_c) \times (t - T_o)
 $$
 
 ##### Where <!-- omit in toc -->

@@ -60,8 +60,9 @@ public:
      * @param timestamp the timestamp in microseconds.
      * @param position the angle and velocity.
      * @param raw the raw value from the ADC.
+     * @param isTransmitting whether the MCU was transmitting / performing activities that could affect the reading.
      */
-    void processData(uint32_t timestamp, Matrix<2, 1, float> position, uint32_t raw);
+    void processData(uint32_t timestamp, Matrix<2, 1, float> position, uint32_t raw, bool isTransmitting);
 
     /**
      * @brief Tells the ADC to perform offset calibration the next time data is read.
