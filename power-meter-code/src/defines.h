@@ -116,30 +116,26 @@
  */
 // Logging (with mutexes)
 #define SERIAL_TAKE() xSemaphoreTake(serialMutex, portMAX_DELAY)
-#define SERIAL_GIVE() \
-    delay(200);       \
-    xSemaphoreGive(serialMutex)
-// #define SERIAL_TAKE()
-// #define SERIAL_GIVE()
-#define LOGV(tag, format, ...)            \
-    SERIAL_TAKE();                        \
-    ESP_LOGV(tag, format, ##__VA_ARGS__); \
+#define SERIAL_GIVE() xSemaphoreGive(serialMutex)
+#define LOGV(tag, format, ...)                 \
+    SERIAL_TAKE();                             \
+    log_v("[%s] " format, tag, ##__VA_ARGS__); \
     SERIAL_GIVE()
-#define LOGD(tag, format, ...)            \
-    SERIAL_TAKE();                        \
-    ESP_LOGD(tag, format, ##__VA_ARGS__); \
+#define LOGD(tag, format, ...)                 \
+    SERIAL_TAKE();                             \
+    log_d("[%s] " format, tag, ##__VA_ARGS__); \
     SERIAL_GIVE()
-#define LOGI(tag, format, ...)            \
-    SERIAL_TAKE();                        \
-    ESP_LOGI(tag, format, ##__VA_ARGS__); \
+#define LOGI(tag, format, ...)                 \
+    SERIAL_TAKE();                             \
+    log_i("[%s] " format, tag, ##__VA_ARGS__); \
     SERIAL_GIVE()
-#define LOGW(tag, format, ...)            \
-    SERIAL_TAKE();                        \
-    ESP_LOGW(tag, format, ##__VA_ARGS__); \
+#define LOGW(tag, format, ...)                 \
+    SERIAL_TAKE();                             \
+    log_w("[%s] " format, tag, ##__VA_ARGS__); \
     SERIAL_GIVE()
-#define LOGE(tag, format, ...)            \
-    SERIAL_TAKE();                        \
-    ESP_LOGE(tag, format, ##__VA_ARGS__); \
+#define LOGE(tag, format, ...)                 \
+    SERIAL_TAKE();                             \
+    log_e("[%s] " format, tag, ##__VA_ARGS__); \
     SERIAL_GIVE()
 
 // https://gcc.gnu.org/onlinedocs/gcc-4.8.5/cpp/Stringification.html
