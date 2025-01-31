@@ -59,7 +59,7 @@ void BLEConnection::runActive()
         // Power
         int16_t power = lowSpeed.power;
         m_measData[2] = (uint8_t)(power);
-        m_measData[3] = (uint8_t)(power > 8);
+        m_measData[3] = (uint8_t)(power >> 8);
 
         // Power balance
         m_measData[4] = 2 * lowSpeed.balance; // In 0.5% steps.

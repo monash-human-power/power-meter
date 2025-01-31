@@ -4829,7 +4829,6 @@
 	)
 	(label "USB.D_P"
 		(at 124.46 133.35 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4840,7 +4839,6 @@
 	)
 	(label "USB.D_N"
 		(at 87.63 148.59 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4851,7 +4849,6 @@
 	)
 	(label "USB.D_N"
 		(at 124.46 135.89 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4862,7 +4859,6 @@
 	)
 	(label "USB.D_P"
 		(at 87.63 151.13 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4873,7 +4869,6 @@
 	)
 	(label "USB.D_P"
 		(at 43.18 148.59 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4884,7 +4879,6 @@
 	)
 	(label "USB.D_N"
 		(at 43.18 151.13 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4896,7 +4890,6 @@
 	(hierarchical_label "USB{D_P D_N}"
 		(shape bidirectional)
 		(at 138.43 187.96 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -4908,7 +4901,6 @@
 	(hierarchical_label "Battery voltage"
 		(shape output)
 		(at 255.27 134.62 0)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)

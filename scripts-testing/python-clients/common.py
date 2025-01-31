@@ -320,9 +320,9 @@ class PolarLiveChart(LiveChart):
             ymax (int): Maximum Y value.
             show_current_angle (bool, optional): Add a red line showing the current position. Defaults to True.
         """
-        fig, ax = plt.subplots(subplot_kw={"projection": "polar"}, figsize=[3, 3])
+        fig, ax = plt.subplots(subplot_kw={"projection": "polar"}) #, figsize=[3, 3])
         # fig, ax = plt.subplots()
-        ax.set_ylim(0, ymax)
+        # ax.set_ylim(0, ymax)
         if show_current_angle:
             self.latest = ax.axvline(0, color="r")
         super().__init__(fig, ax, max_history, title)
