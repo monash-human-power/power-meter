@@ -5,7 +5,7 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-28
+ * @date 2025-08-16
  */
 #pragma once
 #define SW_VERSION "s0.1.0"
@@ -87,7 +87,7 @@
 #elif HW_VERSION == HW_VERSION_V1_0_5
 #define PIN_BATTERY_VOLTAGE 15 // Bodge wire as original is shorted to ground.
 #elif HW_VERSION == HW_VERSION_V1_1_1
-#define PIN_BATTERY_VOLTAGE 13 // Bodge wire as original is shorted to ground.
+#define PIN_BATTERY_VOLTAGE 13
 #endif
 
 // Extra GPIO pins
@@ -192,6 +192,7 @@ enum EnumConnState
 #define KALMAN_P0 {1e6, 1e6, 1e6, 1e6} // Initial covariance. High numbers mean we don't know to start with.
 
 #define SUPPLY_VOLTAGE 3300             // Power supply in mV, used to calculate the battery voltage.
+#define VOLTAGE_DIVIDER_RATIO 2         // Set to 1 if PIN_BATTERY_VOLTAGE is directly connected to the battery (the original V1.0.4 and first V1.1.1 boards are currently like this).
 #define OFFSET_COMPENSATION_SAMPLES 200 // How many samples to average to calculate the offset.
 #define INVALID_TEMPERATURE -1000       // Invalid temperature so that I don't have to work out formatting NaN in a JSON compatible way.
 

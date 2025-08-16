@@ -7,26 +7,27 @@
  *
  * @author Jotham Gates and Oscar Varney, MHP
  * @version 0.1.0
- * @date 2024-09-28
+ * @date 2025-08-16
  */
 #pragma once
 
 #define DEVICE_NAME "Power meter prototype" // Name of the power meter for easier identification later.
 
 /**
- * Hardware version (v{MAJOR}.{MINOR}.{PATCH})
+ * Hardware version is defined in `platform.ini`.
  */
-#define HW_VERSION_V1_0_4 1000004
-#define HW_VERSION_V1_0_5 1000005
-#define HW_VERSION_V1_1_1 1001001
-// #define HW_VERSION HW_VERSION_V1_0_5
-#define HW_VERSION HW_VERSION_V1_1_1
+
 /**
  * @brief Constants for the Kalman filter used to estimate the current rotation angle and angular velocity.
  * 
  */
 #define DEFAULT_KALMAN_Q {0.002, 0, 0, 0.1} // Environmental covariance matrix.
 #define DEFAULT_KALMAN_R {100, 0, 0, 0.01} // Measurement covariance matrix.
+
+/**
+ * @brief Constants for the strain gauge calibration.
+ * 
+ */
 #define DEFAULT_STRAIN_OFFSET 0
 #define DEFAULT_STRAIN_COEFFICIENT ((1/2873.3978550876277)*9.81*0.13) // Converted to Nm.
 #define DEFAULT_STRAIN_TEMP_CO 0
@@ -37,6 +38,9 @@
  * 
  */
 #define DEFAULT_SLEEP_TIME 600 // 10 minutes of no rotations to sleep.
+
+#define MINIMUM_BATTERY 3060 // Battery voltage to shut down at.
+#define MINIMUM_BATTERY_SUCCESSIVE 3 // Needs to be this many successive readings before shutting down.
 
 /**
  * @brief Relative physical offset of the IMU from the axle centre (in m).

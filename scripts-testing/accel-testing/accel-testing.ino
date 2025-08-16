@@ -9,7 +9,7 @@ This script is based off the [ICM42670P Arduino library `Polling_SPI`](https://g
 #include "ICM42670P.h"
 
 // Accelerometer
-#define PIN_ACCEL_INTERRUPT 38
+#define PIN_ACCEL_INTERRUPT 21 // 21 for V1.1.1, 38 for V1.0.4
 #define PIN_SPI_SDO 39
 #define PIN_SPI_SDI 40
 #define PIN_SPI_SCLK 41

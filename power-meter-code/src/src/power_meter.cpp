@@ -458,7 +458,7 @@ void PowerMeter::offsetCompensate()
 uint32_t PowerMeter::batteryVoltage()
 {
     // return analogRead(PIN_BATTERY_VOLTAGE);
-    return (analogRead(PIN_BATTERY_VOLTAGE) * SUPPLY_VOLTAGE) >> 12;
+    return (analogRead(PIN_BATTERY_VOLTAGE) * SUPPLY_VOLTAGE * VOLTAGE_DIVIDER_RATIO) >> 12;
 }
 
 bool waitLowSpeedNofity(uint32_t timeout)

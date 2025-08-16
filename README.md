@@ -23,9 +23,10 @@ This is the code repository for a Final Year Project (FYP) to develop a crankset
 - See [here](./configs/README.md) for information on configuring the power meter.
 - See [here](./documents/mqtt_topics.md) for information on MQTT topics used when communicating using this protocol.
 - If you are a member of MHP, then the Notion page for this project can be found [here](https://www.notion.so/monashhumanpower/Power-Pedals-Cranks-FYP-3e6eb409a05642b1ad961b32c2f40aa7).
+- The reports submitted for the project are [here](https://github.com/monash-human-power/power-meter-docs/releases) (private repository).
 
 ## Schematic and PCB layout
-The schematic and PCB layout were completed using [KiCAD 8](https://www.kicad.org/). The design files are in the [`power-meter-pcb`](./power-meter-pcb/) folder.
+The schematic and PCB layout were completed using [KiCAD 9](https://www.kicad.org/). The design files are in the [`power-meter-pcb`](./power-meter-pcb/) folder.
 
 ## Code
 The firmware is written to use the Arduino environment of Platform IO and is located in the [`power-meter-code`](power-meter-code) directory.
