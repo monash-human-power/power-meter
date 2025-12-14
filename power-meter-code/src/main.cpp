@@ -15,9 +15,10 @@
 #include "src/connection_mqtt.h"
 #include "src/connection_ble.h"
 #include "src/config.h"
+#include "src/lights.h"
 
 SemaphoreHandle_t serialMutex;
-TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle;
+TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle, fancyLedTaskHandle;
 portMUX_TYPE spinlock = portMUX_INITIALIZER_UNLOCKED;
 Preferences prefs;
 
@@ -70,23 +71,23 @@ void setup()
     switch (config.connectionMethod)
     {
     case CONNECTION_MQTT:
-        connectionMQTT.begin();
+        // connectionMQTT.begin();
         connectionBasePtr = &connectionMQTT;
         break;
     case CONNECTION_BLE:
-        connectionBLE.begin();
+        // connectionBLE.begin();
         connectionBasePtr = &connectionBLE;
         break;
     }
 
-    xTaskCreatePinnedToCore(
-        taskConnection,
-        "Connection",
-        9000,
-        connectionBasePtr,
-        1,
-        &connectionTaskHandle,
-        1);
+    // xTaskCreatePinnedToCore(
+    //     taskConnection,
+    //     "Connection",
+    //     9000,
+    //     connectionBasePtr,
+    //     1,
+    //     &connectionTaskHandle,
+    //     1);
     // TODO: Avoid race condition where the task handle is not initialised to enable or disable the connection.
     delay(100); // Very dodgy way to make sure the condition is avoided.
 
@@ -113,12 +114,23 @@ void setup()
         NULL,
         3, // Make this a higher priority than other tasks.
         &imuTaskHandle,
+        0); // Pin to core 0 so that we don't miss interrupts when updating the LEDs.
+    delay(100);
+
+    // Fancy Christmas lights task.
+    xTaskCreatePinnedToCore(
+        taskChristmasLeds,
+        "Christmas",
+        4096,
+        NULL,
+        4, // Make this a higher priority than other tasks.
+        &fancyLedTaskHandle,
         1);
     delay(100);
 
     // Create tasks to read data from ADCs
-    powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
-    powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
+    // powerMeter.sides[SIDE_LEFT].createDataTask(SIDE_LEFT);
+    // powerMeter.sides[SIDE_RIGHT].createDataTask(SIDE_RIGHT);
 }
 
 void loop()
