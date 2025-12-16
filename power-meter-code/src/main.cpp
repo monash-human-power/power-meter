@@ -123,7 +123,7 @@ void setup()
         "Christmas",
         4096,
         NULL,
-        4, // Make this a higher priority than other tasks.
+        2,
         &fancyLedTaskHandle,
         1);
     delay(100);
