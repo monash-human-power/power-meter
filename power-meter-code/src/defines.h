@@ -103,6 +103,8 @@
 #define SPARE_GPIO_6 15
 #endif
 
+#define PIN_LEDS 43
+
 // Communications
 #define PIN_UART_TX0
 #define PIN_UART_RX0

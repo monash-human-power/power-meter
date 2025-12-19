@@ -15,7 +15,7 @@ extern PowerMeter powerMeter;
 #include "connections.h"
 extern Connection *connectionBasePtr;
 
-extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle;
+extern TaskHandle_t imuTaskHandle, lowSpeedTaskHandle, connectionTaskHandle, ledTaskHandle, fancyLedTaskHandle;
 extern portMUX_TYPE spinlock;
 
 void Side::begin()
@@ -133,8 +133,15 @@ inline void Side::enableStrainOffsetCalibration()
 
 inline void Side::startAmp()
 {
-    enableADCOffsetCalibration();
-    attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
+    if (taskHandle)
+    {
+        enableADCOffsetCalibration();
+        attachInterrupt(digitalPinToInterrupt(m_pinDout), m_irq, FALLING);
+    }
+    else
+    {
+        LOGE("Side", "Cannot start amp, task handle does not exist.");
+    }
 }
 
 inline uint32_t Side::m_readADC()
@@ -519,6 +526,7 @@ void debugMemory()
     log_printf("  - LS:   %lu\n", uxTaskGetStackHighWaterMark(lowSpeedTaskHandle));
     log_printf("  - IMU:  %lu\n", uxTaskGetStackHighWaterMark(imuTaskHandle));
     log_printf("  - Conn: %lu\n", uxTaskGetStackHighWaterMark(connectionTaskHandle));
+    log_printf("  - XMas: %lu\n", uxTaskGetStackHighWaterMark(fancyLedTaskHandle));
     log_printf("  - This: %lu\n", uxTaskGetStackHighWaterMark(NULL));
     SERIAL_GIVE();
 }
