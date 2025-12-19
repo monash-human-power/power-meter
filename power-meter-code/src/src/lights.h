@@ -53,7 +53,7 @@ protected:
     inline uint8_t m_pulsedSine(uint8_t index);
 };
 
-class VerticalLedPattern : public LedPatternBase
+class RadialLedPattern : public LedPatternBase
 {
 protected:
     void m_updateLed(uint8_t index, LedPosition &position, float velocity, uint32_t time) override;
@@ -72,6 +72,10 @@ enum PointInside
     OUTSIDE
 };
 
+/**
+ * @brief Class for a line segment in a shape.
+ * 
+ */
 class LineSegment
 {
 public:
@@ -85,6 +89,10 @@ public:
     const PointInside isInside(const LedPosition &position) const;
 };
 
+/**
+ * @brief Class for a list of line segments that represent a shape.
+ * 
+ */
 class LedShape
 {
 public:
@@ -96,6 +104,11 @@ private:
     const uint8_t m_segmentCount;
 };
 
+/**
+ * @brief Base class for a pattern that is comprised of a single shape.
+ * There is an issue somewhere, but I ran out of patience to debug it.
+ * 
+ */
 class ShapePattern : public LedPatternBase
 {
 public:
@@ -109,6 +122,11 @@ protected:
     virtual CRGB m_outsideUpdate(uint8_t index, LedPosition &position, float velocity, uint32_t time);
 };
 
+/**
+ * @brief Shape where the foreground is yellow and background is black.
+ * There is an issue somewhere, but I ran out of patience to debug it.
+ * 
+ */
 class YellowShape : public ShapePattern
 {
     using ShapePattern::ShapePattern;
@@ -123,6 +141,10 @@ protected:
     void m_updateLed(uint8_t index, LedPosition &position, float velocity, uint32_t time) override;
 };
 
+/**
+ * @brief Class the controls the LEDs.
+ * 
+ */
 class LedMatrix
 {
 public:

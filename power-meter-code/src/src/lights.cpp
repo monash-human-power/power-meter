@@ -76,7 +76,7 @@ inline uint8_t LedPatternBase::m_pulsedSine(uint8_t index)
 CRGBPalette16 rainbowPalete = RainbowColors_p;
 CRGBPalette16 rainbowStripePalete = RainbowStripeColors_p;
 
-void VerticalLedPattern::m_updateLed(uint8_t index, LedPosition &position, float velocity, uint32_t time)
+void RadialLedPattern::m_updateLed(uint8_t index, LedPosition &position, float velocity, uint32_t time)
 {
     // leds[index] = ColorFromPalette(currentPalete, (position.y >> 8) + index);
     leds[index] = ColorFromPalette(rainbowPalete, (position.radii >> 8) + ((time * 255L / 3000L) * (abs(velocity) / 10 + 1)));
@@ -86,8 +86,8 @@ void RedGreenWedges::m_updateLed(uint8_t index, LedPosition &position, float vel
 {
     const uint16_t segments = 8;
     uint16_t segment = position.angle / ((1 << 16) / segments);
-    // uint8_t brightness = m_pulsedSine((time * 255L / 3000L - (position.radii >> 8))); // * (abs(velocity)/28 + 1));
-    uint8_t brightness = m_pulsedSine((time * 255L / 3000L) * (abs(velocity) / 10 + 1) - (position.radii >> 8)); // * (abs(velocity)/28 + 1));
+    uint8_t brightness = m_pulsedSine((time * 255L / 3000L - (position.radii >> 8))); // * (abs(velocity)/28 + 1));
+    // uint8_t brightness = m_pulsedSine((time * 255L / 3000L) * (abs(velocity) / 10 + 1) - (position.radii >> 8)); // * (abs(velocity)/28 + 1));
     int32_t thresholdRadii = (uint32_t)abs(velocity) * 2293L;
     if ((int32_t)position.radii > thresholdRadii)
     {
@@ -173,7 +173,7 @@ void taskChristmasLeds(void *pvParameters)
     christmasLeds.patterns[0] = &diagonalPattern;
     RedGreenWedges patternWedges;
     christmasLeds.patterns[1] = &patternWedges;
-    VerticalLedPattern patternVerticalRainbow;
+    RadialLedPattern patternVerticalRainbow;
     christmasLeds.patterns[2] = &patternVerticalRainbow;
 
     christmasLeds.begin();
@@ -246,7 +246,8 @@ CRGB YellowShape::m_insideUpdate(uint8_t index, LedPosition &position, float vel
 
 void DiagonalPattern::m_updateLed(uint8_t index, LedPosition &position, float velocity, uint32_t time)
 {
-    uint8_t brightness = m_pulsedSine((time * 255L / 3000L) * (abs(velocity) / 10 + 1) - (position.radii >> 8)); // * (abs(velocity)/28 + 1));
+    // uint8_t brightness = m_pulsedSine((time * 255L / 3000L) * (abs(velocity) / 10 + 1) - (position.radii >> 8));
+    uint8_t brightness = m_pulsedSine((time * 255L / 3000L) - (position.radii >> 8));
     leds[index] = ColorFromPalette(rainbowPalete, (position.x >> 8) + (position.y >> 8), brightness); // + (time * 255L / 2000L)));
     // uint8_t red = 0;
     // uint8_t green = 0;
